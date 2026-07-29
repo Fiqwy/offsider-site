@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Offsider: The Never Miss System | Done-for-you AI staff for Australian businesses</title>
+  <meta name="description" content="The Never Miss System deploys and manages the AI staff that answer every call, chase every lead and book every job, 24/7. Done for you. You employ it, you don't operate it." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/logo/favicon.svg" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Offsider: The Never Miss System" />
+  <meta property="og:description" content="A full AI front office in one system: every call answered, every lead chased, every job booked. Done for you, run for you." />
+  <meta property="og:type" content="website" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a href="#top" class="skip-link">Skip to main content</a>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav nav--over-hero" id="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="#top" data-bind="brand.name">Offsider</a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="#staff">The staff</a>
+        <a href="#how">How it works</a>
+        <a href="#roi">ROI</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <a class="btn btn--primary nav__cta" href="#book" data-bind="cta.primary">Book your free AI diagnosis</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ============ HERO (full-bleed cinematic video) ============ -->
+    <section class="hero" id="hero">
+      <!-- background video: swap assets/video/hero.* anytime. poster is the LCP image. -->
+      <div class="hero__media" aria-hidden="true">
+        <video class="hero__video" data-hero-video
+               poster="assets/video/hero-poster.jpg"
+               muted loop playsinline preload="none"></video>
+        <div class="hero__scrim"></div>
+        <!-- neural constellation atmosphere layer (desktop only, drawn by JS) -->
+        <canvas class="hero__net" data-hero-net aria-hidden="true"></canvas>
+      </div>
+      <!-- Static fallback copy (mirrors content.js) so the hero paints at its
+           final height before the parser-blocking scripts run: no CLS, and it
+           degrades gracefully with no JS. bind() overwrites with the same copy. -->
+      <div class="wrap hero__inner">
+        <span class="eyebrow eyebrow--on-dark" data-bind="hero.eyebrow">The Never Miss System · Gold Coast</span>
+        <h1 class="hero__title" data-bind-html="hero.headline">Hire a crew that<br>never clocks <em class="ital">off</em>.</h1>
+        <p class="hero__sub" data-bind="hero.sub">A team of AI staff answering your phone, chasing every lead and booking the job around the clock. You employ them, we build and run them, and you just turn up and do what you do best.</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary btn--lg" href="#book" data-magnetic data-bind="cta.primary">Book your free Leak Audit</a>
+          <a class="btn btn--glass btn--lg" href="#staff" data-bind="cta.secondary">Meet the crew</a>
+        </div>
+        <p class="hero__proof" data-bind="hero.proof">Every lead answered in 60 seconds. Guaranteed.</p>
+      </div>
+      <!-- live crew-at-work feed (glass cards, desktop only, filled by JS) -->
+      <div class="hero__feed" data-hero-feed aria-hidden="true"></div>
+      <a class="hero__cue" href="#problem" aria-label="Scroll to see how it works"><span></span></a>
+    </section>
+
+    <!-- ============ TRUST STRIP ============ -->
+    <section class="trust section--tight" aria-label="Trusted by">
+      <div class="wrap">
+        <p class="trust__line" data-bind="trust.line"></p>
+        <div class="trust__logos" data-trust-logos></div>
+      </div>
+    </section>
+
+    <!-- ============ PROBLEM ============ -->
+    <section class="section problem" id="problem">
+      <div class="wrap">
+        <span class="kicker" data-bind="problem.kicker"></span>
+        <h2 class="section__title" data-bind-html="problem.heading"></h2>
+        <p class="section__lead" data-bind="problem.body"></p>
+        <div class="stat-grid" data-problem-stats></div>
+      </div>
+    </section>
+
+    <!-- ============ DIAGNOSIS (the wedge) ============ -->
+    <section class="section diagnosis" id="diagnosis">
+      <div class="wrap">
+        <span class="kicker" data-bind="diagnosis.kicker"></span>
+        <h2 class="section__title" data-bind-html="diagnosis.heading"></h2>
+        <p class="section__lead" data-bind="diagnosis.body"></p>
+        <div class="steps steps--3" data-diagnosis-steps></div>
+      </div>
+    </section>
+
+    <!-- ============ WATCH A LEAD BOOK ITSELF (signature) ============ -->
+    <section class="section book-itself" id="book-itself" data-book-section>
+      <div class="wrap book-itself__grid">
+        <div class="book-itself__copy">
+          <h2 class="section__title" data-bind-html="bookItself.heading"></h2>
+          <p class="section__lead" data-bind="bookItself.sub"></p>
+          <ol class="book-steps" data-book-steps></ol>
+        </div>
+        <div class="book-itself__phone">
+          <div class="phone" data-phone-thread></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MEET YOUR AI STAFF (roster) ============ -->
+    <section class="section staff" id="staff">
+      <div class="wrap">
+        <span class="kicker" data-bind="roster.kicker"></span>
+        <h2 class="section__title" data-bind-html="roster.heading"></h2>
+        <p class="section__lead" data-bind="roster.sub"></p>
+        <div class="roster" data-roster></div>
+        <div class="roster-more">
+          <span class="roster-more__label" data-bind="roster.moreLabel"></span>
+          <p class="roster-more__line" data-bind="roster.moreLine"></p>
+          <div class="roster-more__chips" data-roster-more></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ONE COCKPIT ============ -->
+    <section class="section cockpit" id="cockpit">
+      <div class="wrap cockpit__grid">
+        <div class="cockpit__copy">
+          <span class="kicker" data-bind="cockpit.kicker"></span>
+          <h2 class="section__title" data-bind-html="cockpit.heading"></h2>
+          <p class="section__lead" data-bind="cockpit.body"></p>
+          <ul class="check-list" data-cockpit-highlights></ul>
+        </div>
+        <div class="cockpit__panel" data-cockpit-panel aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <!-- ============ ROI CALCULATOR ============ -->
+    <section class="section roi" id="roi">
+      <div class="wrap">
+        <span class="kicker" data-bind="roi.kicker"></span>
+        <h2 class="section__title" data-bind-html="roi.heading"></h2>
+        <p class="section__lead" data-bind="roi.sub"></p>
+        <div class="roi-calc" data-roi></div>
+      </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section class="section how" id="how">
+      <div class="wrap">
+        <span class="kicker" data-bind="how.kicker"></span>
+        <h2 class="section__title" data-bind-html="how.heading"></h2>
+        <div class="steps steps--4" data-how-steps></div>
+      </div>
+    </section>
+
+    <!-- ============ PRICING (salary anchor) ============ -->
+    <section class="section pricing" id="pricing">
+      <div class="wrap">
+        <span class="kicker" data-bind="pricing.kicker"></span>
+        <h2 class="section__title" data-bind-html="pricing.heading"></h2>
+        <p class="section__lead" data-bind="pricing.sub"></p>
+        <div class="value-stack reveal" data-value-stack></div>
+        <div class="compare" data-pricing></div>
+        <p class="pricing__note" data-bind="pricing.note"></p>
+        <p class="pricing__scarcity" data-bind="pricing.scarcity"></p>
+        <div class="center-cta">
+          <a class="btn btn--primary btn--lg" href="#book" data-bind="cta.primary"></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ GUARANTEE ============ -->
+    <section class="section guarantee guarantee--dark" id="guarantee">
+      <div class="wrap">
+        <span class="kicker" data-bind="guarantee.kicker"></span>
+        <h2 class="section__title" data-bind-html="guarantee.heading"></h2>
+        <div class="guarantee__promise reveal" data-guarantee-promise></div>
+        <div class="steps steps--3" data-guarantee></div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section faq" id="faq">
+      <div class="wrap">
+        <span class="kicker">FAQ</span>
+        <h2 class="section__title">The questions everyone asks.</h2>
+        <div class="faq-list" data-faq></div>
+      </div>
+    </section>
+
+    <!-- ============ FINAL CTA / BOOK ============ -->
+    <section class="section final-cta" id="book">
+      <div class="wrap wrap--narrow center">
+        <h2 class="final-cta__title" data-bind-html="finalCta.heading"></h2>
+        <p class="section__lead center" data-bind="finalCta.sub"></p>
+        <div class="center-cta">
+          <a class="btn btn--primary btn--xl" href="mailto:hello@offsider.ai" data-book-link data-bind="cta.primary"></a>
+        </div>
+        <p class="final-cta__ps">No cost. No obligation. Just a clear map of where you're losing jobs.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ STICKY MOBILE CTA (appears after hero) ============ -->
+  <div class="sticky-cta safe-bottom" data-sticky-cta aria-hidden="true">
+    <a class="btn btn--primary btn--lg" href="#book" data-bind="cta.primary"></a>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div>
+        <span class="footer__brand" data-bind="brand.name">Offsider</span>
+        <p class="footer__blurb" data-bind="footer.blurb"></p>
+      </div>
+      <div class="footer__meta">
+        <span data-bind="brand.location"></span>
+        <a data-footer-email href="mailto:hello@offsider.ai"></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- libs (vendored, local) -->
+  <script src="vendor/lenis.min.js"></script>
+  <script src="vendor/gsap.min.js"></script>
+  <script src="vendor/ScrollTrigger.min.js"></script>
+  <!-- data + app -->
+  <script src="content.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
