@@ -20,6 +20,8 @@ Built fresh 2026-07-22. Replaces the old single-product "Sarah receptionist" lan
 
 **2026-07-29 — Preview deployed** to GitHub Pages (repo `Fiqwy/offsider-site`, main/root) so Nicholas can review on mobile. WIP preview only; `/security-scan` still required before the real production launch.
 
+**2026-07-30 — Mobile hero parity.** The video background, neural constellation and live notification feed were desktop-only; now they run on mobile too (Nicholas flagged the iPhone hero looked plain). `wireHeroVideo` no longer gates out phones (poster still LCP; reduced-motion + saveData still poster-only). `wireHeroNet` runs on mobile at reduced density (~22 nodes vs 45, DPR capped 1.5) and still pauses off-screen. `wireHeroFeed` shows ONE card at a time on mobile, cycling every 3.5s in a fixed-height slot below the proof line (desktop two-up stack unchanged). CSS: removed the `<1025px { display:none }` on `.hero__feed`/`.hero__net`, added the mobile feed layout + hero padding. Verified 390×844 + reduced-motion + desktop 1440: 0 console errors, no overflow, constellation pauses off-screen, reduced-motion still poster-only/no-feed/no-canvas, desktop visually unchanged. (Minor: mobile reduced-motion hero keeps the 12rem bottom padding = a little empty space; harmless.)
+
 ## ⭐ AGREED NEXT — roster restructure (DECIDED with Nicholas, NOT YET BUILT)
 Tighten the crew so it is logical and honest. Target 6-agent roster:
 - **Zip** — Speed-to-Lead (unchanged).

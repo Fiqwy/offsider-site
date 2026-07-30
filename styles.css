@@ -280,9 +280,25 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .feed-card__time { margin-left: auto; font-size: .7rem; font-weight: 600; color: rgba(255,255,255,.55); font-variant-numeric: tabular-nums; }
 .feed-card__text { margin-top: .15rem; font-size: .86rem; line-height: 1.4; color: rgba(255,255,255,.85); }
 
-/* both intelligence layers are desktop-only atmosphere */
+/* Mobile / narrow: the constellation stays (lighter, tuned in JS) and the feed
+   becomes a single centred notification card in a fixed-height slot near the
+   bottom of the hero, clear of the copy, CTAs, proof line and scroll cue. */
 @media (max-width: 1024px) {
-  .hero__feed, .hero__net { display: none; }
+  /* reserve a bottom band for the notification card by shifting the centred
+     hero copy up (bigger padding-bottom than padding-top pulls the flex
+     centre upward), so the card never overlaps the proof line or scroll cue. */
+  .hero {
+    padding-top: 6.5rem;
+    padding-bottom: 12rem;
+  }
+  .hero__feed {
+    left: 50%; right: auto; top: auto;
+    bottom: calc(5.6rem + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(340px, 90vw);
+    height: 74px;                 /* fixed slot → cycling never shifts layout */
+  }
+  .feed-card--solo { align-items: center; }
 }
 
 /* ---- Phone (shared frame) ------------------------------------------------ */

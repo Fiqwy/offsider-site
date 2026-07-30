@@ -364,10 +364,10 @@
   function wireHeroVideo() {
     const video = $("[data-hero-video]");
     if (!video) return;
-    // Poster is the LCP image. Skip the video on reduced-motion, data-saver,
-    // or small screens (mobile keeps the lightweight poster, saves the download).
+    // Poster is the LCP image. The muted autoplay loop plays on phones too
+    // (small 720p file, iOS Safari autoplays muted+playsinline). Only fall
+    // back to poster-only on reduced-motion or data-saver.
     if (REDUCED || (navigator.connection && navigator.connection.saveData)) return;
-    if (window.matchMedia("(max-width: 767px)").matches) return;
     video.src = "assets/video/hero.mp4";
     video.load();
     video.play().catch(() => {});   // autoplay may be blocked / file missing — poster stays
@@ -488,8 +488,43 @@
   function wireHeroFeed() {
     const mount = $("[data-hero-feed]");
     const feed = S.hero && S.hero.feed;
-    if (!mount || !DESKTOP || NO_HOVER || REDUCED) return;
+    if (!mount || REDUCED) return;
     if (!Array.isArray(feed) || feed.length < 2) return;
+
+    const cardHtml = (m) =>
+      `<span class="feed-card__chip">${m.name[0]}</span>
+       <div class="feed-card__body">
+         <div class="feed-card__top"><span class="feed-card__name">${m.name}</span><span class="feed-card__time">${m.time}</span></div>
+         <p class="feed-card__text">${m.text}</p>
+       </div>`;
+
+    // Narrow screens: ONE card at a time, cycling. Single reused element inside
+    // a fixed-height slot (see .hero__feed mobile CSS) so nothing shifts.
+    if (window.innerWidth < 1025) {
+      let idx = 0, heroOn = true;
+      const card = el("div", "feed-card feed-card--solo");
+      card.innerHTML = cardHtml(feed[0]);
+      card.style.setProperty("--tone", `var(--tone-${feed[0].tone})`);
+      mount.appendChild(card);
+      requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add("in")));
+
+      function swapSolo() {
+        card.classList.remove("in");                 // slide down + fade out
+        setTimeout(() => {
+          idx = (idx + 1) % feed.length;
+          const m = feed[idx];
+          card.innerHTML = cardHtml(m);
+          card.style.setProperty("--tone", `var(--tone-${m.tone})`);
+          requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add("in")));
+        }, 520);                                      // matches .feed-card transition
+      }
+      onHeroVisible((v) => { heroOn = v; });
+      setInterval(() => { if (!heroOn || doc.hidden) return; swapSolo(); }, 3500);
+      return;
+    }
+
+    // Desktop (>=1025, pointer): two-up stack.
+    if (!DESKTOP || NO_HOVER) return;
 
     const GAP = 12;
     let idx = 0, heroOn = true;
@@ -497,12 +532,7 @@
 
     function push() {
       const m = feed[idx]; idx = (idx + 1) % feed.length;
-      const card = el("div", "feed-card",
-        `<span class="feed-card__chip">${m.name[0]}</span>
-         <div class="feed-card__body">
-           <div class="feed-card__top"><span class="feed-card__name">${m.name}</span><span class="feed-card__time">${m.time}</span></div>
-           <p class="feed-card__text">${m.text}</p>
-         </div>`);
+      const card = el("div", "feed-card", cardHtml(m));
       card.style.setProperty("--tone", `var(--tone-${m.tone})`);
       mount.appendChild(card);
       const hNew = card.offsetHeight;
@@ -535,12 +565,16 @@
   function wireHeroNet() {
     const canvas = $("[data-hero-net]");
     const hero = $("#hero");
-    if (!canvas || !hero || !DESKTOP || REDUCED) return;
+    if (!canvas || !hero || REDUCED) return;   // runs on mobile too, just lighter
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const N = 45, LINK = 130;
+    // Smaller screens: half the nodes (scaled to width), lower DPR cap, shorter
+    // link distance — comfortably 60fps on a phone.
+    const MOBILE = window.innerWidth < 1025;
+    const dpr = Math.min(window.devicePixelRatio || 1, MOBILE ? 1.5 : 2);
+    const N = MOBILE ? Math.max(16, Math.min(26, Math.round(window.innerWidth / 18))) : 45;
+    const LINK = MOBILE ? 120 : 130;
     let w = 0, h = 0;
 
     function size() {
