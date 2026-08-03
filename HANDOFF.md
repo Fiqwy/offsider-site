@@ -52,7 +52,7 @@ Vanilla HTML/CSS/JS. Lenis + GSAP + ScrollTrigger, vendored in `vendor/`. No fra
 - `styles.css` — design system (clean/bright/trustworthy, Apple/Stripe restraint) + all components.
 - `assets/characters/` — 6 original 3D mascot PNGs, transparent (zip/ada/echo/nudge/boomer/star .png, 1024², Higgsfield nano_banana_pro + remove_background). `assets/portraits/` (old human headshots) is retired but still on disk.
 - `assets/video/` — `hero.mp4` (~5s loop, 720p, 304KB, Higgsfield kling3_0_turbo) + `hero-poster.jpg` (LCP image / fallback, 40KB). Swap either anytime; poster shows on reduced-motion/save-data.
-- `assets/logo/favicon.svg` — "Ai" monogram tile in brand blue (white A + lowercase i, i-dot as a node); reused as favicon AND the nav/footer mark.
+- `assets/logo/favicon.svg` — brand mark: interlocking rounded-square "linked systems" tile in brand blue (Option 4, chosen 2026-07-30); reused as favicon AND the nav/footer mark. (Superseded the earlier "Ai" monogram.)
 
 ## What's on the page (section order)
 **Full-bleed video hero** (crew intro, light nav over dark, scroll cue) → trust strip → the problem (leak stats, count-up) → the diagnosis wedge (Diagnose/Deploy/Manage) → **⭐ "Watch a lead book itself"** (scroll-driven phone: desktop pinned-scrub, mobile autoplay) → meet your AI staff (6 mascot hire-cards: Zip speed-to-lead, Ada full-time reception, Echo after-hours reception, Nudge quote follow-up, Boomer reactivation, Star reviews + admin catch-all chips) → one cockpit (dashboard mock, new crew names) → ROI calculator → how it works → pricing (salary-anchored, no numbers) → guarantee → FAQ → final CTA (mailto). Sticky mobile CTA bar appears after the hero (≤960px only).
@@ -65,11 +65,11 @@ Vanilla HTML/CSS/JS. Lenis + GSAP + ScrollTrigger, vendored in `vendor/`. No fra
 - FAQ accordion + ROI sliders interactive and correct; stats/KPIs count up once on reveal.
 
 ## OPEN ITEMS before going live (need Nicholas)
-1. **Brand name.** Currently **"Offsider"** (working — AU slang for a right-hand). Shortlist alternatives: Nightshift, Clock On, Cognora, Staffwise, Roster. Change once in `content.js` → `brand.name` (nav/footer bind to it; a few hardcoded "Offsider" fallbacks in index.html can be cleared too). **Confirm `.com.au` + IP Australia trademark are free before committing.**
-2. **AI-staff character names.** Zip / Ada / Echo / Nudge / Boomer / Star — confirm or swap in `content.js` → `roster.members` (mascot art in `assets/characters/`).
-3. **Booking mechanism.** CTAs currently `mailto:hello@offsider.ai`. Swap for a Cal.com / Calendly embed in the `#book` section. Update `brand.email` / `brand.bookingUrl` in `content.js`.
-4. **Real proof.** Trust logos use real client names you work with; add a real hard-dollar result (e.g. "$X recovered for a Gold Coast trade") when available — hard numbers beat adjectives.
-5. **Domain + deploy.** Likely Nicholas's own Cloudflare (DNS/CDN) + GitHub Pages/DigitalOcean. Run `/security-scan` before production deploy. If hosted on a subpath, all asset paths are already relative.
+1. **Brand name — RESOLVED 2026-07-30:** Applied Intelligence (full "Applied Intelligent Systems & Automations", short "AISA"). Flag still open: "AISA" clashes with the Australian Information Security Association and "Applied Intelligence" is generic — do an IP Australia + domain/handle check before spending on the acronym.
+2. **AI-staff character names + roster restructure.** See the "AGREED NEXT — roster restructure" block above (merge receptionists into Ada with after-hours→full-time, Nudge → Quotes & Invoices, add Leo Customer Service, Boomer optional). Not yet built.
+3. **Booking mechanism.** CTAs are `mailto:hello@appliedintelligence.biz`. Swap for a Cal.com / Calendly embed in the `#book` section; update `brand.email` / `brand.bookingUrl` in `content.js`.
+4. **Real proof — HONESTY RULE (do not violate).** The trust strip must NOT name businesses as if they are AI customers. There are no live AI clients yet, and the website clients (Goldy, Control Detailing, Good Coast, Switch-On, Shocked Solar) did NOT buy the AI product (Switch-On isn't even a website client) — naming them as endorsements is misleading under AU Consumer Law. Trust strip currently shows honest, no-name credibility (Australian owned, founder-led, no lock-in, you approve every message). Only add a real client logo + hard-dollar result once a pilot is LIVE and has given written consent to be named.
+5. **Domain + deploy.** Nicholas's Cloudflare (DNS/CDN) + GitHub Pages/DigitalOcean. Run `/security-scan` before production deploy. Asset paths are all relative (subpath-safe). Currently on GitHub Pages: `Fiqwy/offsider-site` → https://fiqwy.github.io/offsider-site/ (repo/folder kept named offsider-site to preserve the URL).
 
 ## Notes
 - Australian English, no em-dashes (house style).
