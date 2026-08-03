@@ -1,7 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="15" fill="#2f6bff"/>
-  <path d="M32 15c-9.4 0-17 6.9-17 15.4 0 4.9 2.6 9.3 6.6 12.1L20 51l9.2-4.2c.9.1 1.9.2 2.8.2 9.4 0 17-6.9 17-15.4S41.4 15 32 15z" fill="#fff"/>
-  <circle cx="25" cy="30" r="2.6" fill="#2f6bff"/>
-  <circle cx="32" cy="30" r="2.6" fill="#2f6bff"/>
-  <circle cx="39" cy="30" r="2.6" fill="#2f6bff"/>
+  <g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <!-- capital A -->
+    <path d="M15 46 L26 18 L37 46"/>
+    <path d="M18.5 38 L33.5 38"/>
+    <!-- lowercase i stem -->
+    <path d="M49 29 L49 46"/>
+  </g>
+  <!-- i-dot as a distinct node (nod to the hero constellation) -->
+  <circle cx="49" cy="20" r="3.6" fill="#fff"/>
 </svg>

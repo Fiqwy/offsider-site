@@ -7,11 +7,12 @@
 window.SITE = {
   /* ---- Brand (change BRAND in one place) --------------------------------- */
   brand: {
-    name: "Offsider",           // working name — swap once Nicholas confirms
-    // AU slang for a trusted right-hand / helper. "Your AI offsider."
+    name: "Applied Intelligence",
+    short: "AISA",
+    fullName: "Applied Intelligent Systems & Automations",
     tagline: "Done-for-you AI staff. You employ it, you don't operate it.",
     location: "Gold Coast, Australia",
-    email: "hello@offsider.ai",
+    email: "hello@appliedintelligence.biz",
     phone: "",                  // add real number when live
     bookingUrl: "#book",        // swap for Cal.com / Calendly embed URL
   },

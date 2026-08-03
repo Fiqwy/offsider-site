@@ -1,5 +1,5 @@
 /* =============================================================================
-   Offsider — styles.css
+   Applied Intelligence — styles.css
    Clean, bright, trustworthy. Apple/Stripe restraint. Light theme.
    ========================================================================== */
 
@@ -153,7 +153,10 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   max-width: var(--maxw); margin: 0 auto; padding: 0.7rem var(--pad);
   display: flex; align-items: center; gap: 1.5rem;
 }
-.nav__brand { font-weight: 800; font-size: 1.28rem; letter-spacing: -0.03em; display: inline-flex; align-items: center; min-height: 44px; }
+.nav__brand { display: inline-flex; align-items: center; gap: .6rem; min-height: 44px; }
+.nav__brand .brand-mark { width: 34px; height: 34px; flex: none; border-radius: 9px; }
+.nav__brand .brand-word { font-weight: 800; font-size: 1.28rem; letter-spacing: -0.03em; }
+.nav__brand .brand-short { font-weight: 800; font-size: 1.28rem; letter-spacing: -0.02em; display: none; }
 .nav__links { display: flex; gap: 1.6rem; margin-left: auto; }
 .nav__links a { font-size: 0.95rem; font-weight: 600; color: var(--ink-2); transition: color .15s; display: inline-flex; align-items: center; min-height: 44px; }
 .nav__links a:hover { color: var(--accent-ink); }
@@ -660,9 +663,12 @@ input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border: 3px s
 /* ---- Footer -------------------------------------------------------------- */
 .footer { background: var(--bg-ink); color: rgba(255,255,255,.7); padding-block: 3rem; }
 .footer__inner { display: flex; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
-.footer__brand { font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: -.03em; }
+.footer__brand { display: inline-flex; align-items: center; gap: .55rem; }
+.footer__brand .brand-mark { width: 30px; height: 30px; flex: none; border-radius: 8px; }
+.footer__brand .brand-word { font-size: 1.4rem; font-weight: 800; color: #fff; letter-spacing: -.03em; }
 .footer__blurb { margin-top: .6rem; max-width: 42ch; font-size: .95rem; }
 .footer__meta { display: flex; flex-direction: column; gap: .4rem; text-align: right; font-size: .95rem; }
+.footer__legal { font-size: .82rem; color: rgba(255,255,255,.5); }
 .footer__meta a:hover { color: #fff; }
 
 /* ---- Scroll reveal (gated behind .is-ready so no-JS shows everything) ----- */
@@ -683,6 +689,9 @@ input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border: 3px s
   .compare { grid-template-columns: 1fr; }
   .book-itself__phone { order: -1; }
   .nav__links { display: none; }
+  /* mark + compact "AISA" wordmark so brand + CTA fit on one row */
+  .nav__brand .brand-word { display: none; }
+  .nav__brand .brand-short { display: inline; }
 }
 @media (max-width: 560px) {
   body { font-size: 16px; }

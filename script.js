@@ -1,5 +1,5 @@
 /* =============================================================================
-   Offsider — script.js
+   Applied Intelligence — script.js
    Renders the page from window.SITE, then wires Lenis + GSAP with the
    mobile-smoothness rules (single ticker source, touch-gated normalize/pin).
    ========================================================================== */
@@ -198,7 +198,7 @@
          <span class="dash__dot" style="background:#ff5f57"></span>
          <span class="dash__dot" style="background:#febc2e"></span>
          <span class="dash__dot" style="background:#28c840"></span>
-         <span class="dash__title">${S.brand.name} · Live</span>
+         <span class="dash__title">${S.brand.short} · Live</span>
        </div>
        <div class="dash__kpis">
          <div class="dash__kpi"><div class="v">128</div><div class="k">Calls answered</div></div>
