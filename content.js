@@ -55,9 +55,13 @@ window.SITE = {
 
   /* ---- Trust strip ------------------------------------------------------- */
   trust: {
-    line: "Trusted by Gold Coast businesses",
-    // real client names you already work with — safe, factual
-    logos: ["Goldy Car Detailing", "Good Coast Finance", "Control Detailing", "Switch-On Electrical", "Shocked Solar"],
+    line: "Australian owned. Built on the Gold Coast.",
+    // Honest credibility ONLY, not client endorsements. Nobody has bought the AI
+    // product yet, so no business names here (naming website clients as if they
+    // were AI customers is a misleading endorsement under AU Consumer Law).
+    // Swap in a real client logo + hard result once the first pilot is live AND
+    // has given written consent to be named.
+    logos: ["Australian owned", "Founder-led", "No lock-in, ever", "You approve every message"],
     stat: { value: "24/7", label: "every call answered, day or night" },
   },
 
