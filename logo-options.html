@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applied Intelligence — logo directions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue: #2f6bff;
+      --ink: #0a0e1a;
+      --muted: #5b6577;
+      --line: #e6ebf5;
+      --bg: #f6f8fc;
+      --card: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+
+    header.page {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: rgba(47,107,255,0.09);
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    header.page h1 {
+      font-size: clamp(28px, 6vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    header.page p {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 26px 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 1px 2px rgba(10,14,26,0.04), 0 12px 30px rgba(10,14,26,0.05);
+    }
+    .card__head {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    .hero-tile { width: 96px; height: 96px; flex: none; border-radius: 22px; display: block; }
+    .card__meta { min-width: 0; }
+    .opt-num {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue);
+    }
+    .opt-name {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-top: 2px;
+    }
+    .opt-desc {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    .sizes {
+      display: flex;
+      align-items: flex-end;
+      gap: 26px;
+      padding: 18px 4px 20px;
+      border-top: 1px solid var(--line);
+    }
+    .size-item { text-align: center; }
+    .size-item img { display: block; margin: 0 auto 8px; border-radius: 20%; }
+    .size-item .px32 { width: 32px; height: 32px; }
+    .size-item .px16 { width: 16px; height: 16px; }
+    .size-cap { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+    .lockups { display: grid; gap: 10px; }
+    .lockup {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+    }
+    .lockup img { width: 34px; height: 34px; border-radius: 24%; display: block; }
+    .lockup .word { font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+    .lockup.light { background: #ffffff; border: 1px solid var(--line); }
+    .lockup.light .word { color: var(--ink); }
+    .lockup.dark { background: var(--ink); }
+    .lockup.dark .word { color: #ffffff; }
+
+    footer.page {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 480px) {
+      .card__head { gap: 14px; }
+      .hero-tile { width: 76px; height: 76px; border-radius: 18px; }
+      .sizes { gap: 20px; }
+      .opt-name { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="page">
+      <span class="eyebrow">Brand exploration</span>
+      <h1>Applied Intelligence — logo directions</h1>
+      <p>Four distinct mark candidates to replace the current "Ai" monogram. Each is shown at hero, nav and favicon scale, and in a live nav lockup on light and dark.</p>
+    </header>
+
+    <!-- OPTION 1 -->
+    <section class="card">
+      <div class="card__head">
+        <img class="hero-tile" src="assets/logo/options/mark-1.svg" alt="Option 1 constellation mark" />
+        <div class="card__meta">
+          <div class="opt-num">Option 1</div>
+          <div class="opt-name">Constellation</div>
+          <div class="opt-desc">Connected nodes and links resolve into an ascending "A" — a direct tie to the site's neural-constellation hero.</div>
+        </div>
+      </div>
+      <div class="sizes">
+        <div class="size-item"><img class="px32" src="assets/logo/options/mark-1.svg" alt="" /><div class="size-cap">32px · nav</div></div>
+        <div class="size-item"><img class="px16" src="assets/logo/options/mark-1.svg" alt="" /><div class="size-cap">16px · favicon</div></div>
+      </div>
+      <div class="lockups">
+        <div class="lockup light"><img src="assets/logo/options/mark-1.svg" alt="" /><span class="word">Applied Intelligence</span></div>
+        <div class="lockup dark"><img src="assets/logo/options/mark-1.svg" alt="" /><span class="word">Applied Intelligence</span></div>
+      </div>
+    </section>
+
+    <!-- OPTION 2 -->
+    <section class="card">
+      <div class="card__head">
+        <img class="hero-tile" src="assets/logo/options/mark-2.svg" alt="Option 2 signal pulse mark" />
+        <div class="card__meta">
+          <div class="opt-num">Option 2</div>
+          <div class="opt-name">Signal / Pulse</div>
+          <div class="opt-desc">A pulse radiating from a solid origin dot — every call answered, instantly. Always on, minimal, premium.</div>
+        </div>
+      </div>
+      <div class="sizes">
+        <div class="size-item"><img class="px32" src="assets/logo/options/mark-2.svg" alt="" /><div class="size-cap">32px · nav</div></div>
+        <div class="size-item"><img class="px16" src="assets/logo/options/mark-2.svg" alt="" /><div class="size-cap">16px · favicon</div></div>
+      </div>
+      <div class="lockups">
+        <div class="lockup light"><img src="assets/logo/options/mark-2.svg" alt="" /><span class="word">Applied Intelligence</span></div>
+        <div class="lockup dark"><img src="assets/logo/options/mark-2.svg" alt="" /><span class="word">Applied Intelligence</span></div>
+      </div>
+    </section>
+
+    <!-- OPTION 3 -->
+    <section class="card">
+      <div class="card__head">
+        <img class="hero-tile" src="assets/logo/options/mark-3.svg" alt="Option 3 geometric A monogram" />
+        <div class="card__meta">
+          <div class="opt-num">Option 3</div>
+          <div class="opt-name">Geometric "A" monogram</div>
+          <div class="opt-desc">A confident, solid capital A on a white tile, with a node floating in the counter as an ownable detail.</div>
+        </div>
+      </div>
+      <div class="sizes">
+        <div class="size-item"><img class="px32" src="assets/logo/options/mark-3.svg" alt="" /><div class="size-cap">32px · nav</div></div>
+        <div class="size-item"><img class="px16" src="assets/logo/options/mark-3.svg" alt="" /><div class="size-cap">16px · favicon</div></div>
+      </div>
+      <div class="lockups">
+        <div class="lockup light"><img src="assets/logo/options/mark-3.svg" alt="" /><span class="word">Applied Intelligence</span></div>
+        <div class="lockup dark"><img src="assets/logo/options/mark-3.svg" alt="" /><span class="word">Applied Intelligence</span></div>
+      </div>
+    </section>
+
+    <!-- OPTION 4 -->
+    <section class="card">
+      <div class="card__head">
+        <img class="hero-tile" src="assets/logo/options/mark-4.svg" alt="Option 4 linked systems mark" />
+        <div class="card__meta">
+          <div class="opt-num">Option 4</div>
+          <div class="opt-name">Linked systems</div>
+          <div class="opt-desc">Two interlocking rounded-square modules — "Systems &amp; Automations", connected. Abstract, corporate, ownable.</div>
+        </div>
+      </div>
+      <div class="sizes">
+        <div class="size-item"><img class="px32" src="assets/logo/options/mark-4.svg" alt="" /><div class="size-cap">32px · nav</div></div>
+        <div class="size-item"><img class="px16" src="assets/logo/options/mark-4.svg" alt="" /><div class="size-cap">16px · favicon</div></div>
+      </div>
+      <div class="lockups">
+        <div class="lockup light"><img src="assets/logo/options/mark-4.svg" alt="" /><span class="word">Applied Intelligence</span></div>
+        <div class="lockup dark"><img src="assets/logo/options/mark-4.svg" alt="" /><span class="word">Applied Intelligence</span></div>
+      </div>
+    </section>
+
+    <footer class="page">Live brand unchanged until you pick — the current mark stays shipped in the nav, footer and favicon.</footer>
+  </div>
+</body>
+</html>

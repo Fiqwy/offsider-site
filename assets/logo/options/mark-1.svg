@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="15" fill="#2f6bff"/>
+  <g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- ascending "A" formed by two legs + a crossbar of nodes -->
+    <path d="M32 15 L15 50"/>
+    <path d="M32 15 L49 50"/>
+    <path d="M21.3 37 L42.7 37"/>
+  </g>
+  <g fill="#fff">
+    <!-- apex node (the spark) -->
+    <circle cx="32" cy="15" r="4.8"/>
+    <!-- base nodes -->
+    <circle cx="15" cy="50" r="4.2"/>
+    <circle cx="49" cy="50" r="4.2"/>
+    <!-- crossbar nodes -->
+    <circle cx="21.3" cy="37" r="3.4"/>
+    <circle cx="42.7" cy="37" r="3.4"/>
+  </g>
+</svg>
