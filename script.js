@@ -206,10 +206,10 @@
          <div class="dash__kpi"><div class="v up">4.9★</div><div class="k">Rating</div></div>
        </div>
        <div class="dash__feed">
-         <div class="dash__row"><span class="who" style="background:var(--tone-brand)"></span><span class="txt">Ada booked a driveway quote</span><span class="tag">Nerang · now</span></div>
+         <div class="dash__row"><span class="who" style="background:var(--tone-brand)"></span><span class="txt">Ada answered a call and booked the job</span><span class="tag">Nerang · now</span></div>
          <div class="dash__row"><span class="who" style="background:var(--tone-amber)"></span><span class="txt">Zip replied to a new lead in 43s</span><span class="tag">2m ago</span></div>
          <div class="dash__row"><span class="who" style="background:var(--tone-gold)"></span><span class="txt">Star collected a 5-star review</span><span class="tag">11m ago</span></div>
-         <div class="dash__row"><span class="who" style="background:var(--tone-teal)"></span><span class="txt">Nudge chased quote #1042</span><span class="tag">18m ago</span></div>
+         <div class="dash__row"><span class="who" style="background:var(--tone-teal)"></span><span class="txt">Nudge sent quote #1042 and chased it</span><span class="tag">18m ago</span></div>
        </div>`;
     return d;
   }
@@ -497,6 +497,11 @@
          <div class="feed-card__top"><span class="feed-card__name">${m.name}</span><span class="feed-card__time">${m.time}</span></div>
          <p class="feed-card__text">${m.text}</p>
        </div>`;
+
+    // honesty label: these are simulated events, not live client activity
+    const note = el("div", "hero__feed-note");
+    note.textContent = S.hero.feedNote || "Simulated preview of your crew at work";
+    mount.appendChild(note);
 
     // Narrow screens: ONE card at a time, cycling. Single reused element inside
     // a fixed-height slot (see .hero__feed mobile CSS) so nothing shifts.

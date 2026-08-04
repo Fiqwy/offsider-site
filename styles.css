@@ -257,6 +257,12 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   width: min(300px, calc(100vw - 760px));
   pointer-events: none;
 }
+/* honesty micro-label above the cards: these events are simulated */
+.hero__feed-note {
+  position: absolute; left: 2px; bottom: 100%; margin-bottom: .45rem;
+  font-size: .66rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: rgba(255,255,255,.48); white-space: nowrap;
+}
 .feed-card {
   position: absolute; top: 0; left: 0; right: 0;
   display: flex; align-items: flex-start; gap: .65rem;
@@ -302,6 +308,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
     height: 74px;                 /* fixed slot → cycling never shifts layout */
   }
   .feed-card--solo { align-items: center; }
+  .hero__feed-note { left: 50%; transform: translateX(-50%); }
 }
 
 /* ---- Phone (shared frame) ------------------------------------------------ */

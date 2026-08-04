@@ -41,13 +41,16 @@ window.SITE = {
     sub: "A team of AI staff answering your phone, chasing every lead and booking the job around the clock. You employ them, we build and run them, and you just turn up and do what you do best.",
     // hero micro-proof line (a live stat, not the diagnosis promise)
     proof: "Every lead answered in 60 seconds. Guaranteed.",
-    // live crew-at-work feed: glass cards cycling over the hero video (desktop only).
+    // crew-at-work feed: glass cards cycling over the hero video.
     // Late-night/early timestamps on purpose: the crew works while you sleep.
+    // These are SIMULATED events (no live clients yet); the visible feedNote
+    // label keeps that honest. Swap to real (consented) events post-pilot.
+    feedNote: "Simulated preview of your crew at work",
     feed: [
       { name: "Zip",    tone: "amber",  text: "Replied to a new lead in 43 seconds",          time: "9:47pm"  },
       { name: "Ada",    tone: "brand",  text: "Answered the phone and booked the job",        time: "2:13am"  },
-      { name: "Echo",   tone: "indigo", text: "Took an after-hours call, booking confirmed",  time: "10:32pm" },
-      { name: "Nudge",  tone: "teal",   text: "Chased quote #1042, customer said yes",        time: "7:15am"  },
+      { name: "Leo",    tone: "indigo", text: "Answered a warranty question and saved the job", time: "8:12pm" },
+      { name: "Nudge",  tone: "teal",   text: "Sent quote #1042, chased it, customer said yes", time: "7:15am" },
       { name: "Boomer", tone: "violet", text: "Won back a customer who went quiet",           time: "4:40pm"  },
       { name: "Star",   tone: "gold",   text: "Collected another 5-star review",              time: "6:02pm"  },
     ],
@@ -129,32 +132,32 @@ window.SITE = {
         line: "A lead comes in and I reply in 60 seconds, not 47 minutes, before they call anyone else.",
         also: "Missed-call text-back, web-form follow-up, instant booking links, lead scoring.",
         portrait: "zip.webp" },
-      { outcome: "Never miss a call", name: "Ada", role: "Full-Time Receptionist", tone: "brand",
-        line: "I answer every call in a natural Australian voice, all day, and book the job while we're still talking.",
-        also: "Full front-desk cover, live calendar booking, call summaries, message taking.",
+      { outcome: "Never miss a call", name: "Ada", role: "AI Receptionist", tone: "brand",
+        line: "Start me on nights and weekends, where missed calls already cost you jobs. When I have proven it, hand me the whole front desk.",
+        also: "After-hours or full-time cover, a natural Australian voice, live calendar booking, call summaries. Most start after hours and upgrade.",
         portrait: "ada.webp" },
-      { outcome: "Answered after hours", name: "Echo", role: "After-Hours Receptionist", tone: "indigo",
-        line: "The moment your office closes, I take over, so a 9pm caller still gets a real answer and a booking.",
-        also: "Nights, weekends and overflow. Nobody hits an answering machine again.",
-        portrait: "echo.webp" },
-      { outcome: "Close more quotes", name: "Nudge", role: "Quote Follow-up", tone: "teal",
-        line: "I chase every quote on day 1, 3 and 7, so none go cold in an inbox and the winnable ones get won.",
-        also: "Proposal reminders, objection handling, gentle win-back.",
+      { outcome: "Quotes out. Money in.", name: "Nudge", role: "Quotes & Invoices", tone: "teal",
+        line: "Give me your pricing guide and I build and send the quote, chase it until it is answered, then invoice and follow the money in.",
+        also: "Quote building from your rules, day 1-3-7 follow-up, invoicing, gentle payment chasing.",
         portrait: "nudge.webp" },
-      { outcome: "Win back lost customers", name: "Boomer", role: "Reactivation", tone: "violet",
-        line: "I win back the customers who went quiet and get them booking again.",
-        also: "Dormant-list campaigns, seasonal offers, past-customer reminders.",
-        portrait: "boomer.webp" },
+      { outcome: "Every question answered", name: "Leo", role: "Customer Service", tone: "indigo",
+        line: "Customers ask, I answer, day or night. Warranty, booking changes, that thing on their invoice. You stay on the tools.",
+        also: "SMS, email and web chat, instant answers from your business info, warm leads nursed to a booking.",
+        portrait: "leo.webp" },
       { outcome: "More 5-star reviews", name: "Star", role: "Review Engine", tone: "gold",
         line: "Every finished job, I ask for the review at the right moment, so your happiest customers are the ones leaving the stars.",
         also: "Google review requests, reputation monitoring, replies handled.",
         portrait: "star.webp" },
+      { outcome: "Win back lost customers", name: "Boomer", role: "Reactivation · Optional", tone: "violet",
+        line: "I win back the customers who went quiet and get them booking again.",
+        also: "Dormant-list campaigns, seasonal offers, past-customer reminders. An optional hire: fits businesses with a customer list to wake up.",
+        portrait: "boomer.webp" },
     ],
     // the "and it also does" catch-all — the admin line Nicholas asked for
     moreLabel: "And it also automates the repetitive admin",
     moreLine: "If it is manual and it repeats, we can hand it to your AI staff. Whatever you are picturing, we can probably build it.",
     more: [
-      "Appointment reminders", "Data entry & CRM updates", "Invoice & quote chasing",
+      "Appointment reminders", "Data entry & CRM updates",
       "Inbox triage", "Lead qualification", "Website chat widget", "Weekly business X-ray",
     ],
   },
@@ -196,7 +199,7 @@ window.SITE = {
   pricing: {
     kicker: "The Never Miss System",
     heading: "A fraction of a wage. Round-the-clock {i:coverage}.",
-    sub: "The Never Miss System is your whole front office in one place, priced against a salary and coming in well under it. Most businesses start with the full system. Prefer to start with a single worker, like the AI receptionist? You can, and add the rest as you grow. The free Leak Audit works out exactly what you need.",
+    sub: "The Never Miss System is your whole front office in one place, priced against a salary and coming in well under it. Take the full system, or start with a single worker, like the AI receptionist after hours, and add the rest as you grow. The free Leak Audit works out exactly what you need.",
     human: {
       title: "One human hire",
       points: [
@@ -221,8 +224,9 @@ window.SITE = {
       "Your crew, built and tuned to your business",
       "Every call answered and every lead chased, 24/7",
       "Done-for-you setup: your phone, calendar and tools connected",
-      "A week-one reactivation blitz to your old customers",
-      "Every quote chased until it closes",
+      "The Week-One Win-Back Blitz: your dormant customers messaged in week one, pulling work forward fast",
+      "Quotes built, sent and chased from your pricing rules",
+      "Invoices raised and politely chased",
       "5-star reviews collected after every job",
       "One dashboard showing everything your staff did",
       "A plain-English business X-ray every week",
@@ -238,13 +242,13 @@ window.SITE = {
     heading: "Every lead answered in 60 seconds, or the month is {i:free}.",
     promise: {
       badge: "Our promise, in writing",
-      statement: "Every call your AI staff pick up and every new enquiry they reply to happens within 60 seconds, day or night. If we ever drop below that in a month, that month is on us.",
+      statement: "Every call and every new enquiry that comes through your AI staff gets a response within 60 seconds, day or night. If we ever drop below that in a month, that month is on us.",
       finePrint: "Measured across the calls and leads routed through your AI staff. The refund is that month's fee. No lock-in, cancel any time.",
     },
     points: [
       { title: "You see it work first", text: "Every worker starts in a supervised warm-up. You approve the messages before anything goes live in front of a customer." },
       { title: "No lock-in", text: "Month to month. Stay because it is booking you jobs, not because you are trapped in a contract." },
-      { title: "Hard guardrails", text: "Spend caps, quiet hours and a strict no-quoting-prices rule are built in. It stays on the rails, always." },
+      { title: "Hard guardrails", text: "Spend caps, quiet hours and one hard rule: your staff never invent a price. Quotes only ever come from your pricing rules, and you can switch quoting off entirely." },
     ],
   },
 
@@ -259,7 +263,9 @@ window.SITE = {
     { q: "What if it gets something wrong?",
       a: "Every worker starts in a supervised warm-up so you catch anything before it goes live. Once running, spend caps and quiet hours keep it safe, and we monitor it for you." },
     { q: "How does the 60-Second Promise work?",
-      a: "Every call your AI staff answer and every new enquiry they reply to happens within 60 seconds, day or night. If in any month we drop below that on the calls and leads routed through your staff, that month is free. No lock-in, and you can cancel any time." },
+      a: "Every call and every new enquiry that comes through your AI staff gets a response within 60 seconds, day or night. If in any month we drop below that on the calls and leads routed through your staff, that month is free. No lock-in, and you can cancel any time." },
+    { q: "Can it really send quotes for me?",
+      a: "Yes. You give us your pricing rules once, and Nudge builds and sends quotes from them, follows each one up, then invoices when the job is done. It never invents a price. If a job falls outside your rules, it hands straight to you." },
     { q: "How much does it cost?",
       a: "It depends on which staff your business needs, which is exactly what the free Leak Audit works out. It is always a fraction of the salary of the person it replaces." },
     { q: "Do I have to change my phone number?",
@@ -275,7 +281,7 @@ window.SITE = {
   /* ---- Final CTA --------------------------------------------------------- */
   finalCta: {
     heading: "Find out what your business is {i:leaking}.",
-    sub: "The Leak Audit is free. Worst case, you walk away with a clear map of exactly where you are losing jobs. Best case, you hire your first AI staff this week.",
+    sub: "The Leak Audit is free, and you keep your Leak Map even if you never hire us. Worst case, you walk away knowing exactly where you are losing jobs. Best case, you hire your first AI staff this week. And remember, we take one business per trade, per area. If your competitor books first, the spot is theirs.",
   },
 
   footer: {
