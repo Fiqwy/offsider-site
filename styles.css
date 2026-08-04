@@ -484,23 +484,40 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   background: var(--green-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316a34a' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center / 13px no-repeat;
 }
 /* dashboard mock panel */
+/* light like the real cockpit: reads as a product screenshot, not a mockup,
+   and breaks the run of dark panels (cockpit / ROI / pricing) */
 .dash {
-  background: var(--bg-ink); border-radius: var(--radius-lg); padding: 1.2rem;
-  box-shadow: var(--shadow-lg); color: #fff;
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  padding: 1.2rem; box-shadow: var(--shadow-lg); color: var(--ink);
 }
 .dash__bar { display: flex; align-items: center; gap: 8px; padding: 4px 6px 12px; }
 .dash__dot { width: 10px; height: 10px; border-radius: 50%; }
-.dash__title { margin-left: 8px; font-size: .8rem; color: rgba(255,255,255,.7); font-weight: 600; }
+.dash__title { margin-left: 8px; font-size: .8rem; color: var(--muted); font-weight: 600; }
+.dash__sample {
+  margin-left: auto; font-size: .62rem; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--muted-2);
+  border: 1px solid var(--line); border-radius: 999px; padding: .18rem .55rem;
+}
+.dash__health {
+  display: flex; align-items: center; gap: .5rem;
+  margin-bottom: .8rem; padding: .55rem .8rem; border-radius: 11px;
+  background: var(--green-soft); border: 1px solid rgba(22,163,74,.22);
+  font-size: .78rem; font-weight: 700; color: #116a34;
+}
+.dash__pulse {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex: none;
+  box-shadow: 0 0 0 3px rgba(22,163,74,.18);
+}
 .dash__kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; }
-.dash__kpi { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: .9rem; }
-.dash__kpi .v { font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; }
-.dash__kpi .k { font-size: .72rem; color: rgba(255,255,255,.7); margin-top: 2px; }
-.dash__kpi .v.up { color: #4ade80; }
+.dash__kpi { background: var(--bg-soft); border: 1px solid var(--line-2); border-radius: 14px; padding: .9rem; }
+.dash__kpi .v { font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; color: var(--ink); }
+.dash__kpi .k { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+.dash__kpi .v.up { color: var(--green); }
 .dash__feed { margin-top: .8rem; display: flex; flex-direction: column; gap: .4rem; }
-.dash__row { display: flex; align-items: center; gap: .6rem; background: rgba(255,255,255,.04); border-radius: 11px; padding: .6rem .75rem; font-size: .82rem; }
+.dash__row { display: flex; align-items: center; gap: .6rem; background: var(--bg-soft); border: 1px solid var(--line-2); border-radius: 11px; padding: .6rem .75rem; font-size: .82rem; }
 .dash__row .who { width: 7px; height: 7px; border-radius: 50%; flex: none; }
-.dash__row .txt { color: rgba(255,255,255,.82); }
-.dash__row .tag { margin-left: auto; font-size: .68rem; color: rgba(255,255,255,.45); font-weight: 600; }
+.dash__row .txt { color: var(--ink-2); }
+.dash__row .tag { margin-left: auto; font-size: .68rem; color: var(--muted-2); font-weight: 600; white-space: nowrap; }
 
 /* ---- ROI calculator ------------------------------------------------------ */
 .roi-calc { display: grid; grid-template-columns: 1fr 0.9fr; gap: clamp(1.5rem, 4vw, 3rem); margin-top: 2.8rem; align-items: stretch; }

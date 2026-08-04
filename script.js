@@ -234,24 +234,29 @@
   }
 
   function buildDash() {
+    // A healthy week for a (fictional) autobody client, light like the real
+    // cockpit. "Sample data" chip keeps it honest, same standard as the hero feed.
     const d = el("div", "dash");
     d.innerHTML =
       `<div class="dash__bar">
          <span class="dash__dot" style="background:#ff5f57"></span>
          <span class="dash__dot" style="background:#febc2e"></span>
          <span class="dash__dot" style="background:#28c840"></span>
-         <span class="dash__title">${S.brand.short} · Live</span>
+         <span class="dash__title">Coastline Smash Repairs · ${S.brand.short} cockpit</span>
+         <span class="dash__sample">Sample data</span>
        </div>
+       <div class="dash__health"><span class="dash__pulse"></span>All staff healthy · 60-Second Promise on track: 100% this month</div>
        <div class="dash__kpis">
-         <div class="dash__kpi"><div class="v">128</div><div class="k">Calls answered</div></div>
-         <div class="dash__kpi"><div class="v up">+41</div><div class="k">Jobs booked</div></div>
-         <div class="dash__kpi"><div class="v up">4.9★</div><div class="k">Rating</div></div>
+         <div class="dash__kpi"><div class="v">47/47</div><div class="k">Calls answered this week</div></div>
+         <div class="dash__kpi"><div class="v up">12</div><div class="k">Jobs booked</div></div>
+         <div class="dash__kpi"><div class="v up">$18k</div><div class="k">Revenue recovered</div></div>
        </div>
        <div class="dash__feed">
-         <div class="dash__row"><span class="who" style="background:var(--tone-brand)"></span><span class="txt">Ada answered a call and booked the job</span><span class="tag">Nerang · now</span></div>
-         <div class="dash__row"><span class="who" style="background:var(--tone-amber)"></span><span class="txt">Zip replied to a new lead in 43s</span><span class="tag">2m ago</span></div>
-         <div class="dash__row"><span class="who" style="background:var(--tone-gold)"></span><span class="txt">Star collected a 5-star review</span><span class="tag">11m ago</span></div>
-         <div class="dash__row"><span class="who" style="background:var(--tone-teal)"></span><span class="txt">Nudge sent quote #1042 and chased it</span><span class="tag">18m ago</span></div>
+         <div class="dash__row"><span class="who" style="background:var(--tone-brand)"></span><span class="txt">Ada answered and booked a bumper respray</span><span class="tag">Southport · now</span></div>
+         <div class="dash__row"><span class="who" style="background:var(--tone-amber)"></span><span class="txt">Zip replied to an insurance lead in 38s</span><span class="tag">2m ago</span></div>
+         <div class="dash__row"><span class="who" style="background:var(--tone-teal)"></span><span class="txt">Nudge sent quote #217, hail damage, and chased it</span><span class="tag">26m ago</span></div>
+         <div class="dash__row"><span class="who" style="background:var(--tone-indigo)"></span><span class="txt">Leo answered an "is my car ready" text</span><span class="tag">1h ago</span></div>
+         <div class="dash__row"><span class="who" style="background:var(--tone-gold)"></span><span class="txt">Star collected another 5-star review</span><span class="tag">2h ago</span></div>
        </div>`;
     return d;
   }
