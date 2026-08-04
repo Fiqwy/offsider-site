@@ -54,9 +54,56 @@
     if (!cal) return;
     const url = (S.brand.bookingUrl || "").trim();
     const isCalendar = /^https:\/\//.test(url);
+    const formKey = (S.booking && S.booking.web3formsKey || "").trim();
+
+    if (!isCalendar && formKey) {
+      // SMS-first enquiry form lane (Web3Forms)
+      const f = S.booking.form;
+      cal.innerHTML =
+        `<form class="booking__form" novalidate>
+           <b class="booking__form-title">${f.title}</b>
+           <label><span>${f.fields.name}</span><input type="text" name="name" autocomplete="name" required /></label>
+           <label><span>${f.fields.mobile}</span><input type="tel" name="mobile" autocomplete="tel" inputmode="tel" required /></label>
+           <label><span>${f.fields.trade}</span><input type="text" name="trade" required /></label>
+           <input type="checkbox" name="botcheck" class="booking__hp" tabindex="-1" aria-hidden="true" />
+           <button class="btn btn--primary btn--lg" type="submit">${f.button}</button>
+           <p class="booking__form-note">${f.note}</p>
+           <p class="booking__form-msg" role="status" aria-live="polite"></p>
+         </form>`;
+      const form = $("form", cal);
+      const msg = $(".booking__form-msg", cal);
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!form.reportValidity()) return;
+        const btn = $("button[type=submit]", form);
+        btn.disabled = true; btn.textContent = "Sending...";
+        try {
+          const data = Object.fromEntries(new FormData(form).entries());
+          const res = await fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify({
+              access_key: formKey,
+              subject: "New Leak Audit enquiry (website)",
+              from_name: "Applied Intelligence website",
+              ...data,
+            }),
+          });
+          const out = await res.json();
+          if (!out.success) throw new Error("send failed");
+          form.querySelectorAll("label, button, .booking__form-note").forEach((n) => { n.style.display = "none"; });
+          msg.textContent = f.success;
+          msg.classList.add("is-ok");
+        } catch {
+          msg.textContent = f.error;
+          btn.disabled = false; btn.textContent = f.button;
+        }
+      });
+      return;
+    }
 
     if (!isCalendar) {
-      // interim card: keeps the section converting until the calendar link exists
+      // interim card: keeps the section converting until a calendar link or form key exists
       const ph = (S.booking && S.booking.placeholder) || {};
       cal.innerHTML =
         `<div class="booking__ph">
@@ -236,6 +283,46 @@
   function buildDash() {
     // A healthy week for a (fictional) autobody client, light like the real
     // cockpit. "Sample data" chip keeps it honest, same standard as the hero feed.
+    // Each feed row expands (like the real product) to show the job details +
+    // the conversation the AI actually had.
+    const ROWS = [
+      { tone: "brand", txt: "Ada answered and booked a bumper respray", tag: "Southport · now",
+        meta: ["Front bumper respray · 2019 Ranger", "Assessment booked Thu 7:30am", "Logged to calendar + CRM"],
+        convo: [
+          ["Caller", "Had a ding in the front bumper, can you fit me in this week?"],
+          ["Ada", "We can. Thursday 7:30am for a 20 minute assessment, or Friday arvo if that suits better?"],
+          ["Caller", "Thursday works."],
+          ["Ada", "Locked in. I have texted you the address and a reminder for Thursday 7:30am. See you then."],
+        ] },
+      { tone: "amber", txt: "Zip replied to an insurance lead in 38s", tag: "2m ago",
+        meta: ["Web form enquiry · insurance claim", "First reply in 38 seconds", "Booking link sent and opened"],
+        convo: [
+          ["Lead", "Not-at-fault accident, other party insured with AAMI. Do you handle the claim?"],
+          ["Zip", "We do, start to finish, and we deal with the insurer for you. Want to grab an assessment time now? Here is the link."],
+          ["Lead", "Booked for Tuesday, thanks."],
+        ] },
+      { tone: "teal", txt: "Nudge sent quote #217, hail damage, and chased it", tag: "26m ago",
+        meta: ["Quote #217 · hail damage, roof + bonnet", "Built from your pricing rules", "Accepted on day-3 follow-up · invoice scheduled"],
+        convo: [
+          ["Nudge", "Hi Sarah, your quote for the hail repair is attached. Any questions, just reply here."],
+          ["Nudge", "(day 3) Hi Sarah, checking you got the quote okay. Want us to hold a spot next week?"],
+          ["Customer", "Yes go ahead, book it in."],
+        ] },
+      { tone: "indigo", txt: 'Leo answered an "is my car ready" text', tag: "1h ago",
+        meta: ["Status enquiry · job #204", "Answered from the live job board", "Zero interruption to the workshop"],
+        convo: [
+          ["Customer", "Hey, any word on the Camry?"],
+          ["Leo", "Paint is curing now. It is on track for Friday 2pm pickup, we will text you the moment it is ready."],
+          ["Customer", "Legend, thanks."],
+        ] },
+      { tone: "gold", txt: "Star collected another 5-star review", tag: "2h ago",
+        meta: ["Job #198 completed 5:40pm", "Review request sent 6:10pm", "5 stars left 6:47pm · reply posted"],
+        convo: [
+          ["Star", "Thanks for choosing Coastline, Dave. If we looked after you, a quick Google review helps heaps: [link]"],
+          ["Dave", "★★★★★ Car looks brand new, couldn't tell it was ever hit."],
+          ["Star", "(reply as the business) Thanks Dave, enjoy having her back to new. See you next time."],
+        ] },
+    ];
     const d = el("div", "dash");
     d.innerHTML =
       `<div class="dash__bar">
@@ -251,13 +338,35 @@
          <div class="dash__kpi"><div class="v up">12</div><div class="k">Jobs booked</div></div>
          <div class="dash__kpi"><div class="v up">$18k</div><div class="k">Revenue recovered</div></div>
        </div>
-       <div class="dash__feed">
-         <div class="dash__row"><span class="who" style="background:var(--tone-brand)"></span><span class="txt">Ada answered and booked a bumper respray</span><span class="tag">Southport · now</span></div>
-         <div class="dash__row"><span class="who" style="background:var(--tone-amber)"></span><span class="txt">Zip replied to an insurance lead in 38s</span><span class="tag">2m ago</span></div>
-         <div class="dash__row"><span class="who" style="background:var(--tone-teal)"></span><span class="txt">Nudge sent quote #217, hail damage, and chased it</span><span class="tag">26m ago</span></div>
-         <div class="dash__row"><span class="who" style="background:var(--tone-indigo)"></span><span class="txt">Leo answered an "is my car ready" text</span><span class="tag">1h ago</span></div>
-         <div class="dash__row"><span class="who" style="background:var(--tone-gold)"></span><span class="txt">Star collected another 5-star review</span><span class="tag">2h ago</span></div>
+       <div class="dash__feed">${ROWS.map((r, i) =>
+         `<div class="dash__item">
+            <button class="dash__row" type="button" aria-expanded="false" aria-controls="dash-detail-${i}">
+              <span class="who" style="background:var(--tone-${r.tone})"></span>
+              <span class="txt">${r.txt}</span>
+              <span class="tag">${r.tag}</span>
+              <span class="dash__chev" aria-hidden="true"></span>
+            </button>
+            <div class="dash__detail" id="dash-detail-${i}" aria-hidden="true">
+              <div class="dash__detail-inner">
+                <div class="dash__meta">${r.meta.map((m) => `<span>${m}</span>`).join("")}</div>
+                <div class="dash__convo">${r.convo.map(([who, line]) =>
+                  `<p><b>${who}:</b> ${line}</p>`).join("")}</div>
+              </div>
+            </div>
+          </div>`).join("")}
        </div>`;
+
+    // expand/collapse, same max-height pattern as the FAQ accordion
+    $$(".dash__row", d).forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const item = btn.parentElement;
+        const detail = $(".dash__detail", item);
+        const open = item.classList.toggle("open");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+        detail.setAttribute("aria-hidden", open ? "false" : "true");
+        detail.style.maxHeight = open ? detail.scrollHeight + "px" : "0px";
+      });
+    });
     return d;
   }
 
