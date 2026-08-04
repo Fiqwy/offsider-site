@@ -667,6 +667,47 @@ input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border: 3px s
 .final-cta__title { font-size: clamp(2.1rem, 5vw, 3.4rem); max-width: 18ch; margin-inline: auto; }
 .final-cta__ps { margin-top: 1.4rem; font-size: .92rem; color: var(--muted); font-weight: 600; }
 
+/* ---- Booking section (final CTA) ----------------------------------------- */
+.booking {
+  display: grid; grid-template-columns: 0.85fr 1.15fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  margin-top: 3rem; align-items: stretch;
+}
+.booking__info {
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  padding: 2rem; box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column; text-align: left;
+}
+.booking__label {
+  font-size: .8rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--accent);
+}
+.booking__points { margin-top: 1.4rem; display: flex; flex-direction: column; gap: 1.15rem; }
+.booking__point b { display: block; font-size: 1.05rem; font-weight: 800; color: var(--ink); }
+.booking__point span { display: block; margin-top: .3rem; font-size: .97rem; color: var(--muted); line-height: 1.5; }
+.booking__note {
+  margin-top: auto; padding-top: 1.4rem; border-top: 1px dashed var(--line);
+  font-size: .9rem; font-weight: 600; color: var(--muted-2);
+}
+.booking__cal {
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md); overflow: hidden;
+  min-height: 560px; display: flex;
+}
+.booking__frame { width: 100%; border: 0; min-height: 560px; flex: 1; }
+.booking__ph {
+  margin: auto; text-align: center; padding: 2.5rem 2rem; max-width: 40ch;
+}
+.booking__ph b { display: block; font-size: 1.35rem; font-weight: 800; letter-spacing: -.01em; }
+.booking__ph p { margin-top: .7rem; color: var(--muted); font-size: 1.02rem; }
+.booking__ph .btn { margin-top: 1.6rem; }
+@media (max-width: 900px) {
+  .booking { grid-template-columns: 1fr; }
+  .booking__cal { min-height: 520px; }
+  .booking__frame { min-height: 520px; }
+  .booking__info { order: 2; }   /* calendar first on mobile: action above rationale */
+}
+
 /* ---- Footer -------------------------------------------------------------- */
 .footer { background: var(--bg-ink); color: rgba(255,255,255,.7); padding-block: 3rem; }
 .footer__inner { display: flex; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }

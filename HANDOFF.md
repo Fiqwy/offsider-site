@@ -74,3 +74,5 @@ Vanilla HTML/CSS/JS. Lenis + GSAP + ScrollTrigger, vendored in `vendor/`. No fra
 ## Notes
 - Australian English, no em-dashes (house style).
 - Pricing never shows a number and never compares to SaaS — it anchors to a salary (compliance + strategy).
+
+**2026-08-04 — Booking section.** The #book section is now a real booking area: left card = "What happens on the call" (3 points + no-cost/one-per-trade note, from `content.js booking`), right card = calendar slot (`renderBooking()` in script.js). Behaviour: if `brand.bookingUrl` starts with https:// it lazy-embeds the calendar iframe (Cal.com `?embed=true&theme=light` or Calendly `?hide_gdpr_banner=1`) when the section nears the viewport; otherwise a converting interim card (email CTA) shows. TO ACTIVATE THE CALENDAR: set `brand.bookingUrl` in content.js to the real Cal.com/Calendly event URL. Mobile stacks calendar-first.

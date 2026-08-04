@@ -278,10 +278,24 @@ window.SITE = {
       a: "Days, not months. We map the leaks on the call, build your staff, run a supervised warm-up, then go live." },
   ],
 
-  /* ---- Final CTA --------------------------------------------------------- */
+  /* ---- Final CTA + booking section ---------------------------------------- */
   finalCta: {
     heading: "Find out what your business is {i:leaking}.",
     sub: "The Leak Audit is free, and you keep your Leak Map even if you never hire us. Worst case, you walk away knowing exactly where you are losing jobs. Best case, you hire your first AI staff this week. And remember, we take one business per trade, per area. If your competitor books first, the spot is theirs.",
+  },
+  booking: {
+    label: "What happens on the call",
+    points: [
+      { title: "15 minutes, straight to it", text: "No slideshow, no tech talk. We walk your customer journey and find where calls, leads and quotes leak." },
+      { title: "You keep the Leak Map", text: "A one-page map of every leak and what it is roughly costing you, yours even if we never speak again." },
+      { title: "A straight answer", text: "Which AI worker pays for itself first, or an honest 'you don't need us yet'." },
+    ],
+    note: "No cost. No obligation. One business per trade, per area.",
+    // interim card shown until brand.bookingUrl is a real calendar URL
+    placeholder: {
+      title: "Pick a time that suits you",
+      text: "Email us and we will reply today with times for your free Leak Audit.",
+    },
   },
 
   footer: {

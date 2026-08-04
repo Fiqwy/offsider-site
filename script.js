@@ -43,6 +43,48 @@
     doc.title = S.brand.name + ": The Never Miss System | Done-for-you AI staff for Australian businesses";
   }
 
+  /* ---- booking section (calendar embed or interim card) ------------------ */
+  function renderBooking() {
+    const pts = $("[data-booking-points]");
+    if (pts && S.booking) {
+      S.booking.points.forEach((p) => pts.appendChild(el("li", "booking__point",
+        `<b>${p.title}</b><span>${p.text}</span>`)));
+    }
+    const cal = $("[data-booking-cal]");
+    if (!cal) return;
+    const url = (S.brand.bookingUrl || "").trim();
+    const isCalendar = /^https:\/\//.test(url);
+
+    if (!isCalendar) {
+      // interim card: keeps the section converting until the calendar link exists
+      const ph = (S.booking && S.booking.placeholder) || {};
+      cal.innerHTML =
+        `<div class="booking__ph">
+           <b>${ph.title || "Pick a time that suits you"}</b>
+           <p>${ph.text || ""}</p>
+           <a class="btn btn--primary btn--lg" href="mailto:${S.brand.email}?subject=Free%20Leak%20Audit">${S.cta.primary}</a>
+         </div>`;
+      return;
+    }
+
+    // lazy-load the calendar iframe only when the section approaches the viewport
+    const src = url.includes("calendly.com")
+      ? url + (url.includes("?") ? "&" : "?") + "hide_gdpr_banner=1"
+      : url + (url.includes("?") ? "&" : "?") + "embed=true&theme=light";
+    const io = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect();
+      const f = doc.createElement("iframe");
+      f.className = "booking__frame";
+      f.src = src;
+      f.title = "Book your free Leak Audit";
+      f.loading = "lazy";
+      f.setAttribute("allow", "payment");
+      cal.appendChild(f);
+    }, { rootMargin: "600px" });
+    io.observe(cal);
+  }
+
   /* ---- phone / SMS builder ---------------------------------------------- */
   function buildSms(thread, { animated }) {
     const screen = el("div", "phone__screen");
@@ -771,6 +813,7 @@
   function boot() {
     bind();
     renderLists();
+    renderBooking();
     renderRoi();
     wireFaq();
     wireNav();

@@ -200,15 +200,21 @@
       </div>
     </section>
 
-    <!-- ============ FINAL CTA / BOOK ============ -->
+    <!-- ============ FINAL CTA / BOOK (booking section) ============ -->
     <section class="section final-cta" id="book">
-      <div class="wrap wrap--narrow center">
+      <div class="wrap center">
         <h2 class="final-cta__title" data-bind-html="finalCta.heading"></h2>
         <p class="section__lead center" data-bind="finalCta.sub"></p>
-        <div class="center-cta">
-          <a class="btn btn--primary btn--xl" href="mailto:hello@appliedintelligence.biz?subject=Free%20Leak%20Audit" data-book-link data-bind="cta.primary"></a>
+      </div>
+      <div class="wrap booking reveal">
+        <div class="booking__info">
+          <span class="booking__label" data-bind="booking.label"></span>
+          <ul class="booking__points" data-booking-points></ul>
+          <p class="booking__note" data-bind="booking.note"></p>
         </div>
-        <p class="final-cta__ps">No cost. No obligation. Just a clear map of where you're losing jobs.</p>
+        <!-- calendar embed renders here when brand.bookingUrl is a real URL;
+             a converting interim card shows until then (script.js renderBooking) -->
+        <div class="booking__cal" data-booking-cal></div>
       </div>
     </section>
   </main>
