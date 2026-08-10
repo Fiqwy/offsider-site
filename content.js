@@ -12,7 +12,7 @@ window.SITE = {
     fullName: "Applied Intelligent Systems & Automations",
     tagline: "Done-for-you AI staff. You employ it, you don't operate it.",
     location: "Gold Coast, Australia",
-    email: "hello@appliedintelligence.biz",
+    email: "nickjmatthews@pm.me",
     phone: "",                  // add real number when live
     bookingUrl: "#book",        // swap for Cal.com / Calendly embed URL
   },
