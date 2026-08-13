@@ -40,7 +40,7 @@ window.SITE = {
     ],
     sub: "A team of AI staff answering your phone, chasing every lead and booking the job around the clock. You employ them, we build and run them, and you just turn up and do what you do best.",
     // hero micro-proof line (a live stat, not the diagnosis promise)
-    proof: "Every lead answered in 60 seconds. Guaranteed.",
+    proof: "Replies in under a minute. Your first 30 days, risk free.",
     // crew-at-work feed: glass cards cycling over the hero video.
     // Late-night/early timestamps on purpose: the crew works while you sleep.
     // These are SIMULATED events (no live clients yet); the visible feedNote
@@ -75,10 +75,14 @@ window.SITE = {
     body: "You're on the tools, on a ladder, under a car. The phone rings out. The lead texts someone else. The quote goes cold. None of it is your fault, but all of it costs you.",
     stats: [
       { value: "62%", label: "of calls to small businesses go unanswered" },
-      { value: "21x", label: "more likely to convert if you reply within 5 minutes" },
-      { value: "47 min", label: "average time a busy business takes to reply to a lead" },
+      { value: "21x", label: "better odds of qualifying a lead if you reply in 5 minutes, not 30" },
+      { value: "42 hrs", label: "average time a business takes to reply to a web lead" },
       { value: "$0", label: "of that lost revenue ever shows up on a report" },
     ],
+    // Honesty note under the stat row: every borrowed number is attributed, and
+    // labelled as industry research rather than our own client results.
+    // Do not add a number here without a named, checkable source.
+    sourceNote: "Sources: 411 Locals, 85 businesses across 58 industries, 2016. MIT / InsideSales.com Lead Response Management Study, Dr James Oldroyd. Harvard Business Review, “The Short Life of Online Sales Leads”, Oldroyd, McElheran and Elkington, 2011, audit of 2,241 companies. Figures are industry research, not our own client results.",
   },
 
   /* ---- The Diagnosis promise (the wedge) --------------------------------- */
@@ -129,7 +133,7 @@ window.SITE = {
     // Each is a unique animated character (non-human), toned to its job.
     members: [
       { outcome: "Reply in 60 seconds", name: "Zip", role: "Speed-to-Lead", tone: "amber",
-        line: "A lead comes in and I reply in 60 seconds, not 47 minutes, before they call anyone else.",
+        line: "A lead comes in and I reply in 60 seconds, not two days later, before they call anyone else.",
         also: "Missed-call text-back, web-form follow-up, instant booking links, lead scoring.",
         portrait: "zip.webp" },
       { outcome: "Never miss a call", name: "Ada", role: "AI Receptionist", tone: "brand",
@@ -137,8 +141,8 @@ window.SITE = {
         also: "After-hours or full-time cover, a natural Australian voice, live calendar booking, call summaries. Upgrade: have her answer in your own voice, cloned with your consent, so callers hear the voice they already know.",
         portrait: "ada.webp" },
       { outcome: "Quotes out. Money in.", name: "Nudge", role: "Quotes & Invoices", tone: "teal",
-        line: "Give me your pricing guide and I build and send the quote, chase it until it is answered, then invoice and follow the money in.",
-        also: "Quote building from your rules, day 1-3-7 follow-up, invoicing, gentle payment chasing.",
+        line: "You build the quote in the portal, I make sure it never goes cold. Then I follow the money in.",
+        also: "Day 1-3-7 quote follow-up, gentle payment chasing, price questions answered from your list.",
         portrait: "nudge.webp" },
       { outcome: "Every question answered", name: "Leo", role: "Customer Service", tone: "indigo",
         line: "Customers ask, I answer, day or night. Warranty, booking changes, that thing on their invoice. You stay on the tools.",
@@ -150,7 +154,7 @@ window.SITE = {
         portrait: "star.webp" },
       { outcome: "Win back lost customers", name: "Boomer", role: "Reactivation · Optional", tone: "violet",
         line: "I win back the customers who went quiet and get them booking again.",
-        also: "Dormant-list campaigns, seasonal offers, past-customer reminders. An optional hire: fits businesses with a customer list to wake up.",
+        also: "Dormant-list campaigns, seasonal offers, past-customer reminders. An optional hire: fits businesses with a customer list to wake up, and every send is checked against your opt-out list.",
         portrait: "boomer.webp" },
     ],
     // the "and it also does" catch-all — the admin line Nicholas asked for
@@ -225,7 +229,7 @@ window.SITE = {
       "Every call answered and every lead chased, 24/7",
       "Done-for-you setup: your phone, calendar and tools connected",
       "The Week-One Win-Back Blitz: your dormant customers messaged in week one, pulling work forward fast",
-      "Quotes built, sent and chased from your pricing rules",
+      "Quotes chased from the moment you send them",
       "Invoices raised and politely chased",
       "5-star reviews collected after every job",
       "One dashboard showing everything your staff did",
@@ -238,12 +242,12 @@ window.SITE = {
 
   /* ---- Guarantee / risk removal ------------------------------------------ */
   guarantee: {
-    kicker: "The 60-Second Promise",
-    heading: "Every lead answered in 60 seconds, or the month is {i:free}.",
+    kicker: "The 30-Day Promise",
+    heading: "If your first month doesn't pay for itself, you don't {i:pay}.",
     promise: {
       badge: "Our promise, in writing",
-      statement: "Every call and every new enquiry that comes through your AI staff gets a response within 60 seconds, day or night. If we ever drop below that in a month, that month is on us.",
-      finePrint: "Measured across the calls and leads routed through your AI staff. The refund is that month's fee. No lock-in, cancel any time.",
+      statement: "Run your AI staff for 30 days. If it hasn't paid for itself by the end of your first month, tell us and we refund that month in full.",
+      finePrint: "Your first month's fee, refunded in full, no questions and no exit interview. Month to month after that, cancel any time.",
     },
     points: [
       { title: "You see it work first", text: "Every worker starts in a supervised warm-up. You approve the messages before anything goes live in front of a customer." },
@@ -262,10 +266,10 @@ window.SITE = {
       a: "Yes. Your data stays yours, isolated to your business, and your AI staff run with strict guardrails on what they can see and do." },
     { q: "What if it gets something wrong?",
       a: "Every worker starts in a supervised warm-up so you catch anything before it goes live. Once running, spend caps and quiet hours keep it safe, and we monitor it for you." },
-    { q: "How does the 60-Second Promise work?",
-      a: "Every call and every new enquiry that comes through your AI staff gets a response within 60 seconds, day or night. If in any month we drop below that on the calls and leads routed through your staff, that month is free. No lock-in, and you can cancel any time." },
+    { q: "What's the 30-Day Promise?",
+      a: "Run your AI staff for a month. If it hasn't paid for itself by the end of that first month, tell us and we refund it in full. No lock-in, and you can cancel any time after that." },
     { q: "Can it really send quotes for me?",
-      a: "Yes. You give us your pricing rules once, and Nudge builds and sends quotes from them, follows each one up, then invoices when the job is done. It never invents a price. If a job falls outside your rules, it hands straight to you." },
+      a: "You build the quote in your portal from your own price list, in a couple of clicks, and Nudge does the chasing: a follow-up on day 1, day 3 and day 7 until the customer answers. Same with invoices: raised in the portal, then politely chased until they're paid. Nudge will answer a price question by quoting your price list word for word, and it will never invent a number or add anything up, that stays yours." },
     { q: "How much does it cost?",
       a: "It depends on which staff your business needs, which is exactly what the free Leak Audit works out. It is always a fraction of the salary of the person it replaces." },
     { q: "Do I have to change my phone number?",

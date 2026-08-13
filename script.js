@@ -191,12 +191,12 @@
     const gu = $("[data-guarantee]"); if (gu) S.guarantee.points.forEach((s, i) =>
       gu.appendChild(el("div", "step reveal", `<div class="step__n">0${i + 1}</div><div class="step__title">${s.title}</div><div class="step__text">${s.text}</div>`)));
 
-    // guarantee promise band (the headline 60-Second Promise)
+    // guarantee promise band (the headline 30-Day Promise)
     const gp = $("[data-guarantee-promise]");
     if (gp && S.guarantee.promise) {
       const p = S.guarantee.promise;
       gp.innerHTML =
-        `<div class="guarantee__seal" aria-hidden="true"><b>60</b><span>sec</span></div>
+        `<div class="guarantee__seal" aria-hidden="true"><b>30</b><span>days</span></div>
          <div class="guarantee__body">
            <span class="guarantee__badge">${p.badge}</span>
            <p class="guarantee__statement">${ital(p.statement)}</p>
@@ -332,7 +332,7 @@
          <span class="dash__title">Coastline Smash Repairs · ${S.brand.short} cockpit</span>
          <span class="dash__sample">Sample data</span>
        </div>
-       <div class="dash__health"><span class="dash__pulse"></span>All staff healthy · 60-Second Promise on track: 100% this month</div>
+       <div class="dash__health"><span class="dash__pulse"></span>All staff healthy · 4 quotes chased, 2 replies, 1 job won this week</div>
        <div class="dash__kpis">
          <div class="dash__kpi"><div class="v">47/47</div><div class="k">Calls answered this week</div></div>
          <div class="dash__kpi"><div class="v up">12</div><div class="k">Jobs booked</div></div>
