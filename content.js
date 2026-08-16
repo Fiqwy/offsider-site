@@ -295,21 +295,21 @@ window.SITE = {
       { title: "A straight answer", text: "Which AI worker pays for itself first, or an honest 'you don't need us yet'." },
     ],
     note: "No cost. No obligation. One business per trade, per area.",
-    // enquiry form (primary lane): posts to Web3Forms when the key is set.
-    // Lane order in renderBooking: calendar (bookingUrl https) > form (key) > email card.
-    web3formsKey: "",   // paste the Web3Forms access key to activate the form
+    // enquiry box (posts to the platform's own /api/public/contact; no third party)
     form: {
-      title: "Get your audit time by text",
-      fields: { name: "Your name", mobile: "Mobile", trade: "Your trade or business" },
+      title: "Lock in your free Leak Audit",
+      fields: {
+        name: "Your name",
+        mobile: "Mobile",
+        email: "Email",
+        trade: "Your trade or business",
+      },
+      timesLabel: "When suits you best?",
+      times: ["Early morning", "Mid-morning", "Arvo", "After 5pm", "Whenever"],
       button: "Text me my audit time",
-      note: "We text you today. No spam, no obligation.",
-      success: "Sorted. Keep an eye on your phone, we will text you today.",
-      error: "That did not send. Give us a ring or email instead and we will sort you out.",
-    },
-    // interim card shown until a calendar URL or form key exists
-    placeholder: {
-      title: "Pick a time that suits you",
-      text: "Email us and we will reply today with times for your free Leak Audit.",
+      note: "We text you today to lock in a time. No spam, no obligation.",
+      success: "Sorted. Keep an eye on your phone, we will text you today to lock in a time.",
+      error: "That did not send. Ring or email us instead and we will sort you out.",
     },
   },
 

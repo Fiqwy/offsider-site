@@ -54,24 +54,36 @@
     if (!cal) return;
     const url = (S.brand.bookingUrl || "").trim();
     const isCalendar = /^https:\/\//.test(url);
-    const formKey = (S.booking && S.booking.web3formsKey || "").trim();
 
-    if (!isCalendar && formKey) {
-      // SMS-first enquiry form lane (Web3Forms)
+    if (!isCalendar) {
+      // Preferred-times enquiry box: posts to the platform's own endpoint
+      // (/api/public/contact, same origin; the apex proxies /api/* to Flask).
       const f = S.booking.form;
       cal.innerHTML =
         `<form class="booking__form" novalidate>
            <b class="booking__form-title">${f.title}</b>
            <label><span>${f.fields.name}</span><input type="text" name="name" autocomplete="name" required /></label>
            <label><span>${f.fields.mobile}</span><input type="tel" name="mobile" autocomplete="tel" inputmode="tel" required /></label>
+           <label><span>${f.fields.email}</span><input type="email" name="email" autocomplete="email" inputmode="email" required /></label>
            <label><span>${f.fields.trade}</span><input type="text" name="trade" required /></label>
-           <input type="checkbox" name="botcheck" class="booking__hp" tabindex="-1" aria-hidden="true" />
+           <div class="chip-row">
+             <span class="chip-row__label">${f.timesLabel}</span>
+             <div class="chip-row__chips">${f.times.map((t) =>
+               `<button type="button" class="chip-toggle" aria-pressed="false">${t}</button>`).join("")}</div>
+           </div>
+           <input type="text" name="website" class="booking__hp" tabindex="-1" aria-hidden="true" autocomplete="off" />
            <button class="btn btn--primary btn--lg" type="submit">${f.button}</button>
            <p class="booking__form-note">${f.note}</p>
            <p class="booking__form-msg" role="status" aria-live="polite"></p>
          </form>`;
       const form = $("form", cal);
       const msg = $(".booking__form-msg", cal);
+      $$(".chip-toggle", form).forEach((chip) => {
+        chip.addEventListener("click", () => {
+          const on = chip.classList.toggle("is-on");
+          chip.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+      });
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         if (!form.reportValidity()) return;
@@ -79,19 +91,24 @@
         btn.disabled = true; btn.textContent = "Sending...";
         try {
           const data = Object.fromEntries(new FormData(form).entries());
-          const res = await fetch("https://api.web3forms.com/submit", {
+          const times = $$(".chip-toggle.is-on", form).map((c) => c.textContent.trim());
+          const res = await fetch("/api/public/contact", {
             method: "POST",
-            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              access_key: formKey,
-              subject: "New Leak Audit enquiry (website)",
-              from_name: "Applied Intelligence website",
-              ...data,
+              name: data.name,
+              email: data.email,
+              phone: data.mobile,
+              business: data.trade,
+              website: data.website,   // honeypot: empty for humans
+              message: "Free Leak Audit request from the website.\nPreferred times: "
+                + (times.length ? times.join(", ") : "No preference")
+                + "\nMobile: " + data.mobile,
             }),
           });
           const out = await res.json();
           if (!out.success) throw new Error("send failed");
-          form.querySelectorAll("label, button, .booking__form-note").forEach((n) => { n.style.display = "none"; });
+          form.querySelectorAll("label, .chip-row, button, .booking__form-note").forEach((n) => { n.style.display = "none"; });
           msg.textContent = f.success;
           msg.classList.add("is-ok");
         } catch {
@@ -99,18 +116,6 @@
           btn.disabled = false; btn.textContent = f.button;
         }
       });
-      return;
-    }
-
-    if (!isCalendar) {
-      // interim card: keeps the section converting until a calendar link or form key exists
-      const ph = (S.booking && S.booking.placeholder) || {};
-      cal.innerHTML =
-        `<div class="booking__ph">
-           <b>${ph.title || "Pick a time that suits you"}</b>
-           <p>${ph.text || ""}</p>
-           <a class="btn btn--primary btn--lg" href="mailto:${S.brand.email}?subject=Free%20Leak%20Audit">${S.cta.primary}</a>
-         </div>`;
       return;
     }
 
