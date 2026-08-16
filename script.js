@@ -101,6 +101,7 @@
               phone: data.mobile,
               business: data.trade,
               website: data.website,   // honeypot: empty for humans
+              preferred_times: times,  // structured chip labels (platform stores + shows these)
               message: "Free Leak Audit request from the website.\nPreferred times: "
                 + (times.length ? times.join(", ") : "No preference")
                 + "\nMobile: " + data.mobile,
