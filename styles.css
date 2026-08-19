@@ -3,6 +3,38 @@
    Clean, bright, trustworthy. Apple/Stripe restraint. Light theme.
    ========================================================================== */
 
+/* ---- Self-hosted fonts (latin subset, OFL: see assets/fonts/OFL.txt) -----
+   Was Google Fonts; now local, so there is no third-party request on load.
+   Hanken Grotesk ships as ONE variable file covering the whole 400-800 range
+   the site uses, so every weight costs a single download. Instrument Serif is
+   static, and BOTH cuts are needed: italic for the .ital accent device, roman
+   for the curly quotes on .worker__line. unicode-range matches Google's own
+   latin subset, so non-latin text still falls through to the system stack. */
+@font-face {
+  font-family: "Hanken Grotesk";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("assets/fonts/hanken-grotesk-latin-var.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/fonts/instrument-serif-italic-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/fonts/instrument-serif-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* ---- Design tokens ------------------------------------------------------- */
 :root {
   --bg:        #ffffff;
@@ -139,12 +171,19 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   transition: background .3s ease, box-shadow .3s ease, border-color .3s ease;
   border-bottom: 1px solid transparent;
 }
-.nav.is-stuck {
+/* .nav--solid: sub-pages (work, terms, privacy) have no dark hero behind the
+   bar, so it carries the stuck-state treatment from first paint. Same values as
+   .is-stuck on purpose, so the two never drift apart. */
+.nav.is-stuck,
+.nav.nav--solid {
   background: rgba(255,255,255,.82);
   backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
   border-bottom-color: var(--line);
 }
+.nav--solid .nav__brand,
+.nav--solid .nav__links a { color: var(--ink); }
+.nav--solid .nav__links a:hover { color: var(--accent-ink); }
 /* Over the dark video hero, nav text/brand go light until the nav sticks. */
 .nav--over-hero:not(.is-stuck) .nav__brand,
 .nav--over-hero:not(.is-stuck) .nav__links a { color: #fff; }
@@ -476,6 +515,32 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .roster-more__chips { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; margin-top: 1rem; }
 .chip { border: 1px solid var(--line); border-radius: 999px; padding: .5rem 1rem; font-size: .92rem; font-weight: 600; color: var(--ink-2); background: var(--bg); }
 
+/* ---- Proof band (three recent builds, links into work.html) --------------
+   Light section. Three tall media frames that pan slowly once revealed, so the
+   band reads as craft rather than a logo wall. */
+.proof { background: var(--bg-soft); }
+.proof__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.3rem; margin-top: 2.8rem; }
+.proof-card {
+  display: block; overflow: hidden;
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.proof-card:hover {
+  transform: translateY(-4px); box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
+}
+/* tall frame: the shot overflows the window, then drifts once in view */
+.proof-card__media { position: relative; overflow: hidden; aspect-ratio: 4 / 5; background: var(--bg-soft); }
+.proof-card__media img { width: 100%; height: 114%; object-fit: cover; object-position: center top; }
+.js.is-ready .proof-card.in .proof-card__media img { animation: proofPan 20s ease-in-out infinite alternate; }
+@keyframes proofPan { from { transform: translateY(0); } to { transform: translateY(-12%); } }
+.proof-card__body { padding: 1.3rem 1.4rem 1.5rem; }
+.proof-card__name { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.proof-card__line { margin-top: .5rem; font-size: .98rem; line-height: 1.45; color: var(--muted); }
+.proof__cta { display: flex; justify-content: center; margin-top: 2.4rem; }
+@media (max-width: 720px) { .proof__grid { grid-template-columns: 1fr; } }
+
 /* ---- Cockpit ------------------------------------------------------------- */
 .cockpit { background: var(--bg-soft); }
 .cockpit__grid { display: grid; grid-template-columns: 0.95fr 1.05fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
@@ -781,6 +846,80 @@ input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border: 3px s
 .footer__meta { display: flex; flex-direction: column; gap: .4rem; text-align: right; font-size: .95rem; }
 .footer__legal { font-size: .82rem; color: rgba(255,255,255,.5); }
 .footer__meta a:hover { color: #fff; }
+/* legal link row (Terms / Privacy): sits under the footer meta column */
+.footer__links { display: flex; gap: 1.1rem; justify-content: flex-end; margin-top: .35rem; }
+.footer__links a { font-size: .88rem; color: rgba(255,255,255,.62); text-decoration: underline; text-underline-offset: 3px; }
+.footer__links a:hover { color: #fff; }
+
+/* ---- Legal documents (terms.html, privacy.html) --------------------------
+   Plain reading pages: no hero, no JS, .nav--solid from first paint. The
+   measure is held near 70ch because these are read end to end, not scanned
+   like the marketing sections. Padding-top clears the fixed nav. */
+.legal { padding-top: clamp(6.5rem, 13vh, 8.5rem); padding-bottom: clamp(4rem, 9vw, 7rem); }
+.legal-doc { max-width: 70ch; }
+.legal-doc__head { padding-bottom: 1.6rem; border-bottom: 1px solid var(--line); }
+.legal-doc__kicker {
+  display: inline-block;
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.11em; text-transform: uppercase;
+  color: var(--muted-2);
+  margin-bottom: .9rem;
+}
+.legal-doc h1 { font-size: clamp(2rem, 5vw, 3rem); }
+.legal-doc__lead {
+  margin-top: 1.1rem;
+  font-size: clamp(1.05rem, 1.6vw, 1.18rem);
+  color: var(--muted);
+}
+.legal-doc__updated {
+  margin-top: 1.1rem;
+  font-size: .9rem; font-weight: 600;
+  color: var(--muted-2);
+}
+.legal-doc__section { margin-top: clamp(2.2rem, 5vw, 3rem); }
+.legal-doc__section > h2 {
+  font-size: clamp(1.25rem, 2.6vw, 1.55rem);
+  letter-spacing: -0.015em;
+}
+/* the muted small-caps rung above each h2 */
+.legal-doc__section > .legal-doc__kicker { margin-bottom: .55rem; }
+.legal-doc p { margin-top: 1rem; color: var(--ink-2); }
+.legal-doc h3 {
+  margin-top: 1.8rem;
+  font-size: 1.05rem; font-weight: 700;
+  letter-spacing: -0.005em;
+}
+.legal-doc a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+.legal-doc a:hover { color: var(--accent); }
+.legal-doc ul { margin-top: 1rem; list-style: none; }
+.legal-doc ul li {
+  position: relative;
+  margin-top: .7rem; padding-left: 1.35rem;
+  color: var(--ink-2);
+}
+.legal-doc ul li::before {
+  content: ""; position: absolute; left: .25rem; top: .68em;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); opacity: .55;
+}
+/* the promise, quoted word for word from the marketing page */
+.legal-doc__quote {
+  margin-top: 1.4rem;
+  padding: 1.15rem 1.35rem;
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.legal-doc__quote p { margin-top: 0; color: var(--ink); font-weight: 600; }
+/* placeholder awaiting a real value from Nicholas — the deploy gate greps for it */
+.legal-doc mark[data-todo] {
+  background: #fff4d6; color: #7a5200;
+  padding: .1em .4em; border-radius: 5px;
+  font-weight: 700; font-size: .95em;
+}
+@media (max-width: 560px) {
+  .legal-doc__quote { padding: 1rem 1.1rem; }
+}
 
 /* ---- Scroll reveal (gated behind .is-ready so no-JS shows everything) ----- */
 .js.is-ready .reveal { opacity: 0; transform: translateY(26px); }
@@ -809,6 +948,7 @@ input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border: 3px s
   .compare { gap: 1rem; }
   .hero__actions .btn { width: 100%; }
   .footer__meta { text-align: left; }
+  .footer__links { justify-content: flex-start; }
 }
 
 /* full-height helpers using the dvh cascade (kills iOS address-bar jump) */

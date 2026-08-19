@@ -20,6 +20,8 @@
 
   /* ---- small helpers ----------------------------------------------------- */
   const ital = (str) => String(str).replace(/\{i:([^}]+)\}/g, '<em class="ital">$1</em>');
+  // same {i:...} marker, stripped back to plain text (schema.org, alt text, etc.)
+  const plain = (str) => String(str).replace(/\{i:([^}]+)\}/g, "$1");
   const get  = (path) => path.split(".").reduce((o, k) => (o == null ? o : o[k]), S);
   const el   = (tag, cls, html) => { const e = doc.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
   const money = (n) => "$" + Math.round(n).toLocaleString("en-AU");
@@ -40,7 +42,8 @@
     const email = S.brand.email;
     const fe = $("[data-footer-email]"); if (fe) { fe.textContent = email; fe.href = "mailto:" + email; }
     const bl = $("[data-book-link]"); if (bl) bl.href = "mailto:" + email + "?subject=Free%20Leak%20Audit";
-    doc.title = S.brand.name + ": The Never Miss System | Done-for-you AI staff for Australian businesses";
+    // NOTE: the document title is NOT set here. Each page's own <title> is
+    // authoritative, so work.html / terms.html / privacy.html keep theirs.
   }
 
   /* ---- booking section (calendar embed or interim card) ------------------ */
@@ -284,6 +287,61 @@
          <div class="faq-a" id="${id}" aria-hidden="true"><div class="faq-a__inner">${f.a}</div></div>`;
       fq.appendChild(item);
     });
+
+    // proof band (home): three recent builds, each linking into work.html
+    renderProof();
+  }
+
+  /* ---- Proof band (three recent builds) ----------------------------------
+     No-ops until the home page grows a [data-proof] mount. Copy strings go in
+     via textContent: these are business names we do not control. */
+  function renderProof() {
+    const mount = $("[data-proof]");
+    if (!mount || !S.work) return;
+    (S.work.projects || []).slice(0, 3).forEach((p) => {
+      const card = el("a", "proof-card reveal");
+      card.href = "work.html#" + p.slug;
+
+      const media = el("div", "proof-card__media");
+      const img = doc.createElement("img");
+      img.src = p.card;
+      img.alt = p.name + " website";
+      img.loading = "lazy";
+      img.decoding = "async";
+      media.appendChild(img);
+
+      const body = el("div", "proof-card__body");
+      const name = el("div", "proof-card__name");
+      name.textContent = p.name;
+      const line = el("p", "proof-card__line");
+      line.textContent = p.proofLine || p.oneLiner || "";
+      body.append(name, line);
+
+      card.append(media, body);
+      mount.appendChild(card);
+    });
+  }
+
+  /* ---- FAQPage JSON-LD (home page only) ----------------------------------
+     Built from the same S.faq the visible accordion renders, so the two can
+     never drift apart. */
+  function injectFaqSchema() {
+    if (doc.body.dataset.page !== "home") return;
+    if (!Array.isArray(S.faq) || !S.faq.length) return;
+    const data = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: S.faq.map((f) => ({
+        "@type": "Question",
+        name: plain(f.q),
+        acceptedAnswer: { "@type": "Answer", text: plain(f.a) },
+      })),
+    };
+    const tag = doc.createElement("script");
+    tag.type = "application/ld+json";
+    // escape "<" so the payload can never terminate the script block
+    tag.textContent = JSON.stringify(data).replace(/</g, "\\u003c");
+    doc.head.appendChild(tag);
   }
 
   function buildDash() {
@@ -513,6 +571,7 @@
   /* ---- nav stuck state --------------------------------------------------- */
   function wireNav() {
     const nav = $("#nav");
+    if (!nav) return;
     const overHero = nav.classList.contains("nav--over-hero");
     const onScroll = () => {
       const threshold = overHero ? window.innerHeight * 0.6 : 12;
@@ -933,6 +992,10 @@
   function boot() {
     bind();
     renderLists();
+    // Page modules (work.html and friends) hook in here, after the shared
+    // render pass and before the wiring, so anything they build still gets
+    // picked up by wireReveals()/wireAnchors() below.
+    if (typeof window.PAGE_INIT === "function") window.PAGE_INIT({ $, $$, el, ital, REDUCED, NO_HOVER, DESKTOP });
     renderBooking();
     renderRoi();
     wireFaq();
@@ -943,6 +1006,7 @@
     wireMagnetic();
     wireStickyCta();
     wireCountUps();
+    injectFaqSchema();
     requestAnimationFrame(() => {
       html.classList.add("is-ready");
       wireReveals();

@@ -8,8 +8,11 @@
   <meta name="theme-color" content="#ffffff" />
   <link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/logo/favicon.svg" />
+  <link rel="canonical" href="https://appliedintelligence.biz/" />
 
   <!-- Open Graph (URLs point at the production domain; harmless on the Pages preview) -->
+  <meta property="og:site_name" content="Applied Intelligence" />
+  <meta property="og:locale" content="en_AU" />
   <meta property="og:title" content="Applied Intelligence: The Never Miss System" />
   <meta property="og:description" content="A full AI front office in one system: every call answered, every lead chased, every job booked. Done for you, run for you." />
   <meta property="og:type" content="website" />
@@ -17,19 +20,51 @@
   <meta property="og:image" content="https://appliedintelligence.biz/assets/video/hero-poster.jpg" />
   <meta property="og:image:width" content="1920" />
   <meta property="og:image:height" content="1080" />
+  <meta property="og:image:alt" content="Applied Intelligence: The Never Miss System" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Applied Intelligence: The Never Miss System" />
   <meta name="twitter:description" content="A full AI front office in one system: every call answered, every lead chased, every job booked. Done for you, run for you." />
   <meta name="twitter:image" content="https://appliedintelligence.biz/assets/video/hero-poster.jpg" />
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <!-- Fonts: self-hosted, latin subset, OFL (see assets/fonts/OFL.txt).
+       Preload the two faces that paint above the fold: the Hanken variable file
+       (the h1 is weight 800) and the Instrument Serif italic accent word. -->
+  <link rel="preload" href="assets/fonts/hanken-grotesk-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
 
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Organisation + site identity. Kept static so it is in the HTML source
+       for crawlers that do not run JS. The FAQPage block is injected by
+       script.js from the same data the visible FAQ renders. -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Applied Intelligence",
+      "legalName": "Applied Intelligent Systems & Automations",
+      "url": "https://appliedintelligence.biz/",
+      "logo": "https://appliedintelligence.biz/assets/logo/favicon.svg",
+      "email": "nickjmatthews@pm.me",
+      "areaServed": "AU",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Gold Coast",
+        "addressRegion": "QLD",
+        "addressCountry": "AU"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Applied Intelligence",
+      "url": "https://appliedintelligence.biz/"
+    }
+  ]
+  </script>
 </head>
-<body>
+<body data-page="home">
   <a href="#top" class="skip-link">Skip to main content</a>
 
   <!-- ============ NAV ============ -->
@@ -238,6 +273,11 @@
         <span data-bind="brand.location"></span>
         <a data-footer-email href="mailto:nickjmatthews@pm.me"></a>
         <a href="https://donny.appliedintelligence.biz/login">Client login</a>
+        <!-- mirrors content.js footer.legal; static like the rest of the footer chrome -->
+        <div class="footer__links">
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+        </div>
       </div>
     </div>
   </footer>

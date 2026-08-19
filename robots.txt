@@ -1,0 +1,18 @@
+# Applied Intelligence: https://appliedintelligence.biz/
+# Everything on this site is public marketing. Crawl it all.
+
+User-agent: *
+Allow: /
+
+# Answer engines / AI search crawlers, named explicitly so there is no doubt
+# they are welcome to read and cite these pages.
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://appliedintelligence.biz/sitemap.xml

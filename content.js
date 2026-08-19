@@ -14,6 +14,9 @@ window.SITE = {
     location: "Gold Coast, Australia",
     email: "nickjmatthews@pm.me",
     phone: "",                  // add real number when live
+    // TODO (Nicholas): supply the real ABN before terms.html goes live. The
+    // terms and privacy pages both identify the trading entity by ABN.
+    abn: "",
     bookingUrl: "#book",        // swap for Cal.com / Calendly embed URL
   },
 
@@ -313,7 +316,126 @@ window.SITE = {
     },
   },
 
+  /* ---- The work (work.html) ----------------------------------------------
+     HONESTY RULE (do not violate). Every business below hired us to DESIGN AND
+     BUILD A WEBSITE. None of them bought The Never Miss System. So: no metrics,
+     no invented quotes, no implied AI results. We describe the craft only, and
+     the disclosure line below states the relationship in plain English.
+     ---------------------------------------------------------------------- */
+  work: {
+    kicker: "The work",
+    heading: "Sites we designed, built and {i:shipped}.",
+    sub: "Every site on this page is live right now, working for a real Australian business. Have a look at the detail, then judge us on it.",
+    // the honesty band that sits directly under the heading
+    disclosure: "Every business on this page hired us to design and build their website. None of them are customers of The Never Miss System, so nothing here is a claim about what our AI staff did for them.",
+    projects: [
+      {
+        slug: "shocked-solar",
+        name: "Shocked Solar & Electrical",
+        url: "https://shockedsolarandelectrical.com",
+        trade: "Solar and electrical",
+        location: "Brisbane",
+        built: "June 2026",
+        oneLiner: "A full-bleed video hero, cut from their own 21kW commercial install.",
+        proofLine: "A hero cut from their own 21kW install, over a 30-tile wall of real work.",
+        what: "Shocked Solar had no web presence at all, so every frame on the page had to come from their own jobs. We cut the full-bleed hero video from footage of a real 21kW commercial install, built a monochrome Wall of Kit from the brands they actually fit, and laid out 30 tiles of real installs and install videos. Quote and callback forms carry the enquiries.",
+        features: ["Real-install video hero", "Monochrome Wall of Kit", "30-tile install gallery", "Quote and callback forms"],
+        status: "Their first web presence. Live since June 2026.",
+        captions: {},
+        card: "assets/work/shocked-solar/card.webp",
+        posterDesktop: "assets/work/shocked-solar/reel-desktop.jpg",
+        reelDesktop: "assets/work/shocked-solar/reel-desktop.mp4",
+        posterPhone: "assets/work/shocked-solar/reel-phone.jpg",
+        reelPhone: "assets/work/shocked-solar/reel-phone.mp4",
+        stills: [
+          "assets/work/shocked-solar/still-01.webp",
+          "assets/work/shocked-solar/still-02.webp",
+          "assets/work/shocked-solar/still-03.webp",
+        ],
+      },
+      {
+        slug: "goldy",
+        name: "Goldy Car Detailing",
+        url: "https://goldycardetailing.com.au",
+        trade: "Mobile car detailing",
+        location: "Gold Coast",
+        built: "May 2026",
+        oneLiner: "A WebGL dust-and-light hero, and a condition guide that quotes honestly.",
+        proofLine: "A WebGL hero, a photographic condition guide and SMS-first booking.",
+        // WORDING RULE: the condition guide is a CUSTOMER SELF-ASSESSMENT scale.
+        // One interior, photographed at five levels of grime. It is NEVER a
+        // before/after, and never five different jobs. Do not reword this.
+        what: "Goldy is mobile, so the site has to do the quoting before Gracie ever picks up the phone. The hero is a WebGL dust-and-light scene, and the \"How rough is it?\" guide is a customer self-assessment scale: one interior, photographed at five levels of grime, so a customer can point at where their own car sits. Under it runs a two-rail filterable gallery of real work and SMS-first booking with a price builder.",
+        features: ["WebGL dust-and-light hero", "Photographic condition guide", "Two-rail filterable gallery", "SMS-first price builder"],
+        status: "Live on her own domain, and still being added to as her services grow.",
+        captions: {},
+        card: "assets/work/goldy/card.webp",
+        posterDesktop: "assets/work/goldy/reel-desktop.jpg",
+        reelDesktop: "assets/work/goldy/reel-desktop.mp4",
+        posterPhone: "assets/work/goldy/reel-phone.jpg",
+        reelPhone: "assets/work/goldy/reel-phone.mp4",
+        stills: [
+          "assets/work/goldy/still-01.webp",
+          "assets/work/goldy/still-02.webp",
+          "assets/work/goldy/still-03.webp",
+        ],
+      },
+      {
+        slug: "karine",
+        name: "Karine S. Matthews",
+        url: "https://karinesmatthews.com",
+        trade: "Psychic medium and Reiki",
+        location: "Gold Coast",
+        built: "August 2026",
+        oneLiner: "Hero motion crafted from her real pendulum photograph.",
+        proofLine: "Cinematic hero motion, crafted from her own pendulum photograph.",
+        // WORDING RULE: the pendulum motion is GENERATED from a still photograph
+        // she supplied. Never imply we filmed it.
+        what: "Karine works in a field where how a page feels matters as much as what it says. The hero motion is crafted from her own pendulum photograph rather than filmed footage, and a scroll-driven pendulum and moon dial carry you down the page. Booking is SMS-first, so an enquiry reaches her as a text instead of sitting in an inbox.",
+        features: ["Cinematic pendulum hero", "Scroll-driven moon dial", "SMS-first booking", "Built from her own photography"],
+        status: "Live on her own domain since August 2026.",
+        captions: {},
+        card: "assets/work/karine/card.webp",
+        posterDesktop: "assets/work/karine/reel-desktop.jpg",
+        reelDesktop: "assets/work/karine/reel-desktop.mp4",
+        posterPhone: "assets/work/karine/reel-phone.jpg",
+        reelPhone: "assets/work/karine/reel-phone.mp4",
+        stills: [
+          "assets/work/karine/still-01.webp",
+          "assets/work/karine/still-02.webp",
+          "assets/work/karine/still-03.webp",
+        ],
+      },
+    ],
+    // smaller entries: one line, a card and a single still
+    also: [
+      {
+        slug: "greenwood",
+        name: "Greenwood Asset Finance",
+        url: "https://greenwoodaf.com.au",
+        trade: "Asset finance brokerage",
+        location: "Australia-wide",
+        built: "2026",
+        oneLiner: "A 40-lender wall and a repayment estimator that does the maths up front.",
+        card: "assets/work/greenwood/card.webp",
+        stills: ["assets/work/greenwood/still-01.webp"],
+      },
+    ],
+  },
+
+  /* ---- Proof band (home page, links through to work.html) ---------------- */
+  proof: {
+    kicker: "The proof",
+    heading: "Judge us on the work we have already {i:shipped}.",
+    sub: "The same hands that build your AI staff build the websites they answer for. That is the standard the whole front of your business is held to, not just the clever bit.",
+    cta: { label: "See the work", href: "work.html" },
+  },
+
   footer: {
     blurb: "Done-for-you AI staff for Australian businesses. You employ it, you don't operate it.",
+    legal: [
+      { label: "Terms", href: "terms.html" },
+      { label: "Privacy", href: "privacy.html" },
+    ],
   },
 };

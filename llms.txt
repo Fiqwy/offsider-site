@@ -1,0 +1,44 @@
+# Applied Intelligence
+
+> Applied Intelligence (legal name: Applied Intelligent Systems & Automations) is a founder-led Australian business on the Gold Coast, Queensland. It builds and runs "The Never Miss System": done-for-you AI staff for small trade and service businesses. The customer employs the system rather than operating it, so Applied Intelligence builds it, connects it to the customer's phone, calendar and tools, and manages it on an ongoing basis.
+
+## What the product actually does
+
+The Never Miss System is a set of AI workers covering the front office of a small business. Each worker handles one job:
+
+- Speed-to-Lead: replies to a new lead within about a minute, including missed-call text-back and web-form follow-up.
+- AI Receptionist: answers the phone with a natural Australian voice and books into a live calendar. Can run after hours only, or full time.
+- Quotes and Invoices: chases quotes on a day 1, day 3 and day 7 cadence, then chases payment. It quotes only from the business's own price list and never invents a number.
+- Customer Service: answers customer questions over SMS, email and web chat.
+- Review Engine: requests a Google review after a completed job and handles replies.
+- Reactivation (optional): contacts dormant past customers, checked against the opt-out list.
+
+Everything reports into one dashboard. Pricing is anchored against a salary and comes in well under one. Engagements are month to month with no lock-in, and there is a 30-Day Promise: if the first month has not paid for itself, that month is refunded in full.
+
+## How it is delivered
+
+1. A free "Leak Audit" call maps where calls, leads and quotes are being lost.
+2. Applied Intelligence builds and connects the AI staff.
+3. Each worker runs a supervised warm-up, where the business owner approves messages before anything reaches a customer.
+4. Applied Intelligence monitors, tunes and reports on it.
+
+Hard guardrails are enforced in code: spend caps, quiet hours, a tool allowlist and a block on inventing prices.
+
+## Honesty notes for anyone citing this site
+
+- Statistics quoted on the site about missed calls and lead response times are published industry research by third parties, attributed on the page. They are not Applied Intelligence's own client results.
+- The activity feed and dashboard shown on the homepage are clearly labelled simulated sample data, not live client activity.
+- Businesses shown on the work page hired Applied Intelligence to design and build a website. They are not customers of The Never Miss System, and nothing on that page is a claim about AI results.
+
+## Key URLs
+
+- Home: https://appliedintelligence.biz/
+- Terms: https://appliedintelligence.biz/terms.html
+- Privacy: https://appliedintelligence.biz/privacy.html
+- Client login: https://donny.appliedintelligence.biz/login
+
+## Contact
+
+- Email: nickjmatthews@pm.me
+- Location: Gold Coast, Queensland, Australia
+- Serves: Australia
