@@ -58,6 +58,16 @@
     if (!isCalendar) {
       // Preferred-times enquiry box: posts to the platform's own endpoint
       // (/api/public/contact, same origin; the apex proxies /api/* to Flask).
+      //
+      // The `contact_ref2` input below is the anti-spam honeypot — hidden by .booking__hp,
+      // empty for a human, and treated by the server as a bot if it arrives filled. Its name
+      // is deliberately meaningless. It used to be `website`, which is one of the names
+      // Chrome and every password manager autofill on sight, so an autofiller was enough to
+      // get a genuine person's enquiry flagged. Kept as a JS comment, not an HTML one, so the
+      // shipped markup does not point the trap out to anyone reading the page source.
+      // COORDINATED CHANGE: backend/routes/comms.py _HONEYPOT_FIELDS still accepts `website`
+      // for one deploy, so a CDN-cached copy of this file keeps working. Do not rename either
+      // side alone.
       const f = S.booking.form;
       cal.innerHTML =
         `<form class="booking__form" novalidate>
@@ -71,7 +81,7 @@
              <div class="chip-row__chips">${f.times.map((t) =>
                `<button type="button" class="chip-toggle" aria-pressed="false">${t}</button>`).join("")}</div>
            </div>
-           <input type="text" name="website" class="booking__hp" tabindex="-1" aria-hidden="true" autocomplete="off" />
+           <input type="text" name="contact_ref2" class="booking__hp" tabindex="-1" aria-hidden="true" autocomplete="off" />
            <button class="btn btn--primary btn--lg" type="submit">${f.button}</button>
            <p class="booking__form-note">${f.note}</p>
            <p class="booking__form-msg" role="status" aria-live="polite"></p>
@@ -89,6 +99,13 @@
         if (!form.reportValidity()) return;
         const btn = $("button[type=submit]", form);
         btn.disabled = true; btn.textContent = "Sending...";
+        // One place that puts the form back so the visitor can try again, whichever way
+        // the send failed. All user-facing wording lives in content.js.
+        const fail = (text) => {
+          msg.textContent = text || f.error;
+          msg.classList.remove("is-ok");
+          btn.disabled = false; btn.textContent = f.button;
+        };
         try {
           const data = Object.fromEntries(new FormData(form).entries());
           const times = $$(".chip-toggle.is-on", form).map((c) => c.textContent.trim());
@@ -100,21 +117,34 @@
               email: data.email,
               phone: data.mobile,
               business: data.trade,
-              website: data.website,   // honeypot: empty for humans
+              contact_ref2: data.contact_ref2,   // honeypot: empty for humans
               preferred_times: times,  // structured chip labels (platform stores + shows these)
               message: "Free Leak Audit request from the website.\nPreferred times: "
                 + (times.length ? times.join(", ") : "No preference")
                 + "\nMobile: " + data.mobile,
             }),
           });
-          const out = await res.json();
-          if (!out.success) throw new Error("send failed");
+          // Check the STATUS first. This used to go straight to res.json(), so a 403, a 429
+          // and a 500 all collapsed into the same "that did not send" — and an error body
+          // that was not JSON (an nginx or Cloudflare page) threw a parse error on top,
+          // hiding the real failure completely.
+          if (!res.ok) {
+            // 429 is the only failure we can name honestly to the visitor. Everything else
+            // is ours to fix, so it keeps the generic message and the phone/email fallback.
+            fail(res.status === 429 ? f.errorBusy : f.error);
+            return;
+          }
+          // Parse defensively — a 200 with a body we cannot read is still a failure, but it
+          // must surface as our plain message, not as a JSON syntax error.
+          let out = null;
+          try { out = await res.json(); } catch { out = null; }
+          if (!out || out.success !== true) { fail(f.error); return; }
           form.querySelectorAll("label, .chip-row, button, .booking__form-note").forEach((n) => { n.style.display = "none"; });
           msg.textContent = f.success;
           msg.classList.add("is-ok");
         } catch {
-          msg.textContent = f.error;
-          btn.disabled = false; btn.textContent = f.button;
+          // Network drop / request never completed.
+          fail(f.error);
         }
       });
       return;

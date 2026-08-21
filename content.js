@@ -309,7 +309,11 @@ window.SITE = {
       button: "Text me my audit time",
       note: "We text you today to lock in a time. No spam, no obligation.",
       success: "Sorted. Keep an eye on your phone, we will text you today to lock in a time.",
+      // Generic failure — anything we cannot name (network drop, server error, bad reply).
       error: "That did not send. Ring or email us instead and we will sort you out.",
+      // Rate limited (HTTP 429). Deliberately does NOT claim we already have their details:
+      // the limit is keyed per connection, so the goes that used it up may not be theirs.
+      errorBusy: "Steady on, that is a few too many tries from your connection. Give it a few minutes, or ring or email us and we will sort you out today.",
     },
   },
 
