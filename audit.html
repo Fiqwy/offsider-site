@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Free Leak Audit: find what your business is losing each year | Applied Intelligence</title>
+  <meta name="description" content="Sixteen quick taps, about three minutes, no phone call. The free Leak Audit uses your own numbers to map where calls, leads, quotes and past customers slip out of an Australian trade business, and gives you a dollar range on each one. An estimate from your answers, not a forecast." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/logo/favicon.svg" />
+  <link rel="canonical" href="https://appliedintelligence.biz/audit.html" />
+
+  <!-- Open Graph (URLs point at the production domain; harmless on the Pages preview) -->
+  <meta property="og:site_name" content="Applied Intelligence" />
+  <meta property="og:locale" content="en_AU" />
+  <meta property="og:title" content="The free Leak Audit | Applied Intelligence" />
+  <meta property="og:description" content="Sixteen quick taps, about three minutes. Built on your own numbers: see where calls, leads, quotes and past customers are leaking out of your business, with a dollar range on each." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://appliedintelligence.biz/audit.html" />
+  <meta property="og:image" content="https://appliedintelligence.biz/assets/video/hero-poster.jpg" />
+  <meta property="og:image:width" content="1920" />
+  <meta property="og:image:height" content="1080" />
+  <meta property="og:image:alt" content="Applied Intelligence: the free Leak Audit." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The free Leak Audit | Applied Intelligence" />
+  <meta name="twitter:description" content="Sixteen quick taps, about three minutes. Built on your own numbers: see where calls, leads, quotes and past customers are leaking out of your business, with a dollar range on each." />
+  <meta name="twitter:image" content="https://appliedintelligence.biz/assets/video/hero-poster.jpg" />
+
+  <!-- Fonts: self-hosted, latin subset, OFL (see assets/fonts/OFL.txt).
+       Same rule as index.html: preload only the faces that paint above the
+       fold. This page's h1 is Hanken 800 with one Instrument Serif italic
+       word, so both of those files are preloaded and the roman cut is not. -->
+  <link rel="preload" href="assets/fonts/hanken-grotesk-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- The page itself plus the trail back to home. Static so it is in the
+       source for crawlers that do not run JS. Deliberately thin: no ratings,
+       no results, no numbers we would have to stand behind. -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "The free Leak Audit",
+      "url": "https://appliedintelligence.biz/audit.html",
+      "description": "A sixteen-question self-assessment that uses the owner's own numbers to estimate where calls, leads, quotes and past customers are leaking out of an Australian trade business, and what that is worth over a year.",
+      "inLanguage": "en-AU",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "Applied Intelligence",
+        "url": "https://appliedintelligence.biz/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Applied Intelligence",
+        "url": "https://appliedintelligence.biz/"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://appliedintelligence.biz/" },
+        { "@type": "ListItem", "position": 2, "name": "Free Leak Audit", "item": "https://appliedintelligence.biz/audit.html" }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body data-page="audit">
+  <a href="#top" class="skip-link">Skip to main content</a>
+
+  <!-- ============ NAV (solid from first paint: no dark hero on this page) ============ -->
+  <header class="nav nav--solid" id="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="index.html" aria-label="Applied Intelligence"><img class="brand-mark" src="assets/logo/favicon.svg" alt="" width="34" height="34" /><span class="brand-word">Applied Intelligence</span><span class="brand-short" aria-hidden="true">AISA</span></a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="index.html#staff">The staff</a>
+        <a href="index.html#how">How it works</a>
+        <a href="work.html">Our work</a>
+        <a class="is-current" href="audit.html" aria-current="page">Free audit</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="https://donny.appliedintelligence.biz/login">Client login</a>
+      </nav>
+      <a class="btn btn--primary nav__cta" href="index.html#book">Book your free call</a>
+    </div>
+  </header>
+
+  <main class="audit" id="top" tabindex="-1">
+
+    <!-- ============ HERO ============
+         Static copy mirrors content.js so the page paints at its final height
+         before the scripts run (no CLS, and it degrades with no JS).
+         bind() overwrites it with the same strings. -->
+    <header class="audit-hero">
+      <div class="wrap audit-hero__inner">
+        <span class="kicker" data-bind="audit.kicker">The Leak Audit</span>
+        <h1 class="audit-hero__title" data-bind-html="audit.heading">Find the jobs your business is <em class="ital">leaking</em>. Sixteen taps, three minutes.</h1>
+        <p class="audit-hero__sub" data-bind="audit.sub">Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your week, and put a dollar range on each one. No phone call, no sales pitch.</p>
+        <ul class="audit-meta" data-audit-meta>
+          <li>Sixteen taps, no typing</li>
+          <li>About three minutes</li>
+          <li>Built on your numbers</li>
+        </ul>
+        <p class="audit-hero__note" data-bind="audit.metaNote">The number builds on screen as you go, and you see the whole headline figure before we ask you for a single detail.</p>
+      </div>
+    </header>
+
+    <!-- ============ THE INSTRUMENT ============
+         audit.js builds the stepper here, then replaces it with the Leak Map.
+         The mount keeps a reserved minimum height so the page does not jump
+         when the module paints. -->
+    <section class="audit-stage" aria-label="The Leak Audit">
+      <div class="wrap">
+        <div class="audit-stage__mount" data-audit-stage>
+          <noscript>
+            <p class="audit-noscript">This audit needs JavaScript switched on. If you would rather just talk it through, <a href="index.html#book">book a free 15-minute call</a> instead and we will map it with you on the phone.</p>
+          </noscript>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ METHOD + SOURCES (always visible, never gated) ============ -->
+    <section class="audit-method" aria-label="How the estimate is built">
+      <div class="wrap audit-method__inner">
+        <h2 class="audit-method__title" data-bind="audit.method.title">How we worked that out</h2>
+        <p class="audit-method__lead" data-bind="audit.method.lead"></p>
+        <ul class="check-list" data-audit-method></ul>
+        <p class="stat-note" data-bind="audit.sourceNote"></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER (mirrors index.html) ============ -->
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div>
+        <span class="footer__brand"><img class="brand-mark" src="assets/logo/favicon.svg" alt="" width="30" height="30" /><span class="brand-word" data-bind="brand.name">Applied Intelligence</span></span>
+        <p class="footer__blurb" data-bind="footer.blurb"></p>
+      </div>
+      <div class="footer__meta">
+        <span class="footer__legal" data-bind="brand.fullName"></span>
+        <span data-bind="brand.location"></span>
+        <a data-footer-email href="mailto:nickjmatthews@pm.me"></a>
+        <a href="https://donny.appliedintelligence.biz/login">Client login</a>
+        <div class="footer__links">
+          <a href="audit.html">Free audit</a>
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- libs (vendored, local). Lenis only: this page has no pinned or scrubbed
+       sections, so GSAP and ScrollTrigger are not loaded. script.js falls back
+       to its own rAF loop for Lenis when GSAP is absent. -->
+  <script src="vendor/lenis.min.js" defer></script>
+  <!-- data + page module + app. audit.js must run before script.js: it sets
+       window.PAGE_INIT, which script.js calls inside boot(). defer keeps that
+       order (deferred scripts execute in document order, before
+       DOMContentLoaded), so the chain holds and nothing blocks the parser. -->
+  <script src="content.js" defer></script>
+  <script src="audit.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+</html>

@@ -62,13 +62,26 @@
       // Preferred-times enquiry box: posts to the platform's own endpoint
       // (/api/public/contact, same origin; the apex proxies /api/* to Flask).
       const f = S.booking.form;
+      // Each field carries its own error node. The form is novalidate, so the
+      // browser bubble never appears; we own the message instead, and it is
+      // real text in the DOM (WCAG 3.3.1) wired to the input by
+      // aria-describedby rather than a transient tooltip.
+      // The error node is a SIBLING of the label, not a child: inside the
+      // label its text would be swallowed into the input's accessible name
+      // ("Your name Please fill this in."). The wrapper keeps it as one flex
+      // item so the form's column gap is unchanged.
+      const ERR_STYLE = "display:none;margin-top:.3rem;font-size:.82rem;font-weight:700;color:#b42318";
+      const field = (name, label, attrs) =>
+        `<div class="booking__field"><label><span>${label}</span>
+           <input id="bf-${name}" name="${name}" ${attrs} required aria-describedby="bf-${name}-err" /></label>
+           <span class="booking__form-err" id="bf-${name}-err" style="${ERR_STYLE}"></span></div>`;
       cal.innerHTML =
         `<form class="booking__form" novalidate>
            <b class="booking__form-title">${f.title}</b>
-           <label><span>${f.fields.name}</span><input type="text" name="name" autocomplete="name" required /></label>
-           <label><span>${f.fields.mobile}</span><input type="tel" name="mobile" autocomplete="tel" inputmode="tel" required /></label>
-           <label><span>${f.fields.email}</span><input type="email" name="email" autocomplete="email" inputmode="email" required /></label>
-           <label><span>${f.fields.trade}</span><input type="text" name="trade" required /></label>
+           ${field("name",   f.fields.name,   'type="text" autocomplete="name"')}
+           ${field("mobile", f.fields.mobile, 'type="tel" autocomplete="tel" inputmode="tel"')}
+           ${field("email",  f.fields.email,  'type="email" autocomplete="email" inputmode="email"')}
+           ${field("trade",  f.fields.trade,  'type="text"')}
            <div class="chip-row">
              <span class="chip-row__label">${f.timesLabel}</span>
              <div class="chip-row__chips">${f.times.map((t) =>
@@ -77,10 +90,44 @@
            <input type="text" name="website" class="booking__hp" tabindex="-1" aria-hidden="true" autocomplete="off" />
            <button class="btn btn--primary btn--lg" type="submit">${f.button}</button>
            <p class="booking__form-note">${f.note}</p>
-           <p class="booking__form-msg" role="status" aria-live="polite"></p>
+           <p class="booking__form-msg" role="status" aria-live="polite" tabindex="-1"></p>
          </form>`;
       const form = $("form", cal);
       const msg = $(".booking__form-msg", cal);
+
+      /* ---- per-field validation, announced and visible ------------------- */
+      const errorFor = (inp) => {
+        if (inp.validity.valueMissing) return f.fields.errorRequired || "Please fill this in.";
+        if (inp.type === "email") return f.fields.errorEmail || "Please enter a valid email address.";
+        return f.fields.errorInvalid || "Please check this.";
+      };
+      const clearField = (inp) => {
+        const e = $("#" + inp.id + "-err", form);
+        inp.removeAttribute("aria-invalid");
+        if (e) { e.textContent = ""; e.style.display = "none"; }
+      };
+      const markField = (inp) => {
+        const e = $("#" + inp.id + "-err", form);
+        inp.setAttribute("aria-invalid", "true");
+        if (e) { e.textContent = errorFor(inp); e.style.display = "block"; }
+      };
+      const controls = $$("input[required]", form);
+      controls.forEach((inp) => {
+        // clear the moment the field becomes valid again
+        const recheck = () => { if (inp.checkValidity()) clearField(inp); };
+        inp.addEventListener("input", recheck);
+        inp.addEventListener("blur", () => { if (!inp.checkValidity()) markField(inp); else clearField(inp); });
+      });
+      const validate = () => {
+        let first = null;
+        controls.forEach((inp) => {
+          if (inp.checkValidity()) { clearField(inp); return; }
+          markField(inp);
+          if (!first) first = inp;
+        });
+        if (first) first.focus();
+        return !first;
+      };
       $$(".chip-toggle", form).forEach((chip) => {
         chip.addEventListener("click", () => {
           const on = chip.classList.toggle("is-on");
@@ -89,7 +136,7 @@
       });
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        if (!form.reportValidity()) return;
+        if (!validate()) return;
         const btn = $("button[type=submit]", form);
         btn.disabled = true; btn.textContent = "Sending...";
         try {
@@ -112,9 +159,16 @@
           });
           const out = await res.json();
           if (!out.success) throw new Error("send failed");
-          form.querySelectorAll("label, .chip-row, button, .booking__form-note").forEach((n) => { n.style.display = "none"; });
+          // Move focus to the success message BEFORE the fields disappear.
+          // Hiding the submit button the user just activated destroys focus and
+          // drops it to <body>, which strands a keyboard/screen-reader user at
+          // the top of the document (WCAG 2.4.3).
           msg.textContent = f.success;
           msg.classList.add("is-ok");
+          msg.focus();
+          // .booking__field (not label) — the field wrapper is the flex item,
+          // so hiding the label alone would leave four empty rows of gap.
+          form.querySelectorAll(".booking__field, .chip-row, button, .booking__form-note").forEach((n) => { n.style.display = "none"; });
         } catch {
           msg.textContent = f.error;
           btn.disabled = false; btn.textContent = f.button;
@@ -153,7 +207,8 @@
     const header = el("div", "sms__header",
       `<span class="sms__avatar">${thread.logoText}</span>
        <div><div class="sms__name">${thread.businessName}</div>
-       <div class="sms__status">${thread.status}</div></div>`);
+       <div class="sms__status">${thread.status}</div></div>
+       ${thread.example ? `<span class="sms__status" style="margin-left:auto">${thread.example}</span>` : ""}`);
     sms.appendChild(header);
 
     const body = el("div", "sms__body");
@@ -193,12 +248,22 @@
       ps.appendChild(el("div", "stat reveal", `<div class="stat__value">${s.value}</div><div class="stat__label">${s.label}</div>`)));
 
     // step groups
+    // .step__title / .worker__outcome render as headings (1.25rem+/800) across
+    // ~15 cards, so they are marked up as h3 rather than div: without them the
+    // heading outline jumps section h2 → next section h2 (WCAG 1.3.1).
+    // .worker__outcome sets its own line-height/letter-spacing so it is
+    // pixel-identical as an h3. .step__title does not, so it would pick up the
+    // global `h1,h2,h3` line-height 1.08 / letter-spacing -.02em and shrink
+    // every step card by 10.4px. Inheriting both back keeps the render byte
+    // identical. FOLLOW-UP: fold this into .step__title in styles.css (a class
+    // change now would race the CSS agent working in that file).
+    const STEP_TITLE = ' style="line-height:inherit;letter-spacing:inherit"';
     const stepCard = (s) => el("div", "step reveal",
-      `<div class="step__n">${s.n}</div><div class="step__title">${s.title}</div><div class="step__text">${s.text}</div>`);
+      `<div class="step__n">${s.n}</div><h3 class="step__title"${STEP_TITLE}>${s.title}</h3><div class="step__text">${s.text}</div>`);
     const ds = $("[data-diagnosis-steps]"); if (ds) S.diagnosis.steps.forEach((s) => ds.appendChild(stepCard(s)));
     const hs = $("[data-how-steps]"); if (hs) S.how.steps.forEach((s) => hs.appendChild(stepCard(s)));
     const gu = $("[data-guarantee]"); if (gu) S.guarantee.points.forEach((s, i) =>
-      gu.appendChild(el("div", "step reveal", `<div class="step__n">0${i + 1}</div><div class="step__title">${s.title}</div><div class="step__text">${s.text}</div>`)));
+      gu.appendChild(el("div", "step reveal", `<div class="step__n">0${i + 1}</div><h3 class="step__title"${STEP_TITLE}>${s.title}</h3><div class="step__text">${s.text}</div>`)));
 
     // guarantee promise band (the headline 30-Day Promise)
     const gp = $("[data-guarantee-promise]");
@@ -235,7 +300,7 @@
       card.style.setProperty("--tone", tone);
       card.innerHTML =
         `<div class="worker__figure" role="img" aria-label="${m.name}, ${m.role}" data-portrait="${m.portrait}"><span class="worker__initial">${m.name[0]}</span></div>
-         <div class="worker__outcome">${m.outcome}</div>
+         <h3 class="worker__outcome">${m.outcome}</h3>
          <div class="worker__by">${m.name} · <span>${m.role}</span></div>
          <p class="worker__line">${m.line}</p>
          <p class="worker__also"><b>Also:</b> ${m.also}</p>`;
@@ -263,7 +328,11 @@
     const ch = $("[data-cockpit-highlights]");
     if (ch) S.cockpit.highlights.forEach((h) => ch.appendChild(el("li", null, h)));
     const cp = $("[data-cockpit-panel]");
-    if (cp) cp.appendChild(buildDash());
+    if (cp) {
+      cp.appendChild(buildDash());
+      // honesty caption under the mock: same standard as the hero feed label
+      cp.appendChild(el("p", "stat-note", "Sample data for a made-up business, not a real client's dashboard."));
+    }
 
     // pricing compare
     const pr = $("[data-pricing]");
@@ -301,6 +370,10 @@
     (S.work.projects || []).slice(0, 3).forEach((p) => {
       const card = el("a", "proof-card reveal");
       card.href = "work.html#" + p.slug;
+      // the client's own accent (content.js `tone`), which the dark band uses
+      // as a single mark above their name. Anything that is not a plain hex
+      // value is ignored and the card falls back to the house accent.
+      if (/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(p.tone || "")) card.style.setProperty("--chapter", p.tone);
 
       const media = el("div", "proof-card__media");
       const img = doc.createElement("img");
@@ -379,10 +452,10 @@
           ["Leo", "Paint is curing now. It is on track for Friday 2pm pickup, we will text you the moment it is ready."],
           ["Customer", "Legend, thanks."],
         ] },
-      { tone: "gold", txt: "Star collected another 5-star review", tag: "2h ago",
-        meta: ["Job #198 completed 5:40pm", "Review request sent 6:10pm", "5 stars left 6:47pm · reply posted"],
+      { tone: "gold", txt: "Star sent a review request after job #198", tag: "2h ago",
+        meta: ["Job #198 completed 5:40pm", "Review request sent 6:10pm", "Review left 6:47pm · reply posted"],
         convo: [
-          ["Star", "Thanks for choosing Coastline, Dave. If we looked after you, a quick Google review helps heaps: [link]"],
+          ["Star", "Thanks for choosing Coastline, Dave. If you have a minute, an honest Google review helps us heaps: [link]"],
           ["Dave", "★★★★★ Car looks brand new, couldn't tell it was ever hit."],
           ["Star", "(reply as the business) Thanks Dave, enjoy having her back to new. See you next time."],
         ] },
@@ -452,7 +525,9 @@
     const fields = [
       { key: "calls",  label: "Calls & leads per week",     min: 5,   max: 150, step: 5,  val: d.callsPerWeek, fmt: (v) => v },
       { key: "missed", label: "% you miss or reply late",   min: 5,   max: 70,  step: 5,  val: d.missedPct,    fmt: (v) => v + "%" },
-      { key: "job",    label: "Average job value",          min: 100, max: 3000,step: 50, val: d.avgJob,       fmt: money },
+      // vt: the slider needs aria-valuetext or a screen reader reads the bare
+      // number ("350") instead of the dollar figure the sighted user sees.
+      { key: "job",    label: "Average job value",          min: 100, max: 3000,step: 50, val: d.avgJob,       fmt: money, vt: true },
       { key: "close",  label: "How many you'd win back",    min: 10,  max: 80,  step: 5,  val: d.closeRate,    fmt: (v) => v + "%" },
     ];
     const inputs = el("div", "roi-inputs reveal");
@@ -461,14 +536,21 @@
       wrap.innerHTML =
         `<div class="roi-field__top"><label class="roi-field__label" for="roi-${f.key}">${f.label}</label>
          <span class="roi-field__val" data-out="${f.key}">${f.fmt(f.val)}</span></div>
-         <input id="roi-${f.key}" type="range" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.val}" />`;
+         <input id="roi-${f.key}" type="range" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.val}"${f.vt ? ` aria-valuetext="${f.fmt(f.val)}"` : ""} />`;
       inputs.appendChild(wrap);
     });
     const result = el("div", "roi-result reveal");
+    // The headline figure is recomputed silently as the sliders move, so a
+    // screen-reader user hears the slider value but never the answer. Announce
+    // the whole result block as one polite update (WCAG 4.1.3).
+    result.setAttribute("role", "status");
+    result.setAttribute("aria-live", "polite");
+    result.setAttribute("aria-atomic", "true");
     result.innerHTML =
       `<div class="roi-result__label">Revenue currently walking out the door</div>
        <div class="roi-result__big" data-roi-month></div>
        <div class="roi-result__sub">every month, that your AI staff can catch</div>
+       <div class="roi-result__sub">An estimate from the numbers you moved, not a forecast.</div>
        <div class="roi-result__yr">That's about <b data-roi-year></b> a year in jobs you're currently losing.</div>`;
     mount.append(inputs, result);
 
@@ -484,7 +566,9 @@
       const key = fields[i].key;
       inp.addEventListener("input", () => {
         state[key] = Number(inp.value);
-        inputs.querySelector(`[data-out="${key}"]`).textContent = fmtOf[key](state[key]);
+        const shown = fmtOf[key](state[key]);
+        inputs.querySelector(`[data-out="${key}"]`).textContent = shown;
+        if (inp.hasAttribute("aria-valuetext")) inp.setAttribute("aria-valuetext", shown);
         recompute();
       });
     });
@@ -542,6 +626,13 @@
         start: "top top",
         end: "+=" + Math.round(window.innerHeight * 1.5),
         pin: true,
+        // Pin by transform, not position:fixed. The default pinType re-parents
+        // the section into a pin-spacer and switches it to fixed, which Chrome
+        // records as two ~0.92 layout shifts (engage + release) and puts home
+        // CLS at 1.77 against a 0.1 budget. "transform" pins with a translate
+        // instead: zero shift entries, identical behaviour, and it is also the
+        // correct pairing for Lenis (which drives a smoothed scroll position).
+        pinType: "transform",
         scrub: true,
         onUpdate: (self) => {
           const n = Math.round(self.progress * total);
@@ -585,13 +676,46 @@
   function wireHeroVideo() {
     const video = $("[data-hero-video]");
     if (!video) return;
-    // Poster is the LCP image. The muted autoplay loop plays on phones too
-    // (small 720p file, iOS Safari autoplays muted+playsinline). Only fall
-    // back to poster-only on reduced-motion or data-saver.
+    // The poster (hero-poster.webp, 13KB) is the LCP image and paints on its
+    // own. The loop is pure enhancement, so it is deferred rather than fetched
+    // at boot: never on reduced-motion or data-saver, and only once the main
+    // thread is idle AND the hero is actually on screen. Anything that fails
+    // here just leaves the poster.
+    // Phones DO get the loop (Nicholas's call, 2026-08-20): it is the site's
+    // main visual moment and mobile is most of the traffic. It costs nothing
+    // perceptible because it lands after first paint and after idle.
     if (REDUCED || (navigator.connection && navigator.connection.saveData)) return;
-    video.src = "assets/video/hero.mp4";
-    video.load();
-    video.play().catch(() => {});   // autoplay may be blocked / file missing — poster stays
+
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      video.src = "assets/video/hero.mp4";
+      video.load();
+      video.play().catch(() => {});   // autoplay may be blocked / file missing — poster stays
+    };
+
+    // requestIdleCallback keeps it behind first paint; Safari has no rIC, so
+    // fall back to a timeout. IntersectionObserver holds it until the hero is
+    // visible (a deep-linked load lands past the hero and never pays for it).
+    const whenIdle = (fn) =>
+      (typeof window.requestIdleCallback === "function")
+        ? window.requestIdleCallback(fn, { timeout: 3000 })
+        : setTimeout(fn, 1200);
+
+    const hero = video.closest(".hero") || video;
+    if (typeof IntersectionObserver === "function") {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          io.disconnect();
+          whenIdle(start);
+        });
+      }, { rootMargin: "200px" });
+      io.observe(hero);
+    } else {
+      whenIdle(start);
+    }
   }
 
   /* ---- Hero headline word reveal ---------------------------------------- */
@@ -973,7 +1097,22 @@
   }
 
   function wireAnchors(lenis) {
-    $$('a[href^="#"]').forEach((a) => {
+    // The skip link is deliberately NOT hijacked (WCAG 2.4.1). preventDefault()
+    // here would swallow the fragment navigation, so focus would stay on the
+    // skip link and the next Tab would land back on the brand link, skipping
+    // nothing. Let the browser navigate to #top, then move focus explicitly so
+    // the next Tab starts inside <main tabindex="-1">.
+    $$("a.skip-link").forEach((a) => {
+      a.addEventListener("click", () => {
+        const href = a.getAttribute("href") || "";
+        const target = href.startsWith("#") ? doc.getElementById(href.slice(1)) : null;
+        if (!target) return;
+        // after the browser's own fragment navigation has run
+        setTimeout(() => { try { target.focus({ preventScroll: true }); } catch { target.focus(); } }, 0);
+      });
+    });
+
+    $$('a[href^="#"]:not(.skip-link)').forEach((a) => {
       a.addEventListener("click", (e) => {
         const href = a.getAttribute("href");          // re-read inside handler
         if (!href || href === "#" || href.length < 2) return;

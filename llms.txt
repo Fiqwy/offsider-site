@@ -17,7 +17,7 @@ Everything reports into one dashboard. Pricing is anchored against a salary and 
 
 ## How it is delivered
 
-1. A free "Leak Audit" call maps where calls, leads and quotes are being lost.
+1. A free "Leak Audit" maps where calls, leads and quotes are being lost. It runs two ways: a free 15-minute call, or the online self-serve audit at https://appliedintelligence.biz/audit.html — sixteen tap-only questions where the owner self-reports their own numbers (missed calls a week, quotes that go quiet, list size), producing "The Leak Map": a personalised diagnostic report of what the business is leaking (shown as ranges built from the owner's own answers, labelled an estimate, not a forecast) and a 90-day order-of-fix. The report diagnoses; it does not include how-to templates. The Leak Map is free to keep either way.
 2. Applied Intelligence builds and connects the AI staff.
 3. Each worker runs a supervised warm-up, where the business owner approves messages before anything reaches a customer.
 4. Applied Intelligence monitors, tunes and reports on it.
@@ -33,6 +33,8 @@ Hard guardrails are enforced in code: spend caps, quiet hours, a tool allowlist 
 ## Key URLs
 
 - Home: https://appliedintelligence.biz/
+- Free online Leak Audit: https://appliedintelligence.biz/audit.html
+- Our work: https://appliedintelligence.biz/work.html
 - Terms: https://appliedintelligence.biz/terms.html
 - Privacy: https://appliedintelligence.biz/privacy.html
 - Client login: https://donny.appliedintelligence.biz/login

@@ -74,6 +74,8 @@
       <nav class="nav__links" aria-label="Primary">
         <a href="#staff">The staff</a>
         <a href="#how">How it works</a>
+        <a href="work.html">Our work</a>
+        <a href="audit.html">Free audit</a>
         <a href="#roi">ROI</a>
         <a href="#faq">FAQ</a>
         <a href="https://donny.appliedintelligence.biz/login">Client login</a>
@@ -82,13 +84,19 @@
     </div>
   </header>
 
-  <main id="top">
+  <!-- tabindex="-1" so the skip link can actually move focus here (WCAG 2.4.1) -->
+  <main id="top" tabindex="-1">
     <!-- ============ HERO (full-bleed cinematic video) ============ -->
     <section class="hero" id="hero">
       <!-- background video: swap assets/video/hero.* anytime. poster is the LCP image. -->
       <div class="hero__media" aria-hidden="true">
+        <!-- Poster is the LCP image, so it is the WebP cut (13KB vs 40KB for
+             the JPEG). hero-poster.jpg stays on disk and stays the og:image:
+             OG scrapers want JPEG. A <video> poster takes a single URL, so
+             there is no srcset to fall back through — WebP is universal in
+             every browser that reaches this page. -->
         <video class="hero__video" data-hero-video
-               poster="assets/video/hero-poster.jpg"
+               poster="assets/video/hero-poster.webp"
                muted loop playsinline preload="none"></video>
         <div class="hero__scrim"></div>
         <!-- neural constellation atmosphere layer (desktop only, drawn by JS) -->
@@ -105,7 +113,7 @@
           <a class="btn btn--primary btn--lg" href="#book" data-magnetic data-bind="cta.primary">Book your free Leak Audit</a>
           <a class="btn btn--glass btn--lg" href="#staff" data-bind="cta.secondary">Meet the crew</a>
         </div>
-        <p class="hero__proof" data-bind="hero.proof">Replies in under a minute. Your first 30 days, risk free.</p>
+        <p class="hero__proof" data-bind="hero.proof">Set to reply in under a minute. Your first month, refundable in full.</p>
       </div>
       <!-- live crew-at-work feed (glass cards, desktop only, filled by JS) -->
       <div class="hero__feed" data-hero-feed aria-hidden="true"></div>
@@ -183,6 +191,29 @@
       </div>
     </section>
 
+    <!-- ============ PROOF BAND (dark moment on the light page) ============
+         Three sites we designed and built, linking into work.html. Stills
+         only, no video, and no outbound links to the client sites from here:
+         this band is about the standard, and the work page is where the
+         detail lives. The honesty line is not optional, these are website
+         clients and not customers of The Never Miss System. -->
+    <section class="section proof" id="proof">
+      <div class="wrap">
+        <div class="proof__band">
+          <div class="proof__head">
+            <div class="proof__head-copy">
+              <span class="lbl" data-bind="proof.kicker">The proof</span>
+              <h2 class="section__title" data-bind-html="proof.heading">Judge us on the work we have already <em class="ital">shipped</em>.</h2>
+              <p class="section__lead" data-bind="proof.sub"></p>
+            </div>
+            <a class="ghost-link" href="work.html"><span data-bind="proof.cta.label">See the work</span><span aria-hidden="true">&#8594;</span></a>
+          </div>
+          <div class="proof__grid" data-proof></div>
+          <p class="proof__honest" data-bind="proof.honest">Websites we designed and built for these businesses. They are not customers of The Never Miss System, and nothing here claims a result.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ ROI CALCULATOR ============ -->
     <section class="section roi" id="roi">
       <div class="wrap">
@@ -231,8 +262,8 @@
     <!-- ============ FAQ ============ -->
     <section class="section faq" id="faq">
       <div class="wrap">
-        <span class="kicker">FAQ</span>
-        <h2 class="section__title">The questions everyone asks.</h2>
+        <span class="kicker" data-bind="faqSection.kicker">FAQ</span>
+        <h2 class="section__title" data-bind-html="faqSection.heading">The questions everyone asks.</h2>
         <div class="faq-list" data-faq></div>
       </div>
     </section>
@@ -254,12 +285,16 @@
         <div class="booking__cal" data-booking-cal></div>
       </div>
     </section>
-  </main>
 
-  <!-- ============ STICKY MOBILE CTA (appears after hero) ============ -->
-  <div class="sticky-cta safe-bottom" data-sticky-cta aria-hidden="true">
-    <a class="btn btn--primary btn--lg" href="#book" data-bind="cta.primary"></a>
-  </div>
+    <!-- ============ STICKY MOBILE CTA (appears after hero) ============
+         Lives inside <main> so it sits in a landmark: as a direct child of
+         <body> it was outside every landmark region (axe "region", WCAG 1.3.1).
+         It is position:fixed with no transformed ancestor, so nesting it here
+         does not change where it pins. -->
+    <div class="sticky-cta safe-bottom" data-sticky-cta aria-hidden="true">
+      <a class="btn btn--primary btn--lg" href="#book" data-bind="cta.primary"></a>
+    </div>
+  </main>
 
   <!-- ============ FOOTER ============ -->
   <footer class="footer">
@@ -273,8 +308,15 @@
         <span data-bind="brand.location"></span>
         <a data-footer-email href="mailto:nickjmatthews@pm.me"></a>
         <a href="https://donny.appliedintelligence.biz/login">Client login</a>
-        <!-- mirrors content.js footer.legal; static like the rest of the footer chrome -->
+        <!-- mirrors content.js footer.legal; static like the rest of the footer chrome.
+             "Free audit" rides in this row rather than as a sibling of "Client
+             login": the desktop footer grid pins `.footer__meta > a` to one
+             explicit cell (2 / 2), so a second bare <a> would stack on top of
+             the login link. .footer__links is a plain flex row, so it just
+             flows, and this is the mobile-reachable placement (nav links are
+             display:none <= 960px). -->
         <div class="footer__links">
+          <a href="audit.html">Free audit</a>
           <a href="terms.html">Terms</a>
           <a href="privacy.html">Privacy</a>
         </div>
@@ -282,12 +324,15 @@
     </div>
   </footer>
 
-  <!-- libs (vendored, local) -->
-  <script src="vendor/lenis.min.js"></script>
-  <script src="vendor/gsap.min.js"></script>
-  <script src="vendor/ScrollTrigger.min.js"></script>
+  <!-- libs (vendored, local). defer on all of them: ~98KB gz of JS was
+       blocking the parser at the tail of the body and delaying first paint.
+       defer preserves document order, so lenis → gsap → ScrollTrigger →
+       content.js → script.js still holds. -->
+  <script defer src="vendor/lenis.min.js"></script>
+  <script defer src="vendor/gsap.min.js"></script>
+  <script defer src="vendor/ScrollTrigger.min.js"></script>
   <!-- data + app -->
-  <script src="content.js"></script>
-  <script src="script.js"></script>
+  <script defer src="content.js"></script>
+  <script defer src="script.js"></script>
 </body>
 </html>
