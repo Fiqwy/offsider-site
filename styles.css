@@ -1764,6 +1764,34 @@ body[data-page="work"] :focus-visible { outline-color: var(--accent-lift); }
    Status colour is never the only cue: every bar and pill carries a word.
    ========================================================================== */
 body[data-page="audit"] { background: var(--bg); }
+
+/* ---- Header, audit page only -------------------------------------------- *
+   The ads that point at this page all promise "no call required" and are all
+   signed Applied Intelligence. So on THIS page the header shows the full
+   wordmark at every width (the compact "AISA" appears in no creative and reads
+   as a different company), and it carries no booking button at all. Every rule
+   here is scoped to body[data-page="audit"], so index, work, terms and privacy
+   keep the shared nav exactly as it was.
+   ------------------------------------------------------------------------- */
+/* the quiet fact that replaces the CTA: never a button, desktop only */
+body[data-page="audit"] .nav__note {
+  margin-left: 1.4rem; flex: none;
+  font-size: .9rem; font-weight: 600; color: var(--ink-2);
+  white-space: nowrap;
+}
+@media (max-width: 960px) {
+  /* the nav links are already hidden at this width, so the brand is alone on
+     the bar and there is room for the real name. Type and mark step down a
+     little so the lockup still clears the 44px row on a 320px screen. */
+  body[data-page="audit"] .nav__brand .brand-word { display: inline; font-size: 1.06rem; }
+  body[data-page="audit"] .nav__brand .brand-mark { width: 30px; height: 30px; }
+  /* below the fold the same words sit in .audit-meta, so the header keeps only
+     the name rather than crowding it */
+  body[data-page="audit"] .nav__note { display: none; }
+}
+@media (max-width: 360px) {
+  body[data-page="audit"] .nav__brand .brand-word { font-size: .98rem; letter-spacing: -0.04em; }
+}
 /* One focused reading column for the whole page: hero, instrument, map and
    method all share a single left rail. Narrowing .audit-hero__inner instead
    would centre that one .wrap on its own and break the rail. */

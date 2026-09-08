@@ -345,8 +345,8 @@ window.SITE = {
     navLabel: "Free audit",
     kicker: "The free Leak Audit",
     // MAGIC naming: who it is for, what they get, how long it takes.
-    heading: "Find the jobs your business is {i:leaking}. Sixteen taps, three minutes.",
-    sub: "Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your week, and put a dollar range on each one. No phone call, no sales pitch.",
+    heading: "Find the jobs your business is {i:leaking}. Sixteen taps, about three minutes.",
+    sub: "Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your week, and put a dollar range on each one. No call required, no sales pitch.",
     meta: ["Sixteen taps, no typing", "About three minutes", "Built on your numbers", "Australian owned, founder-led"],
     // The trust play: the sting lands BEFORE we ask for anything. Say it out loud.
     metaNote: "The number builds on screen as you go, and you see the whole headline figure before we ask you for a single detail. The maths is the same for everyone and written out at the bottom of this page, not made up for you. If your answers come back clean, the map says so and we tell you that plainly, because a map that always finds a problem is not a map.",

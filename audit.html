@@ -75,7 +75,7 @@
   <!-- ============ NAV (solid from first paint: no dark hero on this page) ============ -->
   <header class="nav nav--solid" id="nav">
     <div class="nav__inner">
-      <a class="nav__brand" href="index.html" aria-label="Applied Intelligence"><img class="brand-mark" src="assets/logo/favicon.svg" alt="" width="34" height="34" /><span class="brand-word">Applied Intelligence</span><span class="brand-short" aria-hidden="true">AISA</span></a>
+      <a class="nav__brand" href="index.html" aria-label="Applied Intelligence"><img class="brand-mark" src="assets/logo/favicon.svg" alt="" width="34" height="34" /><span class="brand-word">Applied Intelligence</span></a>
       <nav class="nav__links" aria-label="Primary">
         <a href="index.html#staff">The staff</a>
         <a href="index.html#how">How it works</a>
@@ -84,7 +84,12 @@
         <a href="index.html#faq">FAQ</a>
         <a href="https://donny.appliedintelligence.biz/login">Client login</a>
       </nav>
-      <a class="btn btn--primary nav__cta" href="index.html#book">Book your free call</a>
+      <!-- No header CTA on this page. Every ad that points here promises "no call
+           required", so a pinned "Book your free call" button would contradict the
+           thing the visitor was just told. The optional 15-minute call is offered
+           once, on the thank-you screen, after the map is open. What sits here is
+           a quiet fact, not a button, and only where there is room for it. -->
+      <span class="nav__note">Free. About three minutes.</span>
     </div>
   </header>
 
@@ -97,8 +102,8 @@
     <header class="audit-hero">
       <div class="wrap audit-hero__inner">
         <span class="kicker" data-bind="audit.kicker">The Leak Audit</span>
-        <h1 class="audit-hero__title" data-bind-html="audit.heading">Find the jobs your business is <em class="ital">leaking</em>. Sixteen taps, three minutes.</h1>
-        <p class="audit-hero__sub" data-bind="audit.sub">Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your week, and put a dollar range on each one. No phone call, no sales pitch.</p>
+        <h1 class="audit-hero__title" data-bind-html="audit.heading">Find the jobs your business is <em class="ital">leaking</em>. Sixteen taps, about three minutes.</h1>
+        <p class="audit-hero__sub" data-bind="audit.sub">Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your week, and put a dollar range on each one. No call required, no sales pitch.</p>
         <ul class="audit-meta" data-audit-meta>
           <li>Sixteen taps, no typing</li>
           <li>About three minutes</li>
