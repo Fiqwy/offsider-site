@@ -63,6 +63,11 @@
     }
   ]
   </script>
+  <!-- Meta Pixel. One shared loader (meta-pixel.js), deferred like every other
+       script on this site so it never blocks paint. It returns without loading
+       anything at all if the browser sends Do Not Track or Global Privacy
+       Control. Disclosed in full in privacy.html section 04. -->
+  <script defer src="meta-pixel.js"></script>
 </head>
 <body data-page="home">
   <a href="#top" class="skip-link">Skip to main content</a>

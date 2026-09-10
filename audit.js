@@ -505,6 +505,22 @@
     } catch (e) { /* never let telemetry touch the experience */ }
   }
 
+  /* ---- Meta Pixel events (no personal data, ever) -----------------------
+     Two events, at the same two milestones the first-party beacon marks: the
+     audit starting, and a gate submission the API actually accepted. Both are
+     once per pageload. Guarded so a blocked pixel, an ad blocker or a Do Not
+     Track opt-out is silence rather than an error, exactly like the beacon.
+     Never carries an answer, a dollar figure, a name, a mobile or an email:
+     see meta-pixel.js and privacy.html section 04. */
+  const sentPixel = {};
+  function pixel(event, params) {
+    if (!event || sentPixel[event]) return;
+    sentPixel[event] = true;
+    try {
+      if (typeof fbq === "function") fbq("track", event, params);
+    } catch (e) { /* never let a tag touch the experience */ }
+  }
+
   function choose(q, o, btn, group) {
     if (state.busy) return;
     state.answers[q.key] = o.key;
@@ -514,6 +530,7 @@
       c.setAttribute("aria-pressed", on ? "true" : "false");
     });
     mark("start");
+    pixel("ViewContent", { content_name: "leak-audit", content_category: "audit" });
     if (FUNNEL_MARKS[q.key]) mark(FUNNEL_MARKS[q.key]);
     /* the skip answers complete their channel in one tap */
     if (q.key === "quotes_week" && o.key === "no_quotes") mark("quotes");
@@ -1114,6 +1131,7 @@
           renderMap(state.mirror, { locked: false });
         }
         mark("unlocked");
+        pixel("Lead", { content_name: "leak-audit" });
         unlocked(payload.email, null, out.pdf);
       })
       .catch(() => {
