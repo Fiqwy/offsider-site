@@ -592,7 +592,13 @@
       Object.keys(o.answers).forEach((k) => {
         if (table[k] && table[k].indexOf(o.answers[k]) !== -1) clean[k] = o.answers[k];
       });
-      if (table.trade && table.trade.indexOf(o.answers.trade) !== -1) clean.trade = o.answers.trade;
+      /* trade travels on its own, so enumTable() omits it and its enum has to be
+         read straight off the question here. Without this the finished state never
+         restores: a reload after the ninth tap drops the trade, the map reads as
+         not-yet-complete and the partial figures come back under the done heading. */
+      const tradeOpts = (((S.audit && S.audit.questions) || [])
+        .filter((q) => q.key === "trade")[0] || {}).options || [];
+      if (tradeOpts.some((op) => op.key === o.answers.trade)) clean.trade = o.answers.trade;
       o.answers = clean;
       return o;
     } catch (e) { return null; }
