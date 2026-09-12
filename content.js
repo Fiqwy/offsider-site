@@ -729,7 +729,7 @@ window.SITE = {
       kickerLead: "Your worst leak: ",
       kicker: "One step left",
       title: "Now the part you can't guess: the fix.",
-      sub: "Your number was the easy bit. The map shows where each dollar goes. It shows the one change that stops your biggest leak first, written out so you can do it yourself or have it done. Tell us where to send it.",
+      sub: "Your number was the easy bit. The map shows where each dollar goes. It shows what stops your biggest leak first, what that looks like running in your business, and what it should give back. Tell us where to send it.",
       // What they get, in the order it is worth: the document, the fix for the
       // one leak that is costing them most, then the call they can take or leave.
       bullets: [
@@ -968,14 +968,14 @@ window.SITE = {
         body: "That leak has a fix, and it isn't you working harder. On a fifteen minute call we take your map and pick the one leak worth fixing first. Then we show you what plugging it looks like. You get a price on the spot.",
         walkTitle: "Walk away with",
         walk: [
-          "The one change that stops your biggest leak, in plain words",
+          "What stops your biggest leak, and what it looks like running in your business",
           "What it costs and what it should return, from your own numbers",
           "A straight answer if it isn't worth doing yet",
         ],
-        button: "Book my Leak Fix call",
+        button: "Book a call to fix my worst leak",
         // The risk reversal. It promises a thing we control (what they leave
         // the call holding), never a result we do not control.
-        guarantee: "If the fifteen minutes doesn't hand you at least one fix you could do yourself this week, that's on us.",
+        guarantee: "If the fifteen minutes doesn't show you exactly what plugging your worst leak would put back, that's on us.",
         finishLink: "Finish the map first, nine taps",
         trust: "You'll talk to Nicholas, who built this. No sales team, no lock in.",
       },
