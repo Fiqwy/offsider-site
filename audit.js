@@ -529,13 +529,27 @@
     shown: { low: 0, high: 0 },   // what the counter is currently displaying
     token: "",            // the download token, once the gate has been accepted
     email: "",
-    mobile: "",           // only ever set at the booking step, only to echo it back
+    mobile: "",           // taken at the gate, reused by the booking, echoed back
     utm: null,            // read once from the query string, never stored
     busy: false,
   };
   let stage = null, panel = null, qBox = null, meter = null, meterLow = null, meterHigh = null;
   let progText = null, progFill = null, backBtn = null;
   let counterRaf = 0;
+
+  /* The one spelling of "that is a number" on this page. Same rule the server
+     applies at the booking (routes/comms._clean_mobile): the characters a
+     written Australian mobile is allowed to carry, and eight to fifteen digits
+     inside them. Held here so the gate field and the booking field can never
+     drift apart, and so a number Nicholas cannot ring is caught under the
+     visitor's thumb rather than stored and dialled.
+
+     Every punctuation mark in the class is escaped for a reason: a `pattern`
+     attribute is compiled with the RegExp `v` flag, under which a bare `(` or
+     `)` inside a character class is a syntax error, and a pattern that does not
+     compile is silently DROPPED rather than reported. Both WebKit and Blink
+     accepted "ring me maybe" against the unescaped spelling. */
+  const MOBILE_PATTERN = "[ +\\(\\)\\.\\-]*(?:\\d[ +\\(\\)\\.\\-]*){8,15}";
 
   const QS = () => (A && Array.isArray(A.questions) ? A.questions : []);
   const inPhase = (q, finish) => !!q.deferred === !!finish;
@@ -1417,11 +1431,15 @@
       return inp;
     };
 
-    /* TWO fields, each carrying the reason it is asked. The mobile is not one
-       of them: a phone number is the price of a phone call, and it is asked
-       once, later, by the visitor who actually wants one. */
+    /* THREE fields, each carrying the reason it is asked. The mobile is one of
+       them: the map is worth nothing to either side if the fix cannot be said
+       out loud, so the number is asked at the one moment the visitor most
+       wants what is behind the blur, with the reason and the way out of it
+       ("one word stops it") sitting under the label. It is validated the way
+       the booking field is, against the same rule the server applies. */
     const F_ = G.fields || {};
     addField("name",   F_.name   || "First name", { type: "text", autocomplete: "given-name" });
+    addField("mobile", F_.mobile || "Mobile",     { type: "tel", autocomplete: "tel", inputmode: "tel", pattern: MOBILE_PATTERN });
     addField("email",  F_.email  || "Email",      { type: "email", autocomplete: "email", inputmode: "email" });
 
     /* honeypot: humans never see it, bots fill it, the server pretends success */
@@ -1525,11 +1543,13 @@
     const answers = {};
     PRE_GATE_KEYS.forEach((k) => { if (a[k]) answers[k] = a[k]; });
 
-    /* No phone key at all: the gate does not ask for one. The API treats a
-       partial submission without a mobile as a whole lead (email only), and
-       the number is attached later if they book the call. */
+    /* The mobile rides with the submission, so the admin SMS fired at the gate
+       carries a number Nicholas can ring rather than "no mobile yet, email
+       only". The API has always accepted the key (the column is nullable and
+       the booking step still tops it up), so nothing downstream changes. */
     const payload = {
       name: val("name"),
+      phone: val("mobile"),
       email: val("email"),
       website: val("website"),        // honeypot, empty for humans
       answers: answers,
@@ -1545,6 +1565,9 @@
 
     mark("submitted");
     state.email = payload.email;
+    /* kept for the booking post and for the confirmation sentence, and written
+       to sessionStorage by the save() on either branch below */
+    state.mobile = payload.phone;
     fetch("/api/public/leak-audit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1713,9 +1736,11 @@
     return row;
   }
 
-  /* THE BOOKING STEP. The one place on the page that asks for a mobile, asked
-     of somebody who has just tapped a button asking for a phone call, with the
-     reason sitting next to the field. Above the same five time chips as ever.
+  /* THE BOOKING STEP. The number is already in hand from the gate, so this row
+     asks for nothing but the windows: re-typing a mobile you have just given is
+     a form asking you to prove you meant it. The field is built ONLY when the
+     store has no number, which is a tab that took the gate before this change
+     shipped and must still be able to book. Same five time chips as ever.
 
      An OPTIONAL extra on a screen whose whole job is to feel like good news,
      which sets two rules it never breaks:
@@ -1737,48 +1762,58 @@
     const B = T.booking || {};
     const row = el("div", "audit-times chip-row");
 
-    /* ---- the mobile, above the chips, validated the way the gate's fields
-            are: our own message, announced, cleared the moment it is right --- */
-    const fieldWrap = el("div", "gate__field audit-times__field");
-    const labelEl = doc.createElement("label");
-    labelEl.appendChild(el("span", "gate__lab", B.mobileLabel || "Mobile"));
-    const mobile = doc.createElement("input");
-    mobile.id = "la-book-mobile";
-    mobile.name = "mobile";
-    mobile.type = "tel";
-    mobile.required = true;
-    mobile.setAttribute("autocomplete", "tel");
-    mobile.setAttribute("inputmode", "tel");
-    mobile.setAttribute("aria-describedby", "la-book-mobile-err");
-    labelEl.appendChild(mobile);
-    if (B.mobileWhy) labelEl.appendChild(el("span", "gate__why", B.mobileWhy));
-    const err = el("span", "gate__err");
-    err.id = "la-book-mobile-err";
-    fieldWrap.append(labelEl, err);
-    row.appendChild(fieldWrap);
-
+    /* ---- the mobile, only if we somehow do not have one ------------------
+            Built exactly as it always was (our own message, announced, cleared
+            the moment it is right) for the one case that still needs it: a
+            session that took the gate before the gate asked for a number. --- */
+    const known = String(state.mobile || "").trim();
+    let fieldWrap = null, mobile = null;
     const clearMobile = () => {
+      if (!mobile) return;
       mobile.removeAttribute("aria-invalid");
-      err.textContent = "";
-      err.classList.remove("is-on");
+      fieldWrap.querySelector(".gate__err").textContent = "";
+      fieldWrap.querySelector(".gate__err").classList.remove("is-on");
     };
     const markMobile = () => {
+      if (!mobile) return;
+      const err = fieldWrap.querySelector(".gate__err");
       mobile.setAttribute("aria-invalid", "true");
       err.textContent = mobile.validity.valueMissing
         ? (G.errorRequired || "Please fill this in.")
         : (G.errorInvalid || "Please check this.");
       err.classList.add("is-on");
     };
-    mobile.addEventListener("input", () => { if (mobile.checkValidity()) clearMobile(); });
-    mobile.addEventListener("blur", () => {
-      if (mobile.checkValidity()) { clearMobile(); return; }
-      /* An empty field they have not typed in yet has not been got WRONG, it has
-         not been filled in yet. Shouting at it the moment focus leaves (which
-         this row's own "go and pick a time" focus move does) is an error message
-         for something the visitor was never given the chance to do. The submit
-         still says it, out loud, at the moment it actually matters. */
-      if (String(mobile.value || "").trim()) markMobile();
-    });
+    if (!known) {
+      fieldWrap = el("div", "gate__field audit-times__field");
+      const labelEl = doc.createElement("label");
+      labelEl.appendChild(el("span", "gate__lab", B.mobileLabel || "Mobile"));
+      mobile = doc.createElement("input");
+      mobile.id = "la-book-mobile";
+      mobile.name = "mobile";
+      mobile.type = "tel";
+      mobile.required = true;
+      mobile.setAttribute("autocomplete", "tel");
+      mobile.setAttribute("inputmode", "tel");
+      mobile.setAttribute("pattern", MOBILE_PATTERN);
+      mobile.setAttribute("aria-describedby", "la-book-mobile-err");
+      labelEl.appendChild(mobile);
+      if (B.mobileWhy) labelEl.appendChild(el("span", "gate__why", B.mobileWhy));
+      const err = el("span", "gate__err");
+      err.id = "la-book-mobile-err";
+      fieldWrap.append(labelEl, err);
+      row.appendChild(fieldWrap);
+
+      mobile.addEventListener("input", () => { if (mobile.checkValidity()) clearMobile(); });
+      mobile.addEventListener("blur", () => {
+        if (mobile.checkValidity()) { clearMobile(); return; }
+        /* An empty field they have not typed in yet has not been got WRONG, it has
+           not been filled in yet. Shouting at it the moment focus leaves (which
+           this row's own "go and pick a time" focus move does) is an error message
+           for something the visitor was never given the chance to do. The submit
+           still says it, out loud, at the moment it actually matters. */
+        if (String(mobile.value || "").trim()) markMobile();
+      });
+    }
 
     const label = el("span", "chip-row__label audit-times__label", T.timesLabel || "");
     row.appendChild(label);
@@ -1848,19 +1883,20 @@
       }
       clearChips();
       /* A missing mobile is not a failure of ours, so it is the one thing this
-         row does say out loud. Everything else stays silent. */
-      if (!mobile.checkValidity()) {
+         row does say out loud. Everything else stays silent. On the normal path
+         there is no field to miss: the number came in at the gate. */
+      if (mobile && !mobile.checkValidity()) {
         markMobile();
         try { mobile.focus({ preventScroll: true }); } catch (e) { mobile.focus(); }
         return;
       }
       clearMobile();
+      const number = known || String((mobile && mobile.value) || "").trim();
       btn.disabled = true;
       fetch("/api/public/leak-audit/times", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: token, times: times,
-                               mobile: String(mobile.value || "").trim() }),
+        body: JSON.stringify({ token: token, times: times, mobile: number }),
       })
         .then((res) => (res.ok ? res.json() : null))
         .then((out) => {
@@ -1871,12 +1907,12 @@
           pixel("Schedule", { content_name: "leak-audit" });
           /* the number is echoed back in the confirmation, so it is kept for
              the reload that lands straight on the booked state */
-          state.mobile = String(mobile.value || "").trim();
+          state.mobile = number;
           state.book = "done";
           save();
           row.classList.add("is-done");
           [fieldWrap, label, chips, chipErr, foot].forEach((n) => {
-            if (n.parentNode) n.parentNode.removeChild(n);
+            if (n && n.parentNode) n.parentNode.removeChild(n);
           });
           msg.textContent = fill(T.timesSuccess || "", { mobile: state.mobile });
         })

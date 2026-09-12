@@ -719,7 +719,7 @@ window.SITE = {
       figLead: "Your leak, from your own answers",
       figUnit: "a year",
       kicker: "Your map is ready",
-      title: "Two boxes and the blur comes off.",
+      title: "Three boxes and the blur comes off.",
       sub: "You watched it build. Say where to send the map and the blur comes off.",
       fields: {
         name: "First name",
@@ -730,6 +730,7 @@ window.SITE = {
       // the reason line under each label, so no field is asked for silently
       reasons: {
         name: "So the map is addressed to a person",
+        mobile: "So Nicholas can give you one ring about the fix. One word stops it.",
         email: "So you keep a copy when this page is gone.",
       },
       errorRequired: "Please fill this in.",

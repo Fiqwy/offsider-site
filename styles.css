@@ -2405,6 +2405,17 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   .leakmap__head { gap: .4rem .7rem; }
   .leakmap__keep { margin-left: 0; }
   .qopt { font-size: .98rem; padding: .7rem .9rem; }
+  /* THREE boxes now stand between the visitor and the map, and an ask is only
+     an ask if the button doing the asking is in the fold. The third field put
+     the button 49px under the fold on a 360 by 780 Android, so the card's
+     vertical rhythm tightens on a narrow screen: every type size is untouched,
+     and no thumb target goes under the 44px floor the rest of the site keeps. */
+  .gate__fig { margin-bottom: .7rem; padding: .65rem .85rem .7rem; }
+  .gate__figlead { letter-spacing: .05em; }
+  .gate__sub { margin-top: .45rem; }
+  .gate__form { margin-top: .9rem; gap: .55rem; }
+  .gate__why { margin-bottom: .25rem; }
+  .gate__field input { min-height: 46px; }
 }
 
 /* ---- Reduced motion: nothing on this page moves -------------------------- */
