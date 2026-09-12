@@ -1773,45 +1773,66 @@ body[data-page="audit"] { background: var(--bg); }
    here is scoped to body[data-page="audit"], so index, work, terms and privacy
    keep the shared nav exactly as it was.
    ------------------------------------------------------------------------- */
-/* the quiet fact that replaces the CTA: never a button, desktop only */
+/* A 56px bar, so the instrument starts as high up the screen as it can. */
+body[data-page="audit"] .nav__inner { padding-top: .35rem; padding-bottom: .35rem; }
+/* the quiet fact that replaces the CTA: plain text, never a button */
 body[data-page="audit"] .nav__note {
-  margin-left: 1.4rem; flex: none;
+  margin-left: auto; flex: none;
   font-size: .9rem; font-weight: 600; color: var(--ink-2);
   white-space: nowrap;
 }
+/* above 960 the nav links are visible and already carry "Free audit" as the
+   current page, so the plain-text version would be the same words twice */
+@media (min-width: 961px) { body[data-page="audit"] .nav__note { display: none; } }
 @media (max-width: 960px) {
-  /* the nav links are already hidden at this width, so the brand is alone on
-     the bar and there is room for the real name. Type and mark step down a
-     little so the lockup still clears the 44px row on a 320px screen. */
+  /* the nav links are hidden at this width, so the brand is alone on the bar
+     and there is room for the real name. Type and mark step down a little so
+     the lockup still clears the 44px row on a 320px screen. */
   body[data-page="audit"] .nav__brand .brand-word { display: inline; font-size: 1.06rem; }
+  body[data-page="audit"] .nav__brand .brand-short { display: none; }
   body[data-page="audit"] .nav__brand .brand-mark { width: 30px; height: 30px; }
-  /* below the fold the same words sit in .audit-meta, so the header keeps only
-     the name rather than crowding it */
-  body[data-page="audit"] .nav__note { display: none; }
 }
 @media (max-width: 360px) {
-  body[data-page="audit"] .nav__brand .brand-word { font-size: .98rem; letter-spacing: -0.04em; }
+  body[data-page="audit"] .nav__brand .brand-word { font-size: .95rem; letter-spacing: -0.04em; }
+  body[data-page="audit"] .nav__note { font-size: .82rem; }
 }
 /* One focused reading column for the whole page: hero, instrument, map and
-   method all share a single left rail. Narrowing .audit-hero__inner instead
-   would centre that one .wrap on its own and break the rail. */
+   method all share a single left rail. Narrowing one block's inner wrapper
+   instead would centre that .wrap on its own and break the rail. */
 .audit .wrap { max-width: 900px; }
 
-/* ---- Hero ---------------------------------------------------------------- */
-.audit-hero {
-  padding-top: clamp(6.5rem, 13vh, 8.5rem);
+/* --muted-2 is AA on white, but the method block on this page sits on
+   --bg-soft, where it drops to 4.26:1. --muted is 5.56:1 there. */
+body[data-page="audit"] .stat-note { color: var(--muted); }
+
+/* ---- Trust strip (the visible h1) ---------------------------------------
+   There is no hero. The page opens on question one, so the only thing above
+   the instrument is the bar and this one line, which answers the two questions
+   a sceptical owner actually has in the first second: what does this cost me,
+   and is someone going to ring me.
+   ------------------------------------------------------------------------- */
+.audit { padding-top: 56px; }          /* clears the fixed bar */
+.audit-trust {
+  position: sticky; top: 56px; z-index: 80;
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--line);
+}
+.audit-trust__line {
+  margin: 0; padding: .35rem 0;
+  font-size: .84rem; font-weight: 700; line-height: 1.5;
+  letter-spacing: 0; color: var(--accent-ink);
+}
+@media (max-width: 360px) { .audit-trust__line { font-size: .8rem; } }
+
+/* ---- The honesty block (was the hero, now below the instrument) ---------- */
+.audit-honesty {
+  padding-top: clamp(1.6rem, 4vw, 2.6rem);
   padding-bottom: clamp(1.6rem, 4vw, 2.6rem);
-  background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg) 78%);
+  border-top: 1px solid var(--line-2);
 }
-.audit-hero__title {
-  margin-top: .4rem;
-  font-size: clamp(2.05rem, 5.4vw, 3.5rem);
-  letter-spacing: -0.035em;
-  max-width: 18ch;
-}
-.audit-hero__sub {
-  margin-top: 1.2rem; max-width: 56ch;
-  font-size: clamp(1.04rem, 1.6vw, 1.2rem); color: var(--muted); line-height: 1.55;
+.audit-honesty__sub {
+  margin-top: .6rem; max-width: 56ch;
+  font-size: clamp(1rem, 1.6vw, 1.12rem); color: var(--muted); line-height: 1.55;
 }
 /* the effort / time / payoff cues, as three quiet facts */
 .audit-meta {
@@ -1828,7 +1849,7 @@ body[data-page="audit"] .nav__note {
   content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%;
   background: var(--accent);
 }
-.audit-hero__note {
+.audit-honesty__note {
   margin-top: 1.2rem; max-width: 62ch;
   font-size: .92rem; line-height: 1.55; color: var(--muted-2); font-weight: 600;
 }
@@ -1839,7 +1860,7 @@ body[data-page="audit"] .nav__note {
 .audit-noscript a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---- The stage ----------------------------------------------------------- */
-.audit-stage { padding-bottom: clamp(2.5rem, 6vw, 4rem); }
+.audit-stage { padding-top: .8rem; padding-bottom: clamp(2.5rem, 6vw, 4rem); }
 /* reserved so the page does not jump when the module paints */
 .audit-stage__mount { min-height: 520px; }
 
@@ -1847,7 +1868,11 @@ body[data-page="audit"] .nav__note {
 .audit-panel {
   background: var(--bg); border: 1px solid var(--line);
   border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
-  padding: clamp(1.2rem, 3.5vw, 2rem);
+  padding: clamp(.9rem, 3.5vw, 2rem);
+}
+/* the one line that heads the last nine taps */
+.audit-intro {
+  margin-top: .9rem; font-size: .95rem; font-weight: 700; color: var(--accent-ink);
 }
 
 /* progress rail */
@@ -1885,7 +1910,7 @@ body[data-page="audit"] .nav__note {
 .audit-meter__clip { overflow: hidden; min-height: 0; }
 .audit-meter.is-live { grid-template-rows: 1fr; opacity: 1; margin-bottom: .2rem; }
 .audit-meter__box {
-  margin-top: 1.4rem;
+  margin-top: .9rem;
   padding: 1.15rem clamp(1rem, 3vw, 1.5rem);
   border-radius: var(--radius);
   background: var(--bg-ink); color: #fff;
@@ -1910,7 +1935,7 @@ body[data-page="audit"] .nav__note {
 .audit-meter__hint { display: block; margin-top: .2rem; font-size: .8rem; color: rgba(255,255,255,.45); }
 
 /* ---- The question -------------------------------------------------------- */
-.audit-q { margin-top: 1.6rem; overflow: hidden; transition: height .34s cubic-bezier(.22,.61,.36,1); }
+.audit-q { margin-top: 1rem; overflow: hidden; transition: height .34s cubic-bezier(.22,.61,.36,1); }
 .audit-qi { transition: opacity .24s ease, transform .24s ease; }
 .audit-qi.is-enter { opacity: 0; transform: translateY(10px); }
 .audit-qi.is-leave { opacity: 0; transform: translateY(-8px); }
@@ -1931,16 +1956,28 @@ body[data-page="audit"] .nav__note {
   margin-top: .3rem; font-size: .95rem; line-height: 1.5; color: var(--muted); max-width: 52ch;
 }
 .audit-qi__title {
-  font-size: clamp(1.35rem, 3.4vw, 1.95rem); letter-spacing: -.025em; max-width: 22ch;
+  font-size: clamp(1.28rem, 3.4vw, 1.95rem); line-height: 1.2;
+  letter-spacing: -.025em; max-width: 24ch; text-wrap: balance;
 }
-.audit-qi__title:focus-visible { outline: 3px solid var(--accent-ink); outline-offset: 6px; border-radius: 8px; }
-.audit-qi__help { margin-top: .55rem; font-size: .95rem; color: var(--muted); }
+/* The title is focused programmatically after every tap so a screen reader announces the
+   new question. It is not interactive and nobody ever tabs to it, so it must not draw a
+   ring: WebKit paints one anyway on a scripted focus, and the panel clips its own
+   overflow, leaving a blue fragment at the right edge of the title. The options and the
+   gate fields keep their own focus rings, which is where a keyboard actually goes. */
+.audit-qi__title:focus,
+.audit-qi__title:focus-visible { outline: none; }
+.audit-qi__help { margin-top: .4rem; font-size: .92rem; color: var(--muted); max-width: 46ch; }
+/* one quiet line under the options: how much is left, and in whose numbers */
+.audit-qi__micro {
+  margin-top: .7rem; font-size: .82rem; font-weight: 600; color: var(--muted-2);
+  max-width: 44ch;
+}
 
 /* answer chips: big, honest tap targets */
-.audit-opts { margin-top: 1.35rem; display: flex; flex-direction: column; gap: .55rem; }
+.audit-opts { margin-top: .85rem; display: flex; flex-direction: column; gap: .5rem; }
 .qopt {
   display: flex; align-items: center; gap: .8rem; width: 100%;
-  min-height: 56px; padding: .75rem 1.1rem;
+  min-height: 58px; padding: .75rem 1.1rem;
   text-align: left; cursor: pointer;
   background: var(--bg); color: var(--ink);
   border: 1.5px solid var(--line); border-radius: 14px;
@@ -1980,7 +2017,9 @@ body[data-page="audit"] .nav__note {
 .leakmap__keep {
   margin-left: auto;
   font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--green); background: var(--green-soft);
+  /* --green is only 2.95:1 on --green-soft. This darker cut is 4.87:1, which
+     is what a 11.5px uppercase label needs to be read at all. */
+  color: #0f7a37; background: var(--green-soft);
   padding: .28rem .7rem; border-radius: 999px;
 }
 
@@ -2104,14 +2143,17 @@ body[data-page="audit"] .nav__note {
 .leak-row[data-status="critical"] { --st: #e0533d; --st-ink: #b42318; --st-bg: color-mix(in srgb, #e0533d 12%, #fff); }
 .leak-row[data-status="high"]     { --st: var(--tone-amber); --st-ink: #8a5300; --st-bg: color-mix(in srgb, var(--tone-amber) 14%, #fff); }
 .leak-row[data-status="medium"]   { --st: var(--accent); --st-ink: var(--accent-ink); --st-bg: var(--accent-soft); }
-.leak-row[data-status="ok"]       { --st: var(--green); --st-ink: #15803d; --st-bg: var(--green-soft); }
+/* #15803d lands at 4.49:1 on --green-soft, one hundredth under AA. */
+.leak-row[data-status="ok"]       { --st: var(--green); --st-ink: #146c31; --st-bg: var(--green-soft); }
 .leak-row__head { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
 .leak-row__name { font-size: 1.12rem; font-weight: 800; letter-spacing: -.015em; }
 .leak-row__pills { flex: none; display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: .35rem; }
 /* "Estimated": this channel rode on our assumption, not their number */
 .leak-row__est {
   font-size: .7rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
-  color: var(--muted-2); background: var(--bg-soft);
+  /* --muted-2 is AA on white but only 4.26:1 on --bg-soft, and this pill is
+     always on --bg-soft. --muted is 5.56:1 there. */
+  color: var(--muted); background: var(--bg-soft);
   border: 1px dashed var(--line); padding: .22rem .6rem; border-radius: 999px;
 }
 .leak-row__pill {
@@ -2260,7 +2302,10 @@ body[data-page="audit"] .nav__note {
 .gate__list { margin-top: 1rem; gap: .5rem; }
 .gate__list li { font-size: .95rem; }
 .gate__form { margin-top: 1.3rem; display: flex; flex-direction: column; gap: .75rem; }
-.gate__field label span { display: block; font-size: .82rem; font-weight: 700; color: var(--ink-2); margin-bottom: .3rem; }
+.gate__field label span { display: block; }
+.gate__lab { font-size: .86rem; font-weight: 700; color: var(--ink-2); }
+/* why each field is being asked for, said before it is asked */
+.gate__why { margin-bottom: .35rem; font-size: .78rem; font-weight: 600; color: var(--muted-2); line-height: 1.4; }
 .gate__field input {
   width: 100%; min-height: 48px; padding: 0 .9rem;
   border: 1px solid var(--line); border-radius: 12px;
@@ -2277,6 +2322,18 @@ body[data-page="audit"] .nav__note {
 .gate__err.is-on { display: block; }
 .gate__btn { width: 100%; margin-top: .2rem; }
 .gate__note { font-size: .84rem; font-weight: 600; color: var(--muted-2); text-align: center; line-height: 1.5; }
+.gate__note--privacy { margin-top: -.35rem; }
+/* the way out to the rest of the site, so nobody has to type a mobile number
+   into a company they have not looked at */
+.gate__site {
+  margin-top: .2rem; padding-top: .8rem; border-top: 1px solid var(--line-2);
+  font-size: .82rem; font-weight: 600; color: var(--muted-2); text-align: center; line-height: 1.55;
+}
+.gate__site a {
+  color: var(--accent-ink); font-weight: 700;
+  text-decoration: underline; text-underline-offset: 3px;
+  display: inline-block; padding: .2rem .1rem;
+}
 .gate__msg { text-align: center; font-weight: 700; color: #b42318; }
 .gate__msg:empty { display: none; }
 
@@ -2323,4 +2380,69 @@ body[data-page="audit"] .nav__note {
   /* the optional times row is an aside on the thank-you screen: it must not
      lift under the cursor when the visitor has asked for stillness */
   .audit-times__btn:hover { transform: none; }
+}
+
+/* =============================================================================
+   THE REVEAL SCREEN (audit.html, screen 8)
+   Their number, alone on the screen, with nothing asked of them. Every ad says
+   "you see the number before we ask your name", so this is the screen that
+   makes that line true. The figure is the largest type on the page.
+   ========================================================================== */
+.audit-reveal {
+  padding: clamp(1.4rem, 5vw, 2.4rem);
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--bg); box-shadow: var(--shadow-md);
+  text-align: left;
+}
+.audit-reveal:focus-visible { outline: 3px solid var(--accent-ink); outline-offset: 3px; }
+.audit-reveal__kicker { display: block; color: var(--accent-ink); }
+.audit-reveal__fig {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .4rem;
+  margin-top: .5rem;
+  font-size: clamp(2.1rem, 9vw, 3.6rem); font-weight: 800; letter-spacing: -.035em;
+  line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--ink);
+}
+.audit-reveal__fig .num { white-space: nowrap; }
+.audit-reveal__fig .sep { font-size: .42em; font-weight: 700; color: var(--muted); }
+/* On a phone the range already fills the line, so "a year" is set as its own
+   caption under the figure rather than left as an orphan beside it. */
+.audit-reveal__per {
+  display: block; width: 100%; margin-top: .2rem;
+  font-size: 1rem; font-weight: 700; color: var(--muted); letter-spacing: 0;
+}
+.audit-reveal__lead { margin-top: .9rem; font-size: 1.02rem; font-weight: 700; color: var(--ink-2); max-width: 40ch; }
+.audit-reveal__weekly { margin-top: .5rem; font-size: .98rem; color: var(--ink-2); max-width: 42ch; }
+.audit-reveal__fine { margin-top: .7rem; font-size: .84rem; font-weight: 600; color: var(--muted-2); max-width: 46ch; }
+.audit-reveal__honesty {
+  margin-top: 1.1rem; padding: .85rem 1rem;
+  border-radius: var(--radius-sm); background: var(--bg-soft); border: 1px solid var(--line);
+  font-size: .9rem; line-height: 1.55; color: var(--ink-2); max-width: 52ch;
+}
+.audit-reveal__btn { width: 100%; margin-top: 1.3rem; }
+.audit-reveal__note { margin-top: .7rem; font-size: .82rem; font-weight: 600; color: var(--muted-2); text-align: center; }
+
+/* ---- A leak the first seven taps could not reach ------------------------- */
+.leak-row.is-unpriced { opacity: .88; }
+.leak-row__pill--none {
+  /* --muted, not --muted-2: 5.56:1 on --bg-soft rather than 4.26:1 */
+  background: var(--bg-soft); color: var(--muted); border-color: var(--line);
+}
+.leak-row.is-unpriced .leak-row__track { opacity: .45; }
+
+/* ---- The fork on the unlocked screen ------------------------------------- */
+.audit-fork__title {
+  display: block; margin-top: 1.2rem;
+  font-size: 1.05rem; font-weight: 800; letter-spacing: -.015em; color: var(--ink);
+}
+.audit-fork__body { margin-top: .4rem; font-size: .95rem; line-height: 1.55; color: var(--ink-2); max-width: 54ch; }
+.audit-flash__alt-cta { background: var(--bg); }
+
+@media (max-width: 640px) {
+  .audit-reveal__btn { min-height: 58px; }
+  .audit-flash__cta { width: 100%; }
+}
+
+/* ---- Reduced motion: the reveal never moves ------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .audit-reveal { transition: none !important; }
 }

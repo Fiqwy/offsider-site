@@ -83,8 +83,13 @@
   const bump = (s, cap) => LADDER[Math.min(rank(cap), rank(s) + 1)];
   const floorAt = (s, min) => (rank(s) < rank(min) ? min : s);
 
-  /* round$(x): nearest 1000 at or above 5000, otherwise nearest 500. */
-  const roundMoney = (x) => (x >= 5000 ? Math.round(x / 1000) * 1000 : Math.round(x / 500) * 500);
+  /* round$(x): nearest 1000 at or above 5000, otherwise nearest 500. Written
+     as floor(x/step + 0.5) because that is the form PARTIAL-CONTRACT.md pins;
+     it is the same value Math.round gives for every positive number here. */
+  const roundMoney = (x) => {
+    const step = x >= 5000 ? 1000 : 500;
+    return Math.floor(x / step + 0.5) * step;
+  };
   const money = (n) => "$" + Math.round(n).toLocaleString("en-AU");
 
   /* Channel order is fixed and load-bearing: the API returns exactly these
@@ -306,6 +311,168 @@
   }
 
   /* ===========================================================================
+     1b. THE PARTIAL MIRROR  (funnel/PARTIAL-CONTRACT.md — keep in lockstep)
+
+     The first seven taps price two channels of five. The engine's
+     score_audit_partial() is the authority; this reproduces it to the cent so
+     the counter, the reveal and the pre-gate map never disagree with the
+     figure the server sends back a second later.
+
+     Floating point is not associative, so the multiplication ORDER below is
+     part of the contract. Do not tidy it.
+     ========================================================================= */
+  const PRE_GATE_KEYS = ["missed", "missed_week", "winback", "job_value",
+                         "enquiries", "reply_speed", "late_outcome"];
+  const DEFERRED_KEYS = ["after_hours_calls", "quotes_week", "quotes_quiet", "quotes",
+                         "reviews", "review_count", "list_size", "dormant"];
+  const AH_FALLBACK_RATE = 0.30;
+  const DOWNGRADE_BELOW  = 2000;
+
+  /* The enum table is read back off the questions in content.js, so the thing
+     the visitor can tap and the thing the mirror accepts can never drift. */
+  function enumTable() {
+    const out = {};
+    ((S.audit && S.audit.questions) || []).forEach((q) => {
+      if (q.key === "trade") return;                    // travels on its own
+      out[q.key] = (q.options || []).map((o) => o.key);
+    });
+    return out;
+  }
+
+  /* Mirrors validate_answers_partial(). Same five messages, same order, and
+     the offending VALUE is never echoed back. */
+  function validateAnswersPartial(answers) {
+    if (!answers || typeof answers !== "object" || Array.isArray(answers)) {
+      return { ok: false, error: "answers must be an object" };
+    }
+    const table = enumTable();
+    const keys = Object.keys(answers);
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i];
+      if (!table[k]) return { ok: false, error: "unknown answer key: " + k };
+      if (DEFERRED_KEYS.indexOf(k) !== -1 && k !== "after_hours_calls") {
+        return { ok: false, error: "answer not asked before the gate: " + k };
+      }
+    }
+    for (let i = 0; i < PRE_GATE_KEYS.length; i++) {
+      const k = PRE_GATE_KEYS[i];
+      if (!(k in answers)) return { ok: false, error: "missing answer: " + k };
+    }
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i];
+      if (table[k].indexOf(answers[k]) === -1) {
+        return { ok: false, error: "invalid answer for " + k };
+      }
+    }
+    return { ok: true, error: null };
+  }
+
+  const roundInt = (x) => Math.floor(x + 0.5);
+  const rangeOf = (mid) => [roundMoney(mid * K.RANGE_LOW), roundMoney(mid * K.RANGE_HIGH)];
+
+  /* their own answers on the phone channel, when after hours has not been
+     asked yet. Named rather than implied: the fallback is our number, not
+     theirs, and the card says so. */
+  function partialPhoneEcho(a) {
+    const cfg = (S.audit.echo || {}).missed_calls || {};
+    if (a.missed_week === "no_idea") return cfg.estimated || "";
+    return String(cfg.partial || "").replace(/\{(\w+)\}/g, (m, key) => {
+      const map = cfg[key];
+      return (map && map[a[key]]) || "";
+    });
+  }
+
+  function scoreAuditPartial(a, trade) {
+    const v = validateAnswersPartial(a);
+    if (!v.ok) throw new Error(v.error);
+
+    const E = MID.enquiries[a.enquiries];
+    const J = MID.job_value[a.job_value];
+
+    /* ---- missed calls (Ada) ---- */
+    let estimated = false;
+    let M = F.missedWeek[a.missed_week];
+    if (M == null) { estimated = true; M = E * K.PHONE_SHARE * F.missedFallback[a.missed]; }
+    let AH = F.afterHours[a.after_hours_calls == null ? "no_idea" : a.after_hours_calls];
+    if (AH == null) { estimated = true; AH = AH_FALLBACK_RATE * Math.max(M, 1); }
+    const lost = Math.min(M + AH, E) * (1 - F.winback[a.winback]);
+    const midMissed = lost * K.CAPTURE * J * K.WEEKS;
+    let sMissed = lost >= 3 ? "critical" : lost >= 1.5 ? "high" : lost >= 0.5 ? "medium" : "ok";
+    if (midMissed < DOWNGRADE_BELOW) sMissed = downgrade(sMissed);
+    if (estimated) sMissed = floorAt(sMissed, "medium");
+
+    /* ---- slow replies (Zip) ---- */
+    const late = F.lateShare[a.reply_speed];
+    const gone = F.gone[a.late_outcome];
+    const midSlow = E * K.WEB_SHARE * late * gone * K.CAPTURE * J * K.WEEKS;
+    const p = late * gone;
+    let sSlow = p >= 0.45 ? "critical" : p >= 0.25 ? "high" : p >= 0.10 ? "medium" : "ok";
+    if (midSlow < DOWNGRADE_BELOW) sSlow = downgrade(sSlow);
+
+    const mids = { missed_calls: midMissed, slow_reply: midSlow };
+    const statuses = { missed_calls: sMissed, slow_reply: sSlow };
+    const notes = {
+      missed_calls: a.missed,
+      slow_reply: a.reply_speed,
+    };
+    const R = S.audit.result || {};
+    const NP = R.notPriced || {};
+
+    const channels = ORDER.map((k) => {
+      const cfg = (S.audit.channels && S.audit.channels[k]) || {};
+      const base = {
+        key: k,
+        label: cfg.label || k,
+        worker: cfg.worker || { name: "", role: "" },
+      };
+      if (k !== "missed_calls" && k !== "slow_reply") {
+        base.not_priced = true;
+        base.status = null;
+        base.annual_low = null;
+        base.annual_high = null;
+        base.note = NP[k] || "";
+        base.echo = "";
+        base.estimated = false;
+        return base;
+      }
+      const r = rangeOf(mids[k]);
+      base.not_priced = false;
+      base.status = statuses[k];
+      base.annual_low = r[0];
+      base.annual_high = r[1];
+      base.note = (cfg.notes && cfg.notes[notes[k]]) || "";
+      base.echo = k === "missed_calls" ? partialPhoneEcho(a) : buildEcho(k, a, false);
+      base.estimated = k === "missed_calls" ? estimated : false;
+      return base;
+    });
+
+    /* the larger of the two priced mids wins, missed_calls breaks the tie */
+    const startKey = midSlow > midMissed ? "slow_reply" : "missed_calls";
+    const startCfg = (S.audit.channels && S.audit.channels[startKey]) || {};
+    const totalMid = midMissed + midSlow;
+
+    return {
+      total: {
+        annual_low: roundMoney(totalMid * K.RANGE_LOW),
+        annual_high: roundMoney(totalMid * K.RANGE_HIGH),
+        weekly_mid: roundInt(totalMid / K.WEEKS),
+      },
+      all_clear: null,                 // undecidable on two of five channels
+      channels: channels,
+      start_here: {
+        channel_key: startKey,
+        worker: startCfg.worker || { name: "", role: "" },
+        line: (S.audit.startLines && S.audit.startLines[startKey]) || "",
+      },
+      roadmap: [],                     // a 90 day order needs all five
+      partial: true,
+      priced_channels: 2,
+      total_channels: 5,
+      _mid: totalMid,
+    };
+  }
+
+  /* ===========================================================================
      2. SMALL DOM HELPERS (textContent only — no innerHTML anywhere on this page)
      ========================================================================= */
   const el = (tag, cls, text) => {
@@ -353,12 +520,14 @@
   const A = S && S.audit;
   let REDUCED = false;
   const state = {
+    screen: "q",          // q | reveal | gate | unlocked | finish | done
+    phase: "pre",         // pre = the seven in front of the gate, finish = the nine
     step: 0,              // index into the CURRENTLY applicable question list
     answers: {},          // raw enum keys; skipped questions are deleted, not blanked
-    tradeOther: "",
     mirror: null,
     shown: { low: 0, high: 0 },   // what the counter is currently displaying
-    done: 0,              // how many channels were complete last time we looked
+    token: "",            // the download token, once the gate has been accepted
+    email: "",
     utm: null,            // read once from the query string, never stored
     busy: false,
   };
@@ -367,21 +536,66 @@
   let counterRaf = 0;
 
   const QS = () => (A && Array.isArray(A.questions) ? A.questions : []);
+  const inPhase = (q, finish) => !!q.deferred === !!finish;
 
-  /* The applicable list, recomputed from the answers every time. This is the
-     single source of truth for the stepper, the progress count and the POST
-     payload, so a gating answer that changes on the way back automatically
-     restores or removes the questions behind it. */
-  function applicable() {
+  /* The applicable list for the run we are IN, recomputed from the answers
+     every time. Single source of truth for the stepper, the progress count and
+     the POST payload, so a gating answer that changes on the way back
+     automatically restores or removes the questions behind it. */
+  function applicable(finish) {
     const a = state.answers;
-    return QS().filter((q) => !(q.skipWhen && a[q.skipWhen.key] === q.skipWhen.value));
+    const f = finish === undefined ? state.phase === "finish" : finish;
+    return QS().filter((q) => inPhase(q, f))
+               .filter((q) => !(q.skipWhen && a[q.skipWhen.key] === q.skipWhen.value));
   }
   /* A skipped question's answer must not survive: the API treats its absence
      as meaningful, so a stale value would be a lie about what they told us. */
   function prune() {
     const live = {};
-    applicable().forEach((q) => { live[q.key] = true; });
+    applicable(false).forEach((q) => { live[q.key] = true; });
+    applicable(true).forEach((q) => { live[q.key] = true; });
     QS().forEach((q) => { if (!live[q.key]) delete state.answers[q.key]; });
+  }
+
+  /* ---- Progress safety net ------------------------------------------------
+     The gate offers two links out to the rest of the site, and a Meta in-app
+     browser will reload this page under the visitor without being asked. So
+     the answer ENUMS and the screen they are on are written to sessionStorage
+     after every tap and read back on load. Enums and a screen name only: never
+     a name, a mobile, an email or a dollar figure. Same tab, same session,
+     gone the moment the tab closes. */
+  const STORE_KEY = "ai.leakaudit.v1";
+  function save() {
+    try {
+      window.sessionStorage.setItem(STORE_KEY, JSON.stringify({
+        v: 1,
+        screen: state.screen,
+        phase: state.phase,
+        step: state.step,
+        answers: state.answers,
+        token: state.token,
+      }));
+    } catch (e) { /* private mode, full quota: never break the run over it */ }
+  }
+  function wipe() {
+    try { window.sessionStorage.removeItem(STORE_KEY); } catch (e) {}
+  }
+  function readStore() {
+    try {
+      const raw = window.sessionStorage.getItem(STORE_KEY);
+      if (!raw) return null;
+      const o = JSON.parse(raw);
+      if (!o || o.v !== 1 || !o.answers || typeof o.answers !== "object") return null;
+      /* only keys this build still knows about, only values it still offers */
+      const table = enumTable();
+      const clean = {};
+      Object.keys(o.answers).forEach((k) => {
+        if (table[k] && table[k].indexOf(o.answers[k]) !== -1) clean[k] = o.answers[k];
+      });
+      if (table.trade && table.trade.indexOf(o.answers.trade) !== -1) clean.trade = o.answers.trade;
+      o.answers = clean;
+      return o;
+    } catch (e) { return null; }
   }
   const indexOfKey = (list, key) => {
     for (let i = 0; i < list.length; i++) if (list[i].key === key) return i;
@@ -436,26 +650,16 @@
     return panel;
   }
 
+  /* No section label, no section intro, no italic word. Each of those was a
+     separate reading task in front of the first tap, and the first tap is the
+     only thing this screen is for. */
   function buildQuestion(q, index, list) {
     const node = el("div", "audit-qi is-enter");
-
-    /* Section moment: a light label on every question, plus the section's one
-       intro line on the FIRST question of each run. Deliberately not an extra
-       screen: sixteen taps is already the budget. */
-    const sec = (A.sections || {})[q.section];
-    if (sec) {
-      const prev = index > 0 ? list[index - 1] : null;
-      const fresh = !prev || prev.section !== q.section;
-      const head = el("div", "audit-sec" + (fresh ? " is-fresh" : ""));
-      head.appendChild(el("span", "audit-sec__label", sec.label || ""));
-      if (fresh && sec.intro) head.appendChild(el("p", "audit-sec__intro", sec.intro));
-      node.appendChild(head);
-    }
 
     const h = el("h2", "audit-qi__title");
     h.id = "audit-q-" + q.key;
     h.tabIndex = -1;
-    italInto(h, q.title);
+    h.textContent = q.title;
     node.appendChild(h);
 
     if (q.help) node.appendChild(el("p", "audit-qi__help", q.help));
@@ -475,6 +679,7 @@
       group.appendChild(b);
     });
     node.appendChild(group);
+    if (q.micro) node.appendChild(el("p", "audit-qi__micro", q.micro));
     return node;
   }
 
@@ -482,9 +687,6 @@
      One sendBeacon per milestone per pageload, so Nicholas can see where paid
      clicks bail, per campaign, without tracking anyone. Fire-and-forget: an
      ad blocker or a failed send changes nothing for the visitor. */
-  const FUNNEL_MARKS = { job_value: "sizing", after_hours_calls: "phone",
-                         late_outcome: "leads", quotes: "quotes",
-                         review_count: "reviews", dormant: "list" };
   const sentSteps = {};
   function mark(step) {
     if (!step || sentSteps[step]) return;
@@ -520,6 +722,17 @@
       if (typeof fbq === "function") fbq("track", event, params);
     } catch (e) { /* never let a tag touch the experience */ }
   }
+  /* The one custom event: the mid-funnel signal Meta needs to optimise on
+     something other than a handful of Leads. Fired when the counter lands, at
+     the same moment the `priced` beacon goes. No parameters at all, so it can
+     never carry an answer or a figure. Disclosed in privacy.html section 04. */
+  function pixelCustom(event) {
+    if (!event || sentPixel[event]) return;
+    sentPixel[event] = true;
+    try {
+      if (typeof fbq === "function") fbq("trackCustom", event);
+    } catch (e) { /* never let a tag touch the experience */ }
+  }
 
   function choose(q, o, btn, group) {
     if (state.busy) return;
@@ -531,21 +744,22 @@
     });
     mark("start");
     pixel("ViewContent", { content_name: "leak-audit", content_category: "audit" });
-    if (FUNNEL_MARKS[q.key]) mark(FUNNEL_MARKS[q.key]);
-    /* the skip answers complete their channel in one tap */
-    if (q.key === "quotes_week" && o.key === "no_quotes") mark("quotes");
-    if (q.key === "list_size" && o.key === "no_list") mark("list");
     /* A gating answer may have just removed (or restored) later questions. */
     prune();
-    updateCounter();
+    if (state.phase === "pre") updateCounter();
+    save();
     const list = applicable();
     const next = indexOfKey(list, q.key) + 1;
-    const wait = REDUCED ? 0 : 190;
+    const last = next >= list.length;
+    /* the counter has one more climb in it on the last of the seven, so the
+       screen holds a beat longer there before the reveal takes over */
+    const wait = REDUCED ? 0 : (last && state.phase === "pre" ? 700 : 190);
     state.busy = true;
     window.setTimeout(() => {
       state.busy = false;
-      if (next >= list.length) finish();
-      else goTo(next);
+      if (!last) { goTo(next); return; }
+      if (state.phase === "finish") completeFinish();
+      else toReveal();
     }, wait);
   }
 
@@ -553,8 +767,14 @@
     const list = applicable();
     if (index < 0 || index >= list.length) return;
     state.step = index;
+    save();                       // the screen they are ON, not the one they left
     renderRail();
     swapQuestion(buildQuestion(list[index], index, list));
+    /* the counter's one-time reveal line belongs to the step that earned it */
+    if (meter && A.counter && A.counter.hint) {
+      const hint = meter.querySelector(".audit-meter__hint");
+      if (hint && meter.dataset.revealAt !== String(index)) hint.textContent = A.counter.hint;
+    }
   }
 
   function renderRail() {
@@ -569,9 +789,13 @@
      skipped entirely under reduced motion. */
   function swapQuestion(next) {
     if (REDUCED || !qBox.firstChild) {
+      const first = !qBox.firstChild;
       qBox.replaceChildren(next);
       next.classList.remove("is-enter");
-      focusQuestion(next);
+      /* On the very first paint nothing has happened yet, so moving focus (and
+         drawing a ring around the question) would be an announcement of
+         nothing. Every later swap follows a tap and does move focus. */
+      if (!first) focusQuestion(next);
       return;
     }
     const current = qBox.firstElementChild;
@@ -607,25 +831,59 @@
      v2 ticks once per COMPLETED channel, so the build is emotional rather than
      jittery: the phone lands, then the leads, then the quotes, then the list.
      ========================================================================= */
-  function completedChannels() {
-    const a = state.answers;
-    if (!a.enquiries || !a.job_value) return 0;
-    let n = 0;
-    ORDER.forEach((k) => { if (k !== "reviews" && channelReady(k, a)) n++; });
-    return n;
+  /* Pre-gate, the two priced channels are the two the ads are about. The
+     phone lands as soon as the sizing and the three phone answers are in
+     (after hours has not been asked yet, so the engine's own "no idea"
+     fallback carries it and the card is flagged Estimated). The leads land on
+     the last of the seven. */
+  function partialReady(a) {
+    for (let i = 0; i < PRE_GATE_KEYS.length; i++) {
+      const k = PRE_GATE_KEYS[i];
+      if (k === "reply_speed" || k === "late_outcome") continue;
+      if (!a[k]) return false;
+    }
+    return true;
+  }
+  function partialScores(a) {
+    /* the leads half needs both of its answers; until then it is worth zero,
+       which is exactly what the engine would say about an unanswered pair */
+    const feed = {};
+    PRE_GATE_KEYS.forEach((k) => { if (a[k]) feed[k] = a[k]; });
+    if (!feed.reply_speed || !feed.late_outcome) {
+      feed.reply_speed = "minutes";
+      feed.late_outcome = "few_gone";
+      const s = scoreAuditPartial(feed, a.trade);
+      /* strip the placeholder leads figure back out: only the phone is real */
+      const phone = s.channels[0];
+      const mid = phone.annual_high == null ? 0 : (phone.annual_low + phone.annual_high) / 2;
+      s.total.annual_low = phone.annual_low;
+      s.total.annual_high = phone.annual_high;
+      s.total.weekly_mid = roundInt(mid / K.WEEKS);
+      s.channels[1].annual_low = null;
+      s.channels[1].annual_high = null;
+      s.channels[1].status = null;
+      s.channels[1].not_priced = true;
+      s.channels[1].note = (A.result && A.result.notPriced && A.result.notPriced.slow_reply) || "";
+      s.priced_channels = 1;
+      return s;
+    }
+    return scoreAuditPartial(feed, a.trade);
   }
 
   function updateCounter() {
-    const n = completedChannels();
-    state.done = n;
-    if (!n) return;                    // nothing priced yet, so nothing to show
+    const a = state.answers;
+    if (!partialReady(a)) return;      // nothing priced yet, so nothing to show
 
     /* The reveal happens once, the first time a channel completes. */
     if (!meter.classList.contains("is-live")) {
       meter.classList.add("is-live");
-      const hint = A.counter && A.counter.hint;
-      if (hint && !meter.querySelector(".audit-meter__hint")) {
-        meter.querySelector(".audit-meter__box").appendChild(el("span", "audit-meter__hint", hint));
+      /* shown for this step only: what was just priced, and what is left */
+      const first = (A.counter && (A.counter.revealLine || A.counter.hint)) || "";
+      if (first && !meter.querySelector(".audit-meter__hint")) {
+        /* it belongs to the NEXT screen: the counter reveals above the question
+           after the one that priced it */
+        meter.dataset.revealAt = String(state.step + 1);
+        meter.querySelector(".audit-meter__box").appendChild(el("span", "audit-meter__hint", first));
       }
     }
 
@@ -638,8 +896,13 @@
        still during a mid-section answer, which is what changes nothing anyway,
        and re-animates the moment the total genuinely moves in either
        direction. */
-    const s = scoreMirror(state.answers);
+    const s = partialScores(a);
     const target = { low: s.total.annual_low, high: s.total.annual_high };
+    if (target.high > 0) {
+      /* the one mid-funnel signal, first party and Meta, at the same beat */
+      mark("priced");
+      pixelCustom("AuditPriced");
+    }
     if (target.low === state.shown.low && target.high === state.shown.high) return;
     countTo(target);
   }
@@ -681,15 +944,71 @@
   /* ===========================================================================
      6. THE LEAK MAP
      ========================================================================= */
-  function finish() {
-    state.mirror = scoreMirror(state.answers);
+  /* SCREEN 8. Their number, on its own screen, with nothing asked of them.
+     Every ad says "you see the number before we ask your name", so this screen
+     exists on its own and must never be merged into the gate. */
+  function toReveal() {
+    state.screen = "reveal";
+    state.mirror = partialScores(state.answers);
+    save();
+    renderReveal(state.mirror);
+    mark("headline");
+    scrollToStage();
+  }
+
+  function renderReveal(scores) {
+    const V = A.reveal || {};
+    const root = el("section", "audit-reveal");
+    root.tabIndex = -1;
+    root.appendChild(el("span", "lbl audit-reveal__kicker", V.kicker || ""));
+
+    const big = el("p", "audit-reveal__fig");
+    rangeInto(big, scores.total.annual_low, scores.total.annual_high,
+              (A.result && A.result.rangeSep) || " to ");
+    big.appendChild(el("span", "audit-reveal__per", " " + (V.perYear || "")));
+    root.appendChild(big);
+
+    if (V.lead) root.appendChild(el("p", "audit-reveal__lead", V.lead));
+    if (V.weekly) root.appendChild(el("p", "audit-reveal__weekly",
+      fill(V.weekly, { weekly: money(scores.total.weekly_mid) })));
+    if (V.disclaimer) root.appendChild(el("p", "audit-reveal__fine", V.disclaimer));
+    if (V.honesty) root.appendChild(el("p", "audit-reveal__honesty", V.honesty));
+
+    const btn = el("button", "btn btn--primary btn--xl audit-reveal__btn", V.button || "");
+    btn.type = "button";
+    btn.addEventListener("click", toGate);
+    root.appendChild(btn);
+    if (V.note) root.appendChild(el("p", "audit-reveal__note", V.note));
+
+    stage.replaceChildren(root);
+    try { root.focus({ preventScroll: true }); } catch (e) { /* older Safari */ }
+  }
+
+  function toGate() {
+    state.screen = "gate";
+    state.mirror = state.mirror || partialScores(state.answers);
+    save();
     renderMap(state.mirror, { locked: true });
     scrollToStage();
   }
 
+  /* The sticky chrome is the fixed bar plus the trust strip pinned under it, and it is
+     not one fixed height: the trust line wraps to two lines on a narrow iPhone, and
+     WebKit lays the bar out taller than Blink does. A hard 84px was short on both, so
+     the map's "The Leak Map" kicker came to rest half under the strip on the reveal and
+     the gate. Measure it at scroll time instead, and keep 84 only for the case where
+     neither element is on the page. */
+  function chromeHeight() {
+    const bar = document.querySelector(".nav");
+    const strip = document.querySelector(".audit-trust");
+    if (!bar || !strip) return 84;
+    return bar.getBoundingClientRect().height +
+           strip.getBoundingClientRect().height + 12;
+  }
+
   function scrollToStage() {
     if (!stage) return;
-    const y = stage.getBoundingClientRect().top + window.scrollY - 84;
+    const y = stage.getBoundingClientRect().top + window.scrollY - chromeHeight();
     try { window.scrollTo({ top: Math.max(0, y), behavior: REDUCED ? "auto" : "smooth" }); }
     catch (err) { window.scrollTo(0, Math.max(0, y)); }
   }
@@ -739,8 +1058,12 @@
     body.appendChild(rows);
 
     body.appendChild(buildStart(scores, R));
-    body.appendChild(sectionTitle(R.roadmapTitle));
-    body.appendChild(buildRoadmap(scores, R));
+    /* A 90 day order needs all five channels, so a partial map has no roadmap
+       and does not pretend to. */
+    if ((scores.roadmap || []).length) {
+      body.appendChild(sectionTitle(R.roadmapTitle));
+      body.appendChild(buildRoadmap(scores, R));
+    }
     /* the honest hand-off: what this map does for them, and what we do */
     if (R.chain) body.appendChild(el("p", "leakmap__chain", R.chain));
 
@@ -769,7 +1092,8 @@
 
   function buildRow(c, maxFig, R) {
     const row = el("div", "leak-row");
-    row.dataset.status = c.status;
+    row.dataset.status = c.status || "none";
+    if (c.not_priced) row.classList.add("is-unpriced");
 
     const head = el("div", "leak-row__head");
     const name = el("b", "leak-row__name", c.label);
@@ -777,7 +1101,11 @@
     /* estimated: this channel rode on our assumption, not their number. Say so
        plainly rather than letting the figure pass as something they told us. */
     if (c.estimated && R.estimatedTag) pills.appendChild(el("span", "leak-row__est", R.estimatedTag));
-    pills.appendChild(el("span", "leak-row__pill", (R.statusLabels && R.statusLabels[c.status]) || c.status));
+    /* a channel the pre-gate seven could not reach says exactly that, in place
+       of a status word it has not earned */
+    pills.appendChild(c.not_priced
+      ? el("span", "leak-row__pill leak-row__pill--none", R.notPricedLabel || "Not priced yet")
+      : el("span", "leak-row__pill", (R.statusLabels && R.statusLabels[c.status]) || c.status));
     head.append(name, pills);
     row.appendChild(head);
 
@@ -798,7 +1126,7 @@
        a broken card, so zero is treated as unpriced everywhere below. */
     const priced = c.annual_high != null && c.annual_high > 0;
     const pct = !priced
-      ? ({ critical: 85, high: 70, medium: 45, ok: 12 })[c.status] || 12
+      ? (c.not_priced ? 0 : ({ critical: 85, high: 70, medium: 45, ok: 12 })[c.status] || 12)
       : Math.max(6, Math.round((c.annual_high / maxFig) * 100));
     fill_.dataset.w = pct + "%";
     track.appendChild(fill_);
@@ -977,7 +1305,7 @@
     const addField = (name, label, attrs, optional) => {
       const wrapF = el("div", "gate__field" + (optional ? " gate__field--soft" : ""));
       const lab = doc.createElement("label");
-      lab.appendChild(el("span", null, label));
+      lab.appendChild(el("span", "gate__lab", label));
       const inp = doc.createElement("input");
       inp.id = "la-" + name;
       inp.name = name;
@@ -985,6 +1313,8 @@
       if (!optional) inp.required = true;
       inp.setAttribute("aria-describedby", "la-" + name + "-err");
       lab.appendChild(inp);
+      const why = (G.reasons || {})[name];
+      if (why) lab.appendChild(el("span", "gate__why", why));
       const err = el("span", "gate__err");
       err.id = "la-" + name + "-err";
       wrapF.append(lab, err);
@@ -993,20 +1323,14 @@
       return inp;
     };
 
+    /* Three fields, in this order, each carrying the reason it is asked. The
+       optional business name and the free-text trade are gone: four fields
+       read as more work than three, and the trading name is captured on the
+       call or on the last nine taps. */
     const F_ = G.fields || {};
     addField("name",   F_.name   || "Your name", { type: "text", autocomplete: "name" });
     addField("mobile", F_.mobile || "Mobile",    { type: "tel", autocomplete: "tel", inputmode: "tel" });
     addField("email",  F_.email  || "Email",     { type: "email", autocomplete: "email", inputmode: "email" });
-    /* Optional, and deliberately quiet: it costs the visitor nothing to skip,
-       but when it is filled the PDF and the admin card carry the real trading
-       name instead of falling back to the trade ("Prepared for Plumber"). */
-    addField("business", F_.business || "Business name (optional)",
-             { type: "text", autocomplete: "organization" }, true);
-    /* the one place free text about the trade is offered, and only when they
-       picked "other" */
-    if (state.answers.trade === "other") {
-      addField("tradeother", F_.tradeOther || "What do you do?", { type: "text" }, true);
-    }
 
     /* honeypot: humans never see it, bots fill it, the server pretends success */
     const hp = doc.createElement("input");
@@ -1021,7 +1345,23 @@
     const btn = el("button", "btn btn--primary btn--lg gate__btn", G.button || "Unlock");
     btn.type = "submit";
     form.appendChild(btn);
-    form.appendChild(el("p", "gate__note", G.note || ""));
+    /* In this order: what they keep either way, what actually happens to the
+       mobile number, and the two ways to check us out first. */
+    if (G.note) form.appendChild(el("p", "gate__note", G.note));
+    if (G.privacy) form.appendChild(el("p", "gate__note gate__note--privacy", G.privacy));
+    if (G.site && G.site.text) {
+      const site = el("p", "gate__site", G.site.text + " ");
+      (G.site.links || []).forEach((l, i) => {
+        if (i) site.appendChild(doc.createTextNode(" "));
+        const a_ = doc.createElement("a");
+        a_.href = l.href;
+        a_.target = "_blank";
+        a_.rel = "noopener";
+        a_.textContent = l.label;
+        site.appendChild(a_);
+      });
+      form.appendChild(site);
+    }
     const msg = el("p", "gate__msg");
     msg.setAttribute("role", "status");
     msg.setAttribute("aria-live", "polite");
@@ -1046,6 +1386,9 @@
       if (e) { e.textContent = messageFor(inp); e.classList.add("is-on"); }
     };
     fields.forEach((inp) => {
+      /* the single most useful number in the funnel: saw the gate, versus
+         started typing in it */
+      inp.addEventListener("focus", () => mark("gate_focus"));
       inp.addEventListener("input", () => { if (inp.checkValidity()) clearField(inp); });
       inp.addEventListener("blur", () => { if (inp.checkValidity()) clearField(inp); else markField(inp); });
     });
@@ -1082,40 +1425,32 @@
       return f ? String(f.value || "").trim() : "";
     };
     const a = state.answers;
-    const CAP = (v, n) => String(v || "").slice(0, n);
-    const businessName = CAP(val("business"), 200);
-    const tradeOther = val("tradeother");
-    const tradeLabel = (function () {
-      const q = QS()[0];
-      const o = q && (q.options || []).filter((x) => x.key === a.trade)[0];
-      return o ? o.label : "";
-    })();
 
-    /* Only the questions that were actually ASKED go in. A skipped question is
-       a real absence in the payload, which is exactly what the server validates
-       against, so nothing is blanked or defaulted here. */
+    /* Only the seven that were actually ASKED go in. A deferred question is a
+       real absence in the payload, which is exactly what
+       validate_answers_partial checks for, so nothing is blanked or defaulted
+       here and nothing from the finish run is smuggled in early. */
     const answers = {};
-    applicable().forEach((q) => {
-      if (q.key === "trade") return;                 // travels top-level
-      if (a[q.key]) answers[q.key] = a[q.key];
-    });
+    PRE_GATE_KEYS.forEach((k) => { if (a[k]) answers[k] = a[k]; });
 
     const payload = {
       name: val("name"),
-      // their own trading name when they gave one, otherwise the old fallback
-      business: businessName || tradeOther || tradeLabel,
       email: val("email"),
       phone: val("mobile"),
       website: val("website"),        // honeypot, empty for humans
-      trade: a.trade,
-      trade_other: tradeOther,
       answers: answers,
+      partial: true,
     };
+    /* trade is asked on the last of the nine, so pre-gate there is none. The
+       engine defaults it to "other", and it moves only a channel the partial
+       path does not price. */
+    if (a.trade) payload.trade = a.trade;
     /* Campaign attribution for the paid traffic. Read from the URL on load,
        never from a cookie or storage, and omitted entirely when absent. */
     if (state.utm) payload.utm = state.utm;
 
     mark("submitted");
+    state.email = payload.email;
     fetch("/api/public/leak-audit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1126,16 +1461,20 @@
         if (!out || !out.success) throw new Error("send failed");
         /* The server is the authority: its scores replace the mirror's. */
         if (out.scores && out.scores.channels) {
-          renderMap(out.scores, { locked: false });
-        } else {
-          renderMap(state.mirror, { locked: false });
+          state.mirror = out.scores;
         }
+        state.token = (out.pdf && out.pdf.token) ? String(out.pdf.token) : "";
+        state.screen = "unlocked";
+        save();
+        renderMap(state.mirror, { locked: false });
         mark("unlocked");
         pixel("Lead", { content_name: "leak-audit" });
         unlocked(payload.email, null, out.pdf);
       })
       .catch(() => {
         /* Never punish the visitor for our outage: show the whole map anyway. */
+        state.screen = "unlocked";
+        save();
         renderMap(state.mirror, { locked: false });
         unlocked(payload.email, A.sendError || "");
       });
@@ -1147,7 +1486,8 @@
     const flash = el("section", "audit-flash" + (errorLine ? " audit-flash--warn" : ""));
     flash.tabIndex = -1;
     flash.appendChild(el("b", "audit-flash__title", errorLine ? (A.sendErrorTitle || "") : (T.title || "")));
-    flash.appendChild(el("p", "audit-flash__body", errorLine || fill(T.body, { email: email })));
+    if (errorLine) flash.appendChild(el("p", "audit-flash__body", errorLine));
+    else if (email) flash.appendChild(el("p", "audit-flash__body", fill(T.body, { email: email })));
     if (errorLine) {
       const mail = doc.createElement("a");
       mail.className = "audit-flash__mail";
@@ -1155,21 +1495,31 @@
       mail.textContent = S.brand.email || "";
       flash.appendChild(mail);
     }
-    /* The call is offered on BOTH paths. A failed send is our problem, not a
-       reason to drop the visitor at a dead end. The PDF download sits BESIDE
-       the call, never above it: the call is the thing we actually want. */
+    /* THE FORK. Two of five leaks are priced, and the visitor picks how the
+       other three get priced: nine more taps here, or fifteen minutes with us.
+       Both are offered on BOTH paths, because a failed send is our problem and
+       not a reason to drop somebody at a dead end. */
     const actions = el("div", "audit-flash__actions");
-    const cta = doc.createElement("a");
-    cta.className = "btn btn--primary btn--lg audit-flash__cta";
-    cta.href = "index.html#book";
-    cta.textContent = T.cta || "Book your free call";
-    actions.appendChild(cta);
+    if (T.forkTitle) flash.appendChild(el("b", "audit-fork__title", T.forkTitle));
+    if (T.forkBody) flash.appendChild(el("p", "audit-fork__body", T.forkBody));
+    const go = el("button", "btn btn--primary btn--lg audit-flash__cta", T.finishButton || "");
+    go.type = "button";
+    go.addEventListener("click", startFinish);
+    actions.appendChild(go);
     if (!errorLine) {
       const slot = el("div", "audit-pdf");
       actions.appendChild(slot);
       // no token means the audit row never landed, so no PDF is coming either
       if (pdf && pdf.token) pollPdf(String(pdf.token), slot);
       else slot.appendChild(el("p", "audit-pdf__fail", T.pdfFailed || ""));
+    } else {
+      /* nothing landed on our side, so there is no row to book against: the
+         only way through is the old-fashioned one */
+      const cta = doc.createElement("a");
+      cta.className = "btn btn--ghost btn--lg audit-flash__alt-cta";
+      cta.href = "index.html#book";
+      cta.textContent = T.cta || "Book your free call";
+      actions.appendChild(cta);
     }
     flash.appendChild(actions);
     /* The optional booking nudge sits directly under the call row: for the
@@ -1181,8 +1531,7 @@
     if (!errorLine && pdf && pdf.token && Array.isArray(T.times) && T.times.length) {
       flash.appendChild(buildTimes(String(pdf.token), T));
     }
-    flash.appendChild(el("p", "audit-flash__note", T.ctaNote || ""));
-    if (!errorLine && T.secondary) flash.appendChild(el("p", "audit-flash__alt", T.secondary));
+    if (errorLine && T.ctaNote) flash.appendChild(el("p", "audit-flash__note", T.ctaNote));
     /* the one real scarcity fact on this page, stated once, as a fact */
     if (T.scarcity) flash.appendChild(el("p", "audit-flash__scarcity", T.scarcity));
     if (mapRefs) {
@@ -1263,6 +1612,7 @@
         .then((res) => (res.ok ? res.json() : null))
         .then((out) => {
           if (!out || !out.success) { drop(); return; }
+          mark("time_tapped");
           row.classList.add("is-done");
           [label, chips, foot].forEach((n) => { if (n.parentNode) n.parentNode.removeChild(n); });
           msg.textContent = T.timesSuccess || "";
@@ -1271,6 +1621,80 @@
     });
 
     return row;
+  }
+
+  /* ===========================================================================
+     7b. THE LAST NINE TAPS
+     The map is open and two of the five leaks are priced. These nine price the
+     other three, in place, without leaving the screen and without asking for
+     anything else. Nobody has to do them: the fifteen minutes does the same
+     job, which is what keeps "no call required" true in both directions.
+     ========================================================================= */
+  function startFinish() {
+    mark("finish_start");
+    state.phase = "finish";
+    state.screen = "q";
+    state.step = 0;
+    state.busy = false;
+    save();
+    mountPanel((A.thanks || {}).finishIntro);
+    scrollToStage();
+  }
+
+  function completeFinish() {
+    state.screen = "done";
+    save();
+    /* every key is in now, so the full mirror is the honest local answer and
+       the server's rescore replaces it the moment it lands */
+    state.mirror = scoreMirror(state.answers);
+
+    const done = () => {
+      renderMap(state.mirror, { locked: false });
+      mark("finish_done");
+      finishFlash();
+      scrollToStage();
+    };
+    if (!state.token) { done(); return; }
+
+    const answers = {};
+    applicable(true).forEach((q) => {
+      if (state.answers[q.key]) answers[q.key] = state.answers[q.key];
+    });
+    const body = { token: state.token, answers: answers };
+    if (state.answers.trade) body.trade = state.answers.trade;
+
+    fetch("/api/public/leak-audit/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((out) => {
+        if (out && out.success && out.scores && out.scores.channels) state.mirror = out.scores;
+      })
+      .catch(() => { /* the local full map is already correct; say nothing */ })
+      .then(done);
+  }
+
+  function finishFlash() {
+    const T = A.thanks || {};
+    if (!mapRefs) return;
+    const flash = el("section", "audit-flash");
+    flash.tabIndex = -1;
+    flash.appendChild(el("b", "audit-flash__title", T.finishDone || ""));
+    const actions = el("div", "audit-flash__actions");
+    if (state.token) {
+      const slot = el("div", "audit-pdf");
+      actions.appendChild(slot);
+      pollPdf(state.token, slot);
+    }
+    flash.appendChild(actions);
+    if (state.token && Array.isArray(T.times) && T.times.length) {
+      flash.appendChild(buildTimes(state.token, T));
+    }
+    if (T.scarcity) flash.appendChild(el("p", "audit-flash__scarcity", T.scarcity));
+    mapRefs.flashSlot.replaceChildren(flash);
+    try { flash.focus({ preventScroll: true }); } catch (err) { /* older Safari */ }
   }
 
   /* The engine renders the PDF after the POST returns, so the thank-you screen
@@ -1350,13 +1774,49 @@
     return out;
   }
 
+  /* Mount the stepper on the stage and paint whichever question we are up to.
+     `intro` is the one line that heads the finish run, and nothing else. */
+  function mountPanel(intro) {
+    stage.replaceChildren(buildPanel());
+    if (intro) panel.insertBefore(el("p", "audit-intro", intro), qBox);
+    const list = applicable();
+    if (!list.length) return;
+    const i = Math.min(Math.max(0, state.step), list.length - 1);
+    state.step = i;
+    renderRail();
+    swapQuestion(buildQuestion(list[i], i, list));
+    if (state.phase === "pre") updateCounter();
+  }
+
+  const haveSeven = () => PRE_GATE_KEYS.every((k) => !!state.answers[k]);
+
+  /* Back where they left off. A same-tab trip to index.html, a Meta in-app
+     reload or an accidental back swipe all land here, and none of them is
+     allowed to cost the visitor a single tap. */
+  function resume() {
+    const s = state.screen;
+    if (s === "reveal" && haveSeven()) { toReveal(); return; }
+    if (s === "gate" && haveSeven()) { toGate(); return; }
+    if ((s === "unlocked" || s === "done") && haveSeven()) {
+      const full = QS().every((q) => state.answers[q.key] ||
+        (q.skipWhen && state.answers[q.skipWhen.key] === q.skipWhen.value));
+      state.mirror = full ? scoreMirror(state.answers) : partialScores(state.answers);
+      renderMap(state.mirror, { locked: false });
+      if (s === "done") finishFlash();
+      else unlocked("", null, state.token ? { token: state.token } : null);
+      return;
+    }
+    state.screen = "q";
+    mountPanel(state.phase === "finish" ? (A.thanks || {}).finishIntro : null);
+  }
+
   window.PAGE_INIT = function (ctx) {
     if (!A) return;
     REDUCED = !!(ctx && ctx.REDUCED);
     state.utm = readUtm();
     QS().forEach((q) => { QMAP[q.key] = q; });
 
-    /* hero meta chips */
+    /* the honesty block below the instrument */
     const metaMount = doc.querySelector("[data-audit-meta]");
     if (metaMount && Array.isArray(A.meta)) {
       metaMount.replaceChildren();
@@ -1371,9 +1831,33 @@
 
     stage = doc.querySelector("[data-audit-stage]");
     if (!stage) return;
-    stage.replaceChildren(buildPanel());
-    const list = applicable();
-    renderRail();
-    swapQuestion(buildQuestion(list[0], 0, list));
+
+    const saved = readStore();
+    if (saved) {
+      state.answers = saved.answers || {};
+      state.phase = saved.phase === "finish" ? "finish" : "pre";
+      state.step = typeof saved.step === "number" ? saved.step : 0;
+      state.token = typeof saved.token === "string" ? saved.token : "";
+      state.screen = typeof saved.screen === "string" ? saved.screen : "q";
+      prune();
+    }
+    resume();
+    /* the denominator this funnel has never had: somebody was here, and the
+       instrument painted in front of them */
+    mark("land");
   };
+
+  /* QA ONLY. The mirror is handed out when the page is opened with
+     ?mirror=check, so tools/qa-audit-mirror.py can reproduce the three worked
+     examples in PARTIAL-CONTRACT.md inside a real browser. On every normal
+     load nothing is exposed at all. */
+  try {
+    if (/(^|[?&])mirror=check(&|$)/.test(window.location.search)) {
+      window.LEAK_AUDIT_MIRROR = {
+        scoreAuditPartial: scoreAuditPartial,
+        validateAnswersPartial: validateAnswersPartial,
+        scoreMirror: scoreMirror,
+      };
+    }
+  } catch (e) { /* no window.location: nothing to expose */ }
 })();

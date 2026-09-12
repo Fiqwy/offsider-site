@@ -344,27 +344,58 @@ window.SITE = {
   audit: {
     navLabel: "Free audit",
     kicker: "The free Leak Audit",
-    // MAGIC naming: who it is for, what they get, how long it takes.
-    heading: "Find the jobs your business is {i:leaking}. Sixteen taps, about three minutes.",
+
+    /* ---- Chrome (sits above every question screen) ----------------------
+       The ads that point here are all signed Applied Intelligence, so the bar
+       carries the full wordmark at every width. No booking button: every ad
+       says no call required, and a button here would contradict that. */
+    chrome: {
+      home: "Applied Intelligence",
+      homeAria: "Applied Intelligence home page",
+      right: "Free audit",
+      trust: "Free. Sixteen taps all up. No call required.",
+    },
+
+    /* The visible h1 IS the trust strip. The page opens on question one, so
+       there is no hero to headline: the old hero copy survives below the
+       instrument, where the people who actually started can read it. */
+    heading: "Free. Sixteen taps all up. No call required.",
+    honestyTitle: "Before you ask, yes, we made the number up out of your answers",
     sub: "Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your week, and put a dollar range on each one. No call required, no sales pitch.",
     meta: ["Sixteen taps, no typing", "About three minutes", "Built on your numbers", "Australian owned, founder-led"],
     // The trust play: the sting lands BEFORE we ask for anything. Say it out loud.
     metaNote: "The number builds on screen as you go, and you see the whole headline figure before we ask you for a single detail. The maths is the same for everyone and written out at the bottom of this page, not made up for you. If your answers come back clean, the map says so and we tell you that plainly, because a map that always finds a problem is not a map.",
-    // no-JS / pre-JS fallback line under the hero
+    // no-JS / pre-JS fallback line under the chrome
     noscript: "This audit needs JavaScript switched on. If you would rather just talk it through, book a free 15-minute call instead.",
 
     progress: { label: "Question", of: "of", back: "Back", change: "Change an answer" },
 
-    // the running counter that appears once the two sizing questions are in
+    // the running counter, which lands the moment the phone is genuinely priced
     counter: {
       label: "Leaking so far, a year",
       sub: "An estimate from your answers, not a forecast.",
       hint: "Keep going. The number moves as each part of your week is mapped.",
+      // shown once, on the screen where the counter first appears
+      revealLine: "That is the phone on its own, from the numbers you just gave us. Two taps left and we price your leads.",
+    },
+
+    /* ---- The reveal screen ----------------------------------------------
+       Their number, on its own screen, with nothing asked of them. Every ad
+       promises this word for word, so it must never be merged into the gate. */
+    reveal: {
+      kicker: "Your number so far",
+      perYear: "a year",
+      lead: "On your own numbers, that is what the phone and the slow replies are costing you.",
+      weekly: "About {weekly} a week, every week, while nothing changes.",
+      disclaimer: "An estimate from your answers, not a forecast. It is a range on purpose.",
+      honesty: "That is two of the five leaks. Your quotes, your reviews and your past customers are not priced yet, and we will not guess them.",
+      button: "Show me where it is going",
+      note: "The maths is written out below this page, same maths for everyone.",
     },
 
     /* ---- Sections -------------------------------------------------------
-       Six titled runs, shown as a light moment (a label plus one intro line on
-       the first question of each run) rather than an extra tap. */
+       Kept for reference only. The question screens no longer print a section
+       label or intro: each one cost a reading task and bought nothing. */
     sections: {
       sizing:    { label: "The basics",     intro: "Who you are, and how big a normal week looks." },
       phone:     { label: "The phone",      intro: "How calls land, and what happens to the ones you miss." },
@@ -374,16 +405,200 @@ window.SITE = {
       customers: { label: "Old customers",  intro: "The people who already paid you once." },
     },
 
-    /* The sixteen questions (fewer if the skips apply). `key` and every option
-       `key` are the API enum values: the server validates them strictly and
-       recomputes the maths from them, so renaming one breaks the contract.
-       `skipWhen` is the conditional-absence rule: when it fires the question is
-       never asked AND its answer is deleted, because the API treats the absence
-       as meaningful rather than as a missing field. */
+    /* The sixteen questions, in two runs. The first seven price the phone and
+       the leads and sit in front of the gate. The nine marked `deferred` are
+       offered after the map opens, so the audit is still sixteen taps all up.
+       `key` and every option `key` are the API enum values: the server
+       validates them strictly and recomputes the maths from them, so renaming
+       one breaks the contract. `skipWhen` is the conditional-absence rule:
+       when it fires the question is never asked AND its answer is deleted,
+       because the API treats the absence as meaningful rather than as a
+       missing field. `micro` is the one quiet line under the options. */
     questions: [
+      /* ---- The seven, in front of the gate ---- */
       {
-        key: "trade", section: "sizing",
-        title: "First up, what do you {i:do}?",
+        key: "missed", section: "phone",
+        title: "You are on the tools. The phone rings. What usually happens?",
+        help: "Tap the one that sounds like your week. Nobody sees this but you.",
+        micro: "Seven taps and you see your number. No typing until then.",
+        options: [
+          { key: "office",    label: "Someone in the office answers" },
+          { key: "callback",  label: "I see the missed call and ring back later" },
+          { key: "voicemail", label: "It goes to voicemail" },
+          { key: "rings_out", label: "It rings out" },
+        ],
+      },
+      {
+        key: "missed_week", section: "phone",
+        title: "In a normal week, how many calls do you miss?",
+        help: "Best guess is fine. If you genuinely do not know, say so. That matters too.",
+        micro: "Your count, not ours.",
+        options: [
+          { key: "none",     label: "Barely any" },
+          { key: "1_2",      label: "1 or 2" },
+          { key: "3_5",      label: "3 to 5" },
+          { key: "6_10",     label: "6 to 10" },
+          { key: "10_plus",  label: "More than 10" },
+          { key: "no_idea",  label: "Honestly, no idea" },
+        ],
+      },
+      {
+        key: "winback", section: "phone",
+        title: "When you ring a missed call back, how do you go?",
+        help: "The ones you actually get around to ringing.",
+        micro: "This is the bit that stops the number being scary for the sake of it.",
+        options: [
+          { key: "win_most",   label: "I win most of them back" },
+          { key: "about_half", label: "About half" },
+          { key: "a_few",      label: "Only a few" },
+          { key: "moved_on",   label: "They have usually moved on" },
+        ],
+      },
+      {
+        key: "job_value", section: "sizing",
+        title: "What is an average job worth to you?",
+        help: "The invoice, not the profit. A band is plenty.",
+        micro: "One more and your number lands.",
+        options: [
+          { key: "under_200",  label: "Under $200" },
+          { key: "200_500",    label: "$200 to $500" },
+          { key: "500_1500",   label: "$500 to $1,500" },
+          { key: "1500_5000",  label: "$1,500 to $5,000" },
+          { key: "5000_plus",  label: "More than $5,000" },
+        ],
+      },
+      {
+        key: "enquiries", section: "sizing",
+        title: "In a normal week, how many calls and enquiries come in?",
+        help: "Everything, not just the ones that booked.",
+        options: [
+          { key: "under_10", label: "Under 10" },
+          { key: "10_25",    label: "10 to 25" },
+          { key: "25_50",    label: "25 to 50" },
+          { key: "50_100",   label: "50 to 100" },
+          { key: "100_plus", label: "More than 100" },
+        ],
+      },
+      {
+        key: "reply_speed", section: "leads",
+        title: "An enquiry lands from your website or socials. How fast does it get a reply?",
+        help: "On an average day, not your best one.",
+        micro: "One more tap and the leads number lands.",
+        options: [
+          { key: "minutes",         label: "Within a few minutes" },
+          { key: "hours",           label: "A few hours" },
+          { key: "days",            label: "Next day or two" },
+          { key: "sometimes_never", label: "When I remember" },
+        ],
+      },
+      {
+        key: "late_outcome", section: "leads",
+        title: "By the time that reply goes out, how many have already sorted it?",
+        help: "Rung someone else, booked it in, moved on.",
+        options: [
+          { key: "most_gone", label: "Most of them" },
+          { key: "half_gone", label: "About half" },
+          { key: "few_gone",  label: "Only a few" },
+        ],
+      },
+
+      /* ---- The nine, offered after the map opens ---- */
+      {
+        key: "after_hours_calls", section: "phone", deferred: true,
+        title: "After 5pm or on the weekend, how many calls land then?",
+        help: "In a normal week. Nights, weekends, public holidays.",
+        options: [
+          { key: "answered", label: "We answer those too" },
+          { key: "ah_1_2",   label: "1 or 2" },
+          { key: "ah_3_5",   label: "3 to 5" },
+          { key: "ah_more",  label: "More than 5" },
+          { key: "no_idea",  label: "Honestly, no idea" },
+        ],
+      },
+      {
+        key: "quotes_week", section: "quotes", deferred: true,
+        title: "How many quotes go out in a normal week?",
+        help: "Written prices, not chats on the phone.",
+        options: [
+          { key: "no_quotes", label: "I do not really quote" },
+          { key: "under_3",   label: "Under 3" },
+          { key: "3_5",       label: "3 to 5" },
+          { key: "5_10",      label: "5 to 10" },
+          { key: "10_plus",   label: "More than 10" },
+        ],
+      },
+      {
+        key: "quotes_quiet", section: "quotes", deferred: true,
+        skipWhen: { key: "quotes_week", value: "no_quotes" },
+        title: "Of every 10 quotes, how many just go quiet?",
+        help: "No yes, no no, nothing.",
+        options: [
+          { key: "q1_2", label: "1 or 2" },
+          { key: "q3_4", label: "3 or 4" },
+          { key: "half", label: "About half" },
+          { key: "most", label: "Most of them" },
+        ],
+      },
+      {
+        key: "quotes", section: "quotes", deferred: true,
+        skipWhen: { key: "quotes_week", value: "no_quotes" },
+        title: "After you send a quote, what happens?",
+        help: "The ones that never come back.",
+        options: [
+          { key: "chase_all", label: "Followed up until it is a yes or a no" },
+          { key: "chase_big", label: "We chase the big ones" },
+          { key: "keen_call", label: "If they are keen they will call back" },
+          { key: "go_quiet",  label: "Quotes go quiet all the time" },
+        ],
+      },
+      {
+        key: "list_size", section: "customers", deferred: true,
+        title: "Roughly how many past customers are in your phone or job book?",
+        help: "People who have paid you at least once.",
+        options: [
+          { key: "under_50", label: "Under 50" },
+          { key: "50_200",   label: "50 to 200" },
+          { key: "200_500",  label: "200 to 500" },
+          { key: "500_plus", label: "More than 500" },
+          { key: "no_list",  label: "I do not really keep a list" },
+        ],
+      },
+      {
+        key: "dormant", section: "customers", deferred: true,
+        skipWhen: { key: "list_size", value: "no_list" },
+        title: "When did that list last hear from you?",
+        help: "A text, an email, anything at all.",
+        options: [
+          { key: "regular",  label: "We stay in touch" },
+          { key: "odd_text", label: "The odd text here and there" },
+          { key: "never",    label: "Never, not since the job" },
+        ],
+      },
+      {
+        key: "reviews", section: "reviews", deferred: true,
+        title: "How do you ask for Google reviews?",
+        help: "The ones that decide whether a stranger rings you or the next name down.",
+        options: [
+          { key: "automatic",  label: "Every customer gets asked, automatically" },
+          { key: "remember",   label: "I ask when I remember" },
+          { key: "happy_only", label: "I only ask the happy ones" },
+          { key: "dont_ask",   label: "We do not really ask" },
+        ],
+      },
+      {
+        key: "review_count", section: "reviews", deferred: true,
+        title: "Roughly how many Google reviews have you got?",
+        help: "A ballpark is fine.",
+        options: [
+          { key: "r_under_10", label: "Under 10" },
+          { key: "r_10_30",    label: "10 to 30" },
+          { key: "r_30_100",   label: "30 to 100" },
+          { key: "r_100_plus", label: "More than 100" },
+        ],
+      },
+      {
+        key: "trade", section: "sizing", deferred: true,
+        title: "Last one. What do you do?",
         help: "So the map speaks your language.",
         options: [
           { key: "plumber",     label: "Plumber" },
@@ -399,189 +614,6 @@ window.SITE = {
           { key: "other",       label: "Something else" },
         ],
       },
-      {
-        key: "enquiries", section: "sizing",
-        title: "In a normal week, how many calls and enquiries come {i:in}?",
-        help: "A rough count is plenty. Everything, not just the ones that booked.",
-        options: [
-          { key: "under_10", label: "Under 10" },
-          { key: "10_25",    label: "10 to 25" },
-          { key: "25_50",    label: "25 to 50" },
-          { key: "50_100",   label: "50 to 100" },
-          { key: "100_plus", label: "More than 100" },
-        ],
-      },
-      {
-        key: "job_value", section: "sizing",
-        title: "What is an average job {i:worth} to you?",
-        help: "The invoice, not the profit.",
-        options: [
-          { key: "under_200",  label: "Under $200" },
-          { key: "200_500",    label: "$200 to $500" },
-          { key: "500_1500",   label: "$500 to $1,500" },
-          { key: "1500_5000",  label: "$1,500 to $5,000" },
-          { key: "5000_plus",  label: "More than $5,000" },
-        ],
-      },
-
-      /* ---- The phone ---- */
-      {
-        key: "missed", section: "phone",
-        title: "You're on the tools and the phone rings. What usually {i:happens}?",
-        help: "Be honest. Nobody sees this but you.",
-        options: [
-          { key: "office",    label: "Someone in the office answers" },
-          { key: "callback",  label: "I see the missed call and ring back later" },
-          { key: "voicemail", label: "It goes to voicemail" },
-          { key: "rings_out", label: "It rings out" },
-        ],
-      },
-      {
-        key: "missed_week", section: "phone",
-        title: "In a normal week, how many calls do you reckon you {i:miss}?",
-        help: "Your best guess. If you genuinely don't know, say so, it matters.",
-        options: [
-          { key: "none",     label: "Barely any" },
-          { key: "1_2",      label: "1 or 2" },
-          { key: "3_5",      label: "3 to 5" },
-          { key: "6_10",     label: "6 to 10" },
-          { key: "10_plus",  label: "More than 10" },
-          { key: "no_idea",  label: "Honestly, no idea" },
-        ],
-      },
-      {
-        key: "winback", section: "phone",
-        title: "When you ring a missed call back, how do you usually {i:go}?",
-        help: "The ones you actually get around to ringing.",
-        options: [
-          { key: "win_most",   label: "I win most of them back" },
-          { key: "about_half", label: "About half" },
-          { key: "a_few",      label: "Only a few" },
-          { key: "moved_on",   label: "They've usually moved on" },
-        ],
-      },
-      {
-        key: "after_hours_calls", section: "phone",
-        title: "After 5pm or on the weekend, how many calls land {i:then}?",
-        help: "In a normal week. Nights, weekends, public holidays.",
-        options: [
-          { key: "answered", label: "We answer those too" },
-          { key: "ah_1_2",   label: "1 or 2" },
-          { key: "ah_3_5",   label: "3 to 5" },
-          { key: "ah_more",  label: "More than 5" },
-          { key: "no_idea",  label: "Honestly, no idea" },
-        ],
-      },
-
-      /* ---- The leads ---- */
-      {
-        key: "reply_speed", section: "leads",
-        title: "An enquiry lands from your website or socials. How fast does it get a {i:reply}?",
-        help: "On an average day, not your best one.",
-        options: [
-          { key: "minutes",         label: "Within a few minutes" },
-          { key: "hours",           label: "A few hours" },
-          { key: "days",            label: "Next day or two" },
-          { key: "sometimes_never", label: "When I remember" },
-        ],
-      },
-      {
-        key: "late_outcome", section: "leads",
-        title: "By the time that reply goes out, how many have already {i:sorted} it?",
-        help: "Rung someone else, booked it in, moved on.",
-        options: [
-          { key: "most_gone", label: "Most of them" },
-          { key: "half_gone", label: "About half" },
-          { key: "few_gone",  label: "Only a few" },
-        ],
-      },
-
-      /* ---- Your quotes ---- */
-      {
-        key: "quotes_week", section: "quotes",
-        title: "How many quotes go out in a normal {i:week}?",
-        help: "Written prices, not chats on the phone.",
-        options: [
-          { key: "no_quotes", label: "I don't really quote" },
-          { key: "under_3",   label: "Under 3" },
-          { key: "3_5",       label: "3 to 5" },
-          { key: "5_10",      label: "5 to 10" },
-          { key: "10_plus",   label: "More than 10" },
-        ],
-      },
-      {
-        key: "quotes_quiet", section: "quotes",
-        skipWhen: { key: "quotes_week", value: "no_quotes" },
-        title: "Of every 10 quotes, how many just go {i:quiet}?",
-        help: "No yes, no no, nothing.",
-        options: [
-          { key: "q1_2", label: "1 or 2" },
-          { key: "q3_4", label: "3 or 4" },
-          { key: "half", label: "About half" },
-          { key: "most", label: "Most of them" },
-        ],
-      },
-      {
-        key: "quotes", section: "quotes",
-        skipWhen: { key: "quotes_week", value: "no_quotes" },
-        title: "After you send a quote, what {i:happens}?",
-        help: "The ones that never come back.",
-        options: [
-          { key: "chase_all", label: "Followed up until it's a yes or a no" },
-          { key: "chase_big", label: "We chase the big ones" },
-          { key: "keen_call", label: "If they're keen they'll call back" },
-          { key: "go_quiet",  label: "Quotes go quiet all the time" },
-        ],
-      },
-
-      /* ---- Reviews ---- */
-      {
-        key: "reviews", section: "reviews",
-        title: "How do you ask for Google {i:reviews}?",
-        help: "The ones that decide whether a stranger rings you or the next name down.",
-        options: [
-          { key: "automatic",  label: "Every customer gets asked, automatically" },
-          { key: "remember",   label: "I ask when I remember" },
-          { key: "happy_only", label: "I only ask the happy ones" },
-          { key: "dont_ask",   label: "We don't really ask" },
-        ],
-      },
-      {
-        key: "review_count", section: "reviews",
-        title: "Roughly how many Google reviews have you {i:got}?",
-        help: "A ballpark is fine.",
-        options: [
-          { key: "r_under_10", label: "Under 10" },
-          { key: "r_10_30",    label: "10 to 30" },
-          { key: "r_30_100",   label: "30 to 100" },
-          { key: "r_100_plus", label: "More than 100" },
-        ],
-      },
-
-      /* ---- Old customers ---- */
-      {
-        key: "list_size", section: "customers",
-        title: "Roughly how many past customers are in your phone or job {i:book}?",
-        help: "People who have paid you at least once.",
-        options: [
-          { key: "under_50", label: "Under 50" },
-          { key: "50_200",   label: "50 to 200" },
-          { key: "200_500",  label: "200 to 500" },
-          { key: "500_plus", label: "More than 500" },
-          { key: "no_list",  label: "I don't really keep a list" },
-        ],
-      },
-      {
-        key: "dormant", section: "customers",
-        skipWhen: { key: "list_size", value: "no_list" },
-        title: "When did that list last hear from {i:you}?",
-        help: "A text, an email, anything at all.",
-        options: [
-          { key: "regular",  label: "We stay in touch" },
-          { key: "odd_text", label: "The odd text here and there" },
-          { key: "never",    label: "Never, not since the job" },
-        ],
-      },
     ],
 
     /* ---- Echo lines -----------------------------------------------------
@@ -594,6 +626,9 @@ window.SITE = {
       missed_calls: {
         template: "{missed_week}, {after_hours_calls}, and that you {winback}.",
         estimated: "you weren't sure on some of these numbers, so this range comes from our conservative assumption rather than your own count. Not knowing how many calls slip past is a leak of its own.",
+        // pre-gate only: every number here is theirs EXCEPT after hours, which
+        // has not been asked yet, so the fallback is named rather than implied.
+        partial: "{missed_week}, and that you {winback}. We have not asked about after hours yet. That part is our number, not yours.",
         missed_week: {
           none:    "you hardly miss a call",
           "1_2":   "you miss one or two calls in a normal week",
@@ -682,35 +717,51 @@ window.SITE = {
       },
     },
 
-    /* The capture card in front of the blurred breakdown. */
+    /* The capture card in front of the blurred breakdown. Three fields, in
+       this order, each carrying the reason it is being asked. The optional
+       business name and the free-text trade are gone: four fields read as more
+       work than three, and the real trading name is captured on the call or on
+       the last nine taps. */
     gate: {
       kicker: "One step left",
-      title: "See what is behind the blur",
-      sub: "The five leaks behind that number, your own answers quoted back on each one, a dollar range, and the order to plug them in. We email you the PDF and text you if you want a hand reading it.",
+      title: "See where that money is going",
+      sub: "The two leaks behind your number, your own answers quoted back on each one, and the arithmetic written out so you can check it. We email you the PDF too, and it is yours to keep.",
       bullets: [
-        "Your own answers quoted back on each of the five leaks",
-        "A dollar range on each one, with the arithmetic written out so you can check it",
-        "Where your numbers sit against the published research, and the order to plug them in",
+        "Your own answers quoted back on each leak",
+        "A dollar range on each one, with the maths written out",
+        "Where your numbers sit against the published research",
       ],
       fields: {
         name: "Your name",
         mobile: "Mobile",
         email: "Email",
-        // optional, and shown at reduced weight. When it is filled the PDF and
-        // the admin card carry the real trading name instead of the trade.
-        business: "Business name (optional)",
         tradeOther: "What do you do?",
+      },
+      // the reason line under each label, so no field is asked for silently
+      reasons: {
+        name: "So the map is addressed to a person, not a trade.",
+        mobile: "So we can text you the map link and set up the fifteen minutes if you want it.",
+        email: "Where your PDF goes.",
       },
       errorRequired: "Please fill this in.",
       errorEmail: "Please enter a valid email address.",
       errorInvalid: "Please check this.",
-      button: "Unlock my Leak Map",
+      button: "Show me the map",
       sending: "Unlocking...",
-      // Guarantee-adjacent trust line. No countdown, no fake scarcity, no
-      // invented dollar value: the ONE real scarcity fact on this page sits
-      // beside the final CTA in `thanks`, and appears exactly once.
-      note: "The Leak Map is yours to keep either way. No spam, no lock-in.",
-      privacy: "Your email is for the map. Your mobile is for texting you a time if you want the fifteen minutes. Nothing else, and one word from you stops it.",
+      note: "The map is yours to keep either way. No spam, no lock in.",
+      // He rings every lead himself, so the page says so. A page that says "we
+      // will give you one ring" and then rings is honest. The other way round
+      // is not.
+      privacy: "Your email is for the map. We will give you one ring to see if you want the fifteen minutes, and if you would rather we did not, one word stops it.",
+      // A sceptical owner wants to look us up before typing a mobile number.
+      // These two open in a new tab so the run behind them survives.
+      site: {
+        text: "Applied Intelligence is Australian owned and founder led. Have a look at who we are and the work we have done. Both open in a new tab, so your answers stay put.",
+        links: [
+          { label: "Who we are", href: "index.html" },
+          { label: "Our work", href: "work.html" },
+        ],
+      },
     },
 
     /* The map itself. {low} {high} {weekly} {email} are replaced in JS and set
@@ -737,7 +788,18 @@ window.SITE = {
         ok: "Looking good",
       },
       reviewsLine: "More reviews means more calls from Google, but we won't invent a dollar figure for it. That is rather the point of this report.",
-      rangeSep: "–",
+      // the ads say "to", never a dash, so the map says "to" as well
+      rangeSep: " to ",
+      // a channel the seven taps could not price yet
+      notPricedLabel: "Not priced yet",
+      // what those rows say instead of a figure
+      notPriced: {
+        unchased_quotes: "We have not asked about your quotes yet. There is no figure here.",
+        reviews: "We have not asked about your reviews yet. This one never gets a figure.",
+        dormant: "We have not asked about your past customers yet. There is no figure here.",
+        slow_reply: "We have not asked about your leads yet. No figure yet.",
+      },
+      partialNote: "Two of the five leaks are priced. The other three are still yours to finish.",
       // v2: the "You told us: ..." quote sits above the note on every card.
       // `estimatedTag` marks a channel where a "no idea" fallback carried the
       // maths, so the visitor can see which number is theirs and which is ours.
@@ -867,10 +929,17 @@ window.SITE = {
     /* After a successful send. */
     thanks: {
       title: "Unlocked. Your Leak Map is on its way.",
-      body: "We are sending the PDF to {email}. Have a read of the map below in the meantime, it is the same thing. The one thing a map built from sixteen taps cannot do is tell you where we have read your business wrong. That is what the fifteen minutes is for.",
+      body: "We are sending the PDF to {email}. The map below is the same thing, so have a read now.",
+      /* The fork. Three leaks are still unpriced, and the visitor picks how
+         they get priced: nine more taps here, or fifteen minutes with us. */
+      forkTitle: "Three leaks left to price",
+      forkBody: "Your quotes, your reviews and your past customers. Nine more taps finishes the map on this screen, or we do those three with you on the fifteen minutes.",
+      finishButton: "Finish the map. Nine taps.",
+      finishIntro: "Nice one. These nine price the other three leaks, then the map is complete.",
+      finishDone: "That is the lot. All five leaks, priced or honestly refused.",
+      // shown only when the send failed, where there is no row to book against
       cta: "Book your free 15-minute call",
-      ctaNote: "Fifteen minutes, no slideshow. We walk your map with you and tell you which worker pays for itself first, or an honest “you don't need us yet”.",
-      secondary: "Rather talk sooner? Ring us or reply to the email.",
+      ctaNote: "Fifteen minutes, no slideshow. We walk your map with you and tell you which worker pays for itself first, or an honest “you do not need us yet”.",
       // instant download, polled while the engine renders the PDF
       pdfPreparing: "Your Leak Map PDF is being prepared.",
       pdfReady: "Save your Leak Map for the call (PDF)",
@@ -879,13 +948,13 @@ window.SITE = {
          landed (no token, no row). Same five windows as the enquiry box on the
          home page on purpose: the server validates against exactly these
          labels, so they are the contract, not decoration. */
-      timesLabel: "Or just tap when suits, and we will text you a time.",
+      timesLabel: "Or tap when suits and we will text you a time.",
       times: ["Early morning", "Mid-morning", "Arvo", "After 5pm", "Whenever"],
       timesNote: "No cost, no obligation.",
       timesButton: "Text me a time",
       timesSuccess: "Sorted. Keep an eye on your phone, we will text you today to lock in a time.",
       // The site's ONE real scarcity fact, stated as a fact, once, here.
-      scarcity: "We build and run every crew ourselves, so we only take on one business per trade in each area. It is also why we will tell you straight if you don't need us yet.",
+      scarcity: "We build and run every crew ourselves, so we only take on one business per trade in each area. It is also why we will tell you straight if you do not need us yet.",
     },
     /* If the send fails we unlock anyway. Never punish the visitor. */
     sendErrorTitle: "Here is your Leak Map anyway.",
