@@ -364,33 +364,22 @@ window.SITE = {
     sub: "Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your week, and put a dollar range on each one. No call required, no sales pitch.",
     meta: ["Sixteen taps, no typing", "About three minutes", "Built on your numbers", "Australian owned, founder-led"],
     // The trust play: the sting lands BEFORE we ask for anything. Say it out loud.
-    metaNote: "The number builds on screen as you go, and you see the whole headline figure before we ask you for a single detail. The maths is the same for everyone and written out at the bottom of this page, not made up for you. If your answers come back clean, the map says so and we tell you that plainly, because a map that always finds a problem is not a map.",
+    metaNote: "The number lands once the phone is priced, then it moves with every tap after. The maths is the same for everyone and written out at the bottom of this page, not made up for you. If your answers come back clean, the map says so and we tell you that plainly, because a map that always finds a problem is not a map.",
     // no-JS / pre-JS fallback line under the chrome
     noscript: "This audit needs JavaScript switched on. If you would rather just talk it through, book a free 15-minute call instead.",
 
     progress: { label: "Question", of: "of", back: "Back", change: "Change an answer" },
 
-    // the running counter, which lands the moment the phone is genuinely priced
+    /* The running counter. It builds from the first priced channel and the
+       dollars are READABLE the whole way: every ad that points here promises
+       "you see the number before we ask your name", so the digits are never
+       held back. What the gate buys is the map, not the number. */
     counter: {
-      label: "Leaking so far, a year",
+      label: "Your number is building",
       sub: "An estimate from your answers, not a forecast.",
       hint: "Keep going. The number moves as each part of your week is mapped.",
       // shown once, on the screen where the counter first appears
       revealLine: "That is the phone on its own, from the numbers you just gave us. Two taps left and we price your leads.",
-    },
-
-    /* ---- The reveal screen ----------------------------------------------
-       Their number, on its own screen, with nothing asked of them. Every ad
-       promises this word for word, so it must never be merged into the gate. */
-    reveal: {
-      kicker: "Your number so far",
-      perYear: "a year",
-      lead: "On your own numbers, that is what the phone and the slow replies are costing you.",
-      weekly: "About {weekly} a week, every week, while nothing changes.",
-      disclaimer: "An estimate from your answers, not a forecast. It is a range on purpose.",
-      honesty: "That is two of the five leaks. Your quotes, your reviews and your past customers are not priced yet, and we will not guess them.",
-      button: "Show me where it is going",
-      note: "The maths is written out below this page, same maths for everyone.",
     },
 
     /* ---- Sections -------------------------------------------------------
@@ -717,55 +706,45 @@ window.SITE = {
       },
     },
 
-    /* The capture card in front of the blurred breakdown. Three fields, in
-       this order, each carrying the reason it is being asked. The optional
-       business name and the free-text trade are gone: four fields read as more
-       work than three, and the real trading name is captured on the call or on
-       the last nine taps. */
+    /* The gate: a claim, not a toll. The number is already theirs and it is
+       printed SHARP inside this card, above the kicker, so the card opens by
+       handing something over rather than by holding something back. What the
+       two fields buy is the map underneath: the per-leak breakdown, the fix for
+       the worst one, and the copy that outlives this page. The mobile is NOT
+       asked here: it is asked once, later, by the visitor who wants the call.
+       No bullets, no list of contents: every extra line pushed the button past
+       the fold on a phone, and the fold is what this card is for. */
     gate: {
-      // The kicker is built at render time from the worst leak the seven taps
-      // found, so the card opens on THEIR problem, not on our step count.
-      // `kicker` is only the fallback for a state where no leak ranks first.
-      kickerLead: "Your worst leak: ",
-      kicker: "One step left",
-      title: "Now the part you can't guess: the fix.",
-      sub: "Your number was the easy bit. The map shows where each dollar goes. It shows what stops your biggest leak first, what that looks like running in your business, and what it should give back. Tell us where to send it.",
-      // What they get, in the order it is worth: the document, the fix for the
-      // one leak that is costing them most, then the call they can take or leave.
-      bullets: [
-        "Your Leak Map: the five leaks, your own answers, the maths shown",
-        "The Leak Fix for your worst leak, in plain words, with what it should return",
-        "Fifteen minutes on the phone if you want it. A price on the spot. A straight answer if it isn't worth doing yet",
-      ],
+      // the unit that sits under the sharp range at the top of the card
+      figLead: "Your leak, from your own answers",
+      figUnit: "a year",
+      kicker: "Your map is ready",
+      title: "Two boxes and the blur comes off.",
+      sub: "You watched it build. Say where to send the map and the blur comes off.",
       fields: {
-        name: "Your name",
+        name: "First name",
         mobile: "Mobile",
         email: "Email",
         tradeOther: "What do you do?",
       },
       // the reason line under each label, so no field is asked for silently
       reasons: {
-        name: "So the map is addressed to a person.",
-        // He rings every lead himself, so the field that asks for the number
-        // says so, next to the field, where it is actually read. The old
-        // version of this line sat under the button and was skipped.
-        mobile: "So Nicholas can give you one ring about the fix. One word stops it.",
-        email: "Where the map goes.",
+        name: "So the map is addressed to a person",
+        email: "So you keep a copy when this page is gone.",
       },
       errorRequired: "Please fill this in.",
       errorEmail: "Please enter a valid email address.",
       errorInvalid: "Please check this.",
-      button: "Send my map and the fix",
-      sending: "Sending...",
-      note: "The map is yours to keep either way. No spam, no lock in.",
-      // A sceptical owner wants to look us up before typing a mobile number.
-      // These two open in a new tab so the run behind them survives.
+      button: "Show me the map",
+      sending: "One moment...",
+      note: "No spam, no lock in. The map is yours to keep.",
+      // Who is asking. The two outbound links are GONE: this card's whole job
+      // is the fold, and a link out of it at the moment of the ask is an exit
+      // dressed as reassurance. The wordmark in the top bar is the way to the
+      // rest of the site, and it is there on every screen of the run.
       site: {
-        text: "Applied Intelligence is Australian owned and founder led. Have a look at who we are and the work we have done. Both open in a new tab, so your answers stay put.",
-        links: [
-          { label: "Who we are", href: "index.html" },
-          { label: "Our work", href: "work.html" },
-        ],
+        text: "Applied Intelligence is Australian owned and founder led.",
+        links: [],
       },
     },
 
@@ -777,7 +756,7 @@ window.SITE = {
       keep: "Yours to keep",
       lead: "On your own numbers, you are leaking about",
       perYear: "a year",
-      weekly: "That is roughly {weekly} a week, every week, while nothing changes.",
+      weekly: "That is {weekly} a week. Every week. While nothing changes.",
       allClearHeading: "You run a tight ship.",
       allClearLead: "Your answers do not show a serious hole anywhere. That is rare, and it is worth protecting.",
       disclaimer: "An estimate from your answers, not a forecast. It is a range on purpose.",
@@ -945,8 +924,11 @@ window.SITE = {
 
     /* After a successful send. */
     thanks: {
-      title: "Unlocked. Your Leak Map is on its way.",
-      body: "We are sending the PDF to {email}. The map below is the same thing, so have a read now.",
+      /* THE RECEIPT, two lines. It used to be three, and the third said the same
+         thing as the PDF line under it, which put a paragraph of acknowledgement
+         between the number and the offer. What happened, and where the copy went.
+         Nothing else: the map itself is directly below and speaks for itself. */
+      title: "Unlocked. The whole map is below.",
       /* The fork. Three leaks are still unpriced, and the visitor picks how
          they get priced: nine more taps here, or fifteen minutes with us. */
       forkTitle: "Three leaks left to price",
@@ -976,7 +958,7 @@ window.SITE = {
         // The risk reversal. It promises a thing we control (what they leave
         // the call holding), never a result we do not control.
         guarantee: "If the fifteen minutes doesn't show you exactly what plugging your worst leak would put back, that's on us.",
-        finishLink: "Finish the map first, nine taps",
+        finishLink: "Or price the last three leaks, nine taps.",
         trust: "You'll talk to Nicholas, who built this. No sales team, no lock in.",
       },
       finishIntro: "Nice one. These nine price the other three leaks, then the map is complete.",
@@ -985,7 +967,7 @@ window.SITE = {
       cta: "Book your free 15-minute call",
       ctaNote: "Fifteen minutes, no slideshow. We walk your map with you and tell you which worker pays for itself first, or an honest “you do not need us yet”.",
       // instant download, polled while the engine renders the PDF
-      pdfPreparing: "Your Leak Map PDF is being prepared.",
+      pdfPreparing: "Your copy is on the way to {email}.",
       pdfReady: "Save your Leak Map for the call (PDF)",
       pdfFailed: "The download is taking longer than it should. It will land in your email shortly, or reply to that email and we will sort it.",
       /* Optional preferred-call-time row, offered ONLY when the audit row really
@@ -995,8 +977,18 @@ window.SITE = {
       timesLabel: "Tap when suits and we will text you a time.",
       times: ["Early morning", "Mid-morning", "Arvo", "After 5pm", "Whenever"],
       timesNote: "No cost, no obligation.",
-      timesButton: "Text me a time",
-      timesSuccess: "Sorted. Keep an eye on your phone, we will text you today to lock in a time.",
+      // The submit is never disabled, so a tap with nothing picked has to say
+      // what is missing rather than do nothing at all.
+      timesRequired: "Pick a time that suits.",
+      timesButton: "Lock in my call",
+      timesSuccess: "Sorted. We will text {mobile} today to lock in a time.",
+      /* The mobile is asked ONCE, here, by somebody who has just asked for a
+         call. That is the only place on the page where the number is the
+         obvious price of the thing being asked for. */
+      booking: {
+        mobileLabel: "Mobile",
+        mobileWhy: "So Nicholas can ring you at the time you pick. One word stops it.",
+      },
       // The site's ONE real scarcity fact, stated as a fact, once, here.
       scarcity: "We build and run every crew ourselves, so we only take on one business per trade in each area. It is also why we will tell you straight if you do not need us yet.",
     },

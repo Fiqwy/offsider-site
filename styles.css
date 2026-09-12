@@ -1928,11 +1928,16 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 }
 .audit-meter__fig .num { white-space: nowrap; color: #4ade80; }
 .audit-meter__fig .sep { color: rgba(255,255,255,.45); font-weight: 600; }
+/* No blur rule here on purpose. The seven live ads all promise "you see the
+   number before we ask your name", so the counter's digits are sharp from the
+   first priced channel. The blur belongs to the map, not to the number. */
 /* zeroed instrument: one $0, not "$0 – $0" */
 .audit-meter__fig.is-zero .sep,
 .audit-meter__fig.is-zero .num:last-child { display: none; }
 .audit-meter__sub { display: block; margin-top: .45rem; font-size: .8rem; color: rgba(255,255,255,.62); }
-.audit-meter__hint { display: block; margin-top: .2rem; font-size: .8rem; color: rgba(255,255,255,.45); }
+/* .6, not .45: this line now explains the blur, so it has to clear AA on the
+   ink panel (7.3:1 rather than the 4.49:1 it used to run at). */
+.audit-meter__hint { display: block; margin-top: .2rem; font-size: .8rem; color: rgba(255,255,255,.6); }
 
 /* ---- The question -------------------------------------------------------- */
 .audit-q { margin-top: 1rem; overflow: hidden; transition: height .34s cubic-bezier(.22,.61,.36,1); }
@@ -2023,7 +2028,7 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   padding: .28rem .7rem; border-radius: 999px;
 }
 
-/* the sting: always visible, never blurred */
+/* the sting: their number, blurred until the gate is answered */
 .leakmap__sting {
   margin-top: 1.6rem; padding: clamp(1.4rem, 4vw, 2.2rem);
   border-radius: var(--radius-lg);
@@ -2044,6 +2049,9 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   font-size: 1.05rem; font-weight: 700; color: rgba(255,255,255,.75);
 }
 .leakmap__weekly { margin-top: 1rem; font-size: 1rem; color: rgba(255,255,255,.82); max-width: 48ch; }
+/* NO BLUR ON THE STING. The number is the promise the ads made, so it is
+   sharp on every screen this renders. The blur lives on .leakmap__body, which
+   is the per-leak breakdown the two fields actually buy. */
 .leakmap__fine {
   margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.13);
   font-size: .84rem; line-height: 1.5; color: rgba(255,255,255,.62); max-width: 60ch;
@@ -2070,17 +2078,11 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 }
 .audit-flash__cta { margin-top: 0; }
 .audit-pdf { display: flex; align-items: center; min-height: 54px; }
+/* One quiet line where the spinner used to be. A spinner on a screen that has
+   already handed over everything reads as something still going wrong. */
 .audit-pdf__prep {
-  display: inline-flex; align-items: center; gap: .55rem;
-  font-size: .92rem; font-weight: 600; color: var(--muted);
+  font-size: .92rem; font-weight: 600; color: var(--muted); max-width: 46ch;
 }
-.audit-pdf__spin {
-  flex: none; width: 15px; height: 15px; border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--accent) 28%, transparent);
-  border-top-color: var(--accent-ink);
-  animation: audit-spin .8s linear infinite;
-}
-@keyframes audit-spin { to { transform: rotate(360deg); } }
 .audit-pdf__btn { background: var(--bg); }
 .audit-pdf__fail {
   font-size: .9rem; line-height: 1.5; font-weight: 600; color: var(--muted-2); max-width: 46ch;
@@ -2103,6 +2105,12 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   border-top: 1px solid color-mix(in srgb, var(--green) 24%, transparent);
 }
 .audit-times__label { margin-bottom: .55rem; font-size: .9rem; max-width: 46ch; }
+/* The mobile, asked once, here, above the chips. Borrows the gate's field
+   language wholesale so it reads as the same form in the same house voice. */
+.audit-times__field { margin-bottom: 1rem; }
+/* clear of the input's 3px focus ring: this reason line sits under the field */
+.audit-times__field .gate__why { margin-top: .4rem; }
+.audit-times__field input { background: var(--bg); }
 /* the row sits on the green flash panel, so the chips need their own surface */
 .audit-times .chip-toggle { background: var(--bg); }
 .audit-times__foot {
@@ -2112,6 +2120,8 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 .audit-times__btn[disabled] { opacity: .5; cursor: default; }
 .audit-times__btn[disabled]:hover { border-color: var(--line); transform: none; }
 .audit-times__note { font-size: .86rem; font-weight: 600; color: var(--muted-2); }
+/* the submit is never disabled, so this is what a tap with nothing picked says */
+.audit-times__err { margin-top: -.4rem; margin-bottom: .7rem; }
 .audit-times__ok {
   font-size: .96rem; font-weight: 700; line-height: 1.5; color: var(--green); max-width: 46ch;
 }
@@ -2120,6 +2130,12 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 /* ---- the gated breakdown ------------------------------------------------- */
 .leakmap__lockwrap { position: relative; margin-top: 2rem; }
 .leakmap__lockwrap.is-locked { min-height: 760px; }
+/* The unblur. `is-unblur` is the locked blur WITHOUT the crop, the mask or the
+   dead pointer events, so submit can lift it one frame after paint and the map
+   sharpens in place rather than cutting to a new screen. It is the moment the
+   gate copy promises: two boxes and the blur comes off. */
+.leakmap__body { transition: filter .55s ease; }
+.leakmap__body.is-unblur { filter: blur(7px); }
 .leakmap__body.is-locked {
   max-height: 720px; overflow: hidden;
   filter: blur(7px); pointer-events: none; user-select: none; -webkit-user-select: none;
@@ -2293,11 +2309,35 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
     -webkit-backdrop-filter: saturate(160%) blur(10px);
   }
 }
+/* THE CLAIM inside the card: their range, sharp, above the kicker. It is an
+   ink slab so it reads as the same object as the sting above it rather than as
+   another line of card copy, and it is the first thing in the fold. */
+.gate__fig {
+  margin: -.2rem 0 1rem; padding: .85rem 1rem .9rem;
+  border-radius: var(--radius); background: var(--bg-ink); color: #fff;
+}
+.gate__figlead {
+  display: block; font-size: .7rem; font-weight: 700;
+  letter-spacing: .09em; text-transform: uppercase; color: rgba(255,255,255,.58);
+}
+.gate__figrange {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .45rem;
+  margin-top: .2rem;
+  font-size: clamp(1.5rem, 6.6vw, 2.1rem); font-weight: 800; letter-spacing: -.03em;
+  line-height: 1.08; font-variant-numeric: tabular-nums; color: #fff;
+}
+.gate__figrange .num { white-space: nowrap; color: #4ade80; }
+.gate__figrange .sep { color: rgba(255,255,255,.45); font-weight: 600; }
+.gate__figunit {
+  display: block; margin-top: .25rem;
+  font-size: .82rem; font-weight: 700; color: rgba(255,255,255,.72);
+}
 .gate__kicker {
   display: block; font-size: .74rem; font-weight: 800;
   letter-spacing: .12em; text-transform: uppercase; color: var(--accent-ink);
 }
-.gate__title { display: block; margin-top: .35rem; font-size: clamp(1.35rem, 3.6vw, 1.7rem); font-weight: 800; letter-spacing: -.025em; }
+/* balance, so "answers." never lands alone on the second line */
+.gate__title { display: block; margin-top: .35rem; font-size: clamp(1.35rem, 3.6vw, 1.7rem); font-weight: 800; letter-spacing: -.025em; text-wrap: balance; }
 .gate__sub { margin-top: .6rem; font-size: .96rem; line-height: 1.55; color: var(--muted); }
 .gate__list { margin-top: 1rem; gap: .5rem; }
 .gate__list li { font-size: .95rem; }
@@ -2320,7 +2360,9 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 .gate__field input[aria-invalid="true"] { border-color: #b42318; }
 .gate__err { display: none; margin-top: .3rem; font-size: .82rem; font-weight: 700; color: #b42318; }
 .gate__err.is-on { display: block; }
-.gate__btn { width: 100%; margin-top: .2rem; }
+/* The one act on the gate screen, so it is a full-width thumb target rather
+   than a 54px button that happens to be wide. */
+.gate__btn { width: 100%; margin-top: .2rem; min-height: 58px; }
 .gate__note { font-size: .84rem; font-weight: 600; color: var(--muted-2); text-align: center; line-height: 1.5; }
 .gate__note--privacy { margin-top: -.35rem; }
 /* the way out to the rest of the site, so nobody has to type a mobile number
@@ -2373,53 +2415,12 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   .audit-q,
   .audit-qi,
   .leak-row__track > i { transition: none !important; }
-  /* the global rule kills the animation; keep the dot readable as a static ring */
-  .audit-pdf__spin { animation: none !important; border-top-color: var(--accent-ink); }
   .audit-qi.is-enter, .audit-qi.is-leave { opacity: 1 !important; transform: none !important; }
   .qopt:active { transform: none; }
   /* the optional times row is an aside on the thank-you screen: it must not
      lift under the cursor when the visitor has asked for stillness */
   .audit-times__btn:hover { transform: none; }
 }
-
-/* =============================================================================
-   THE REVEAL SCREEN (audit.html, screen 8)
-   Their number, alone on the screen, with nothing asked of them. Every ad says
-   "you see the number before we ask your name", so this is the screen that
-   makes that line true. The figure is the largest type on the page.
-   ========================================================================== */
-.audit-reveal {
-  padding: clamp(1.4rem, 5vw, 2.4rem);
-  border: 1px solid var(--line); border-radius: var(--radius-lg);
-  background: var(--bg); box-shadow: var(--shadow-md);
-  text-align: left;
-}
-.audit-reveal:focus-visible { outline: 3px solid var(--accent-ink); outline-offset: 3px; }
-.audit-reveal__kicker { display: block; color: var(--accent-ink); }
-.audit-reveal__fig {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .4rem;
-  margin-top: .5rem;
-  font-size: clamp(2.1rem, 9vw, 3.6rem); font-weight: 800; letter-spacing: -.035em;
-  line-height: 1.05; font-variant-numeric: tabular-nums; color: var(--ink);
-}
-.audit-reveal__fig .num { white-space: nowrap; }
-.audit-reveal__fig .sep { font-size: .42em; font-weight: 700; color: var(--muted); }
-/* On a phone the range already fills the line, so "a year" is set as its own
-   caption under the figure rather than left as an orphan beside it. */
-.audit-reveal__per {
-  display: block; width: 100%; margin-top: .2rem;
-  font-size: 1rem; font-weight: 700; color: var(--muted); letter-spacing: 0;
-}
-.audit-reveal__lead { margin-top: .9rem; font-size: 1.02rem; font-weight: 700; color: var(--ink-2); max-width: 40ch; }
-.audit-reveal__weekly { margin-top: .5rem; font-size: .98rem; color: var(--ink-2); max-width: 42ch; }
-.audit-reveal__fine { margin-top: .7rem; font-size: .84rem; font-weight: 600; color: var(--muted-2); max-width: 46ch; }
-.audit-reveal__honesty {
-  margin-top: 1.1rem; padding: .85rem 1rem;
-  border-radius: var(--radius-sm); background: var(--bg-soft); border: 1px solid var(--line);
-  font-size: .9rem; line-height: 1.55; color: var(--ink-2); max-width: 52ch;
-}
-.audit-reveal__btn { width: 100%; margin-top: 1.3rem; }
-.audit-reveal__note { margin-top: .7rem; font-size: .82rem; font-weight: 600; color: var(--muted-2); text-align: center; }
 
 /* ---- A leak the first seven taps could not reach ------------------------- */
 .leak-row.is-unpriced { opacity: .88; }
@@ -2465,6 +2466,13 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 .audit-offer {
   margin-top: 1.4rem; padding: clamp(1.05rem, 4vw, 1.45rem);
   border-radius: var(--radius); background: var(--bg); border: 1px solid var(--line);
+}
+/* OUTSIDE the receipt. On the page's own background it has to carry its own
+   presence, so it takes the map's radius and a real shadow: the receipt is an
+   acknowledgement, this is the act, and the two must not read as one block. */
+.audit-offer--solo {
+  margin-top: 1.2rem; padding: clamp(1.2rem, 4.5vw, 1.7rem);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
 }
 .audit-offer__kicker {
   display: block; font-size: .7rem; font-weight: 800; letter-spacing: .1em;
@@ -2516,13 +2524,15 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 .audit-offer .audit-times__btn[disabled] { opacity: .45; }
 
 @media (max-width: 640px) {
-  .audit-reveal__btn { min-height: 58px; }
   .audit-flash__cta { width: 100%; }
-  .audit-offer .audit-times__btn { width: 100%; }
+  /* the booking submit is a thumb target on a phone, not a link */
+  .audit-offer .audit-times__btn { width: 100%; min-height: 58px; }
+  .audit-offer .audit-times .chip-toggle { min-height: 56px; }
+  .audit-offer .audit-times__field input { min-height: 56px; }
   .audit-offer .audit-times__note { text-align: center; width: 100%; }
 }
 
-/* ---- Reduced motion: the reveal never moves ------------------------------ */
+/* ---- Reduced motion: the map sharpens with no transition ---------------- */
 @media (prefers-reduced-motion: reduce) {
-  .audit-reveal { transition: none !important; }
+  .leakmap__body { transition: none !important; }
 }

@@ -281,7 +281,7 @@
        If literally nothing needs plugging the roadmap would be empty, which
        reads as a broken page rather than good news, so the all-clear result
        still gets its one honest Star entry. */
-    const slots = ["1–2", "3–6", "7–12"];
+    const slots = ["1 to 2", "3 to 6", "7 to 12"];
     let hot = ORDER
       .filter((k) => rank(statuses[k]) >= rank("medium"))
       // a Boomer worth nothing (long-cycle trade, or no list yet) must never sit
@@ -520,7 +520,8 @@
   const A = S && S.audit;
   let REDUCED = false;
   const state = {
-    screen: "q",          // q | reveal | gate | unlocked | finish | done
+    screen: "q",          // q | gate | unlocked | done
+    book: "",             // "" = not asked for | open = form showing | done = booked
     phase: "pre",         // pre = the seven in front of the gate, finish = the nine
     step: 0,              // index into the CURRENTLY applicable question list
     answers: {},          // raw enum keys; skipped questions are deleted, not blanked
@@ -528,6 +529,7 @@
     shown: { low: 0, high: 0 },   // what the counter is currently displaying
     token: "",            // the download token, once the gate has been accepted
     email: "",
+    mobile: "",           // only ever set at the booking step, only to echo it back
     utm: null,            // read once from the query string, never stored
     busy: false,
   };
@@ -574,6 +576,8 @@
         step: state.step,
         answers: state.answers,
         token: state.token,
+        book: state.book,
+        mobile: state.mobile,
       }));
     } catch (e) { /* private mode, full quota: never break the run over it */ }
   }
@@ -638,9 +642,13 @@
     const meterClip = el("div", "audit-meter__clip");
     const meterBox = el("div", "audit-meter__box");
     meterBox.appendChild(el("span", "audit-meter__label", (A.counter && A.counter.label) || ""));
+    /* THE DOLLARS ARE READABLE. Every ad that points here promises "you see
+       the number before we ask your name", so the digits are sharp from the
+       first priced channel and they stay sharp. What the gate buys is the MAP
+       underneath, never the number. Not a live region: it re-renders on every
+       animation frame while it counts, which no screen reader should be made
+       to sit through. It is reachable, it is just not announced. */
     const meterFig = el("p", "audit-meter__fig");
-    meterFig.setAttribute("role", "status");
-    meterFig.setAttribute("aria-live", "polite");
     meterLow = el("span", "num", money(0));
     meterHigh = el("span", "num", money(0));
     meterFig.append(meterLow, el("span", "sep", (A.result && A.result.rangeSep) || "–"), meterHigh);
@@ -765,7 +773,7 @@
       state.busy = false;
       if (!last) { goTo(next); return; }
       if (state.phase === "finish") completeFinish();
-      else toReveal();
+      else toGate();
     }, wait);
   }
 
@@ -950,51 +958,18 @@
   /* ===========================================================================
      6. THE LEAK MAP
      ========================================================================= */
-  /* SCREEN 8. Their number, on its own screen, with nothing asked of them.
-     Every ad says "you see the number before we ask your name", so this screen
-     exists on its own and must never be merged into the gate. */
-  function toReveal() {
-    state.screen = "reveal";
-    state.mirror = partialScores(state.answers);
-    save();
-    renderReveal(state.mirror);
-    mark("headline");
-    scrollToStage();
-  }
-
-  function renderReveal(scores) {
-    const V = A.reveal || {};
-    const root = el("section", "audit-reveal");
-    root.tabIndex = -1;
-    root.appendChild(el("span", "lbl audit-reveal__kicker", V.kicker || ""));
-
-    const big = el("p", "audit-reveal__fig");
-    rangeInto(big, scores.total.annual_low, scores.total.annual_high,
-              (A.result && A.result.rangeSep) || " to ");
-    big.appendChild(el("span", "audit-reveal__per", " " + (V.perYear || "")));
-    root.appendChild(big);
-
-    if (V.lead) root.appendChild(el("p", "audit-reveal__lead", V.lead));
-    if (V.weekly) root.appendChild(el("p", "audit-reveal__weekly",
-      fill(V.weekly, { weekly: money(scores.total.weekly_mid) })));
-    if (V.disclaimer) root.appendChild(el("p", "audit-reveal__fine", V.disclaimer));
-    if (V.honesty) root.appendChild(el("p", "audit-reveal__honesty", V.honesty));
-
-    const btn = el("button", "btn btn--primary btn--xl audit-reveal__btn", V.button || "");
-    btn.type = "button";
-    btn.addEventListener("click", toGate);
-    root.appendChild(btn);
-    if (V.note) root.appendChild(el("p", "audit-reveal__note", V.note));
-
-    stage.replaceChildren(root);
-    try { root.focus({ preventScroll: true }); } catch (e) { /* older Safari */ }
-  }
-
+  /* SCREEN 8. The gate. The seventh tap lands here directly: the number is
+     built, it is on the screen, and it is behind a blur until they say where
+     to send the map. There is no separate reveal screen any more, because a
+     figure already read is a figure nobody trades an email for.
+     `headline` still marks here, at the beat the figure is ready on screen, so
+     the funnel strip keeps reading as one journey. */
   function toGate() {
     state.screen = "gate";
     state.mirror = state.mirror || partialScores(state.answers);
     save();
     renderMap(state.mirror, { locked: true });
+    mark("headline");
     scrollToGate();
   }
 
@@ -1022,7 +997,27 @@
     const go = () => {
       const card = doc.querySelector(".gate__card");
       if (!card) { scrollToStage(); return; }
-      const y = card.getBoundingClientRect().top + window.scrollY - chromeHeight() - 10;
+      let top = card.getBoundingClientRect().top;
+      /* The card promises the number "right here", and the blurred number is
+         the thing directly above it, so show as much of it as the fold will
+         take. The ask always wins the tie: whatever else is on screen, the
+         submit button has to be inside the fold, so the test is measured to
+         the BUTTON, not to the bottom of the card.
+         On a 390 by 844 phone neither branch fires and the card gets the fold
+         to itself, which is the right answer there. */
+      const btn = doc.querySelector(".gate__btn");
+      const room = window.innerHeight - chromeHeight() - 10;
+      const bottom = btn ? btn.getBoundingClientRect().bottom
+                         : card.getBoundingClientRect().bottom;
+      [".leakmap__sting", ".leakmap__big"].some((sel) => {
+        const node = doc.querySelector(sel);
+        if (!node) return false;
+        const t = node.getBoundingClientRect().top;
+        if (bottom - t > room) return false;
+        top = t;
+        return true;
+      });
+      const y = top + window.scrollY - chromeHeight() - 10;
       try { window.scrollTo({ top: Math.max(0, y), behavior: REDUCED ? "auto" : "smooth" }); }
       catch (err) { window.scrollTo(0, Math.max(0, y)); }
     };
@@ -1033,7 +1028,9 @@
      the chrome rather than leaving the visitor parked wherever the gate was. */
   function scrollToFlash() {
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      const flash = doc.querySelector(".audit-flash");
+      // Land on the number they just earned, sharp, with the receipt and the
+      // offer under it; fall back to the receipt if the sting is not there.
+      const flash = doc.querySelector(".leakmap__sting") || doc.querySelector(".audit-flash");
       if (!flash) return;
       const y = flash.getBoundingClientRect().top + window.scrollY - chromeHeight() - 10;
       try { window.scrollTo({ top: Math.max(0, y), behavior: REDUCED ? "auto" : "smooth" }); }
@@ -1080,7 +1077,11 @@
     head.appendChild(el("span", "leakmap__keep", R.keep || ""));
     root.appendChild(head);
 
-    /* ---- the sting: shown immediately, never blurred ---- */
+    /* ---- the sting: their number, SHARP, at every screen this renders ----
+       It was blurred for one build and that build broke the promise on all
+       seven live ads ("you see the number before we ask your name"). The blur
+       lives on the breakdown below, which is the thing the gate actually
+       trades for. `opts.unblur` lifts that one, not this. */
     const sting = el("section", "leakmap__sting");
     if (scores.all_clear) {
       sting.appendChild(el("p", "leakmap__lead", R.allClearLead || ""));
@@ -1102,7 +1103,11 @@
 
     /* ---- the gated breakdown ---- */
     const lockwrap = el("div", "leakmap__lockwrap");
-    const body = el("div", "leakmap__body");
+    /* `is-unblur` is the blur WITHOUT the crop, the mask or the dead pointer
+       events, so it can be lifted one frame after paint and the map sharpens
+       in place under the visitor instead of cutting to a new screen. It is the
+       moment the gate copy promises: two boxes and the blur comes off. */
+    const body = el("div", "leakmap__body" + (opts.unblur ? " is-unblur" : ""));
 
     body.appendChild(sectionTitle(R.channelsTitle));
     const rows = el("div", "leak-rows");
@@ -1130,7 +1135,7 @@
     let gate = null;
     if (opts.locked) {
       lock(true);
-      gate = buildGate(worst);
+      gate = buildGate(scores);
       lockwrap.appendChild(gate);
       mark("gate");
     }
@@ -1138,6 +1143,12 @@
     stage.replaceChildren(root);
     animateBars();
     if (gate) fitWell(lockwrap, body, gate);
+    /* the unblur, one frame after paint so the transition has a start state */
+    if (opts.unblur) {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        body.classList.remove("is-unblur");
+      }));
+    }
   }
 
   function sectionTitle(text) {
@@ -1355,24 +1366,31 @@
   /* ===========================================================================
      7. THE GATE
      ========================================================================= */
-  function buildGate(worst) {
+  function buildGate(scores) {
     const G = A.gate || {};
+    const R = A.result || {};
     const wrap = el("div", "leakmap__gate");
     const card = el("div", "gate__card");
 
-    /* Their problem, not our step count: the card opens by naming the leak the
-       seven taps found first. */
-    const lab = channelLabel(worst);
-    card.appendChild(el("span", "gate__kicker",
-      lab ? (G.kickerLead || "") + lab : (G.kicker || "")));
+    /* THE CLAIM, not the toll. Their range, sharp, INSIDE the card and above
+       the kicker: the card is what the fold holds, so the number has to be in
+       the card or the fold does not have it. It is the same figure as the
+       sting above, said once more at the moment of the ask, so the card opens
+       by handing something over rather than by holding something back. */
+    if (scores && !scores.all_clear && scores.total &&
+        scores.total.annual_high != null) {
+      const figWrap = el("div", "gate__fig");
+      if (G.figLead) figWrap.appendChild(el("span", "gate__figlead", G.figLead));
+      const figRange = el("p", "gate__figrange");
+      rangeInto(figRange, scores.total.annual_low, scores.total.annual_high, R.rangeSep);
+      figWrap.appendChild(figRange);
+      if (G.figUnit) figWrap.appendChild(el("span", "gate__figunit", G.figUnit));
+      card.appendChild(figWrap);
+    }
+    /* What the two fields actually buy: the breakdown under the card. */
+    card.appendChild(el("span", "gate__kicker", G.kicker || ""));
     card.appendChild(el("b", "gate__title", G.title || ""));
     card.appendChild(el("p", "gate__sub", G.sub || ""));
-
-    if (Array.isArray(G.bullets) && G.bullets.length) {
-      const ul = el("ul", "check-list gate__list");
-      G.bullets.forEach((b) => ul.appendChild(el("li", null, b)));
-      card.appendChild(ul);
-    }
 
     const form = el("form", "gate__form");
     form.noValidate = true;
@@ -1399,14 +1417,12 @@
       return inp;
     };
 
-    /* Three fields, in this order, each carrying the reason it is asked. The
-       optional business name and the free-text trade are gone: four fields
-       read as more work than three, and the trading name is captured on the
-       call or on the last nine taps. */
+    /* TWO fields, each carrying the reason it is asked. The mobile is not one
+       of them: a phone number is the price of a phone call, and it is asked
+       once, later, by the visitor who actually wants one. */
     const F_ = G.fields || {};
-    addField("name",   F_.name   || "Your name", { type: "text", autocomplete: "name" });
-    addField("mobile", F_.mobile || "Mobile",    { type: "tel", autocomplete: "tel", inputmode: "tel" });
-    addField("email",  F_.email  || "Email",     { type: "email", autocomplete: "email", inputmode: "email" });
+    addField("name",   F_.name   || "First name", { type: "text", autocomplete: "given-name" });
+    addField("email",  F_.email  || "Email",      { type: "email", autocomplete: "email", inputmode: "email" });
 
     /* honeypot: humans never see it, bots fill it, the server pretends success */
     const hp = doc.createElement("input");
@@ -1509,10 +1525,12 @@
     const answers = {};
     PRE_GATE_KEYS.forEach((k) => { if (a[k]) answers[k] = a[k]; });
 
+    /* No phone key at all: the gate does not ask for one. The API treats a
+       partial submission without a mobile as a whole lead (email only), and
+       the number is attached later if they book the call. */
     const payload = {
       name: val("name"),
       email: val("email"),
-      phone: val("mobile"),
       website: val("website"),        // honeypot, empty for humans
       answers: answers,
       partial: true,
@@ -1542,16 +1560,17 @@
         state.token = (out.pdf && out.pdf.token) ? String(out.pdf.token) : "";
         state.screen = "unlocked";
         save();
-        renderMap(state.mirror, { locked: false });
+        renderMap(state.mirror, { locked: false, unblur: true });
         mark("unlocked");
         pixel("Lead", { content_name: "leak-audit" });
         unlocked(payload.email, null, out.pdf);
       })
       .catch(() => {
-        /* Never punish the visitor for our outage: show the whole map anyway. */
+        /* Never punish the visitor for our outage: unblur from the client
+           mirror and show the whole map anyway. */
         state.screen = "unlocked";
         save();
-        renderMap(state.mirror, { locked: false });
+        renderMap(state.mirror, { locked: false, unblur: true });
         unlocked(payload.email, A.sendError || "");
       });
   }
@@ -1563,7 +1582,6 @@
     flash.tabIndex = -1;
     flash.appendChild(el("b", "audit-flash__title", errorLine ? (A.sendErrorTitle || "") : (T.title || "")));
     if (errorLine) flash.appendChild(el("p", "audit-flash__body", errorLine));
-    else if (email) flash.appendChild(el("p", "audit-flash__body", fill(T.body, { email: email })));
     if (errorLine) {
       const mail = doc.createElement("a");
       mail.className = "audit-flash__mail";
@@ -1578,23 +1596,28 @@
       const slot = el("div", "audit-pdf");
       actions.appendChild(slot);
       // no token means the audit row never landed, so no PDF is coming either
-      if (pdf && pdf.token) pollPdf(String(pdf.token), slot);
+      if (pdf && pdf.token) pollPdf(String(pdf.token), slot, email);
       else slot.appendChild(el("p", "audit-pdf__fail", T.pdfFailed || ""));
       flash.appendChild(actions);
     }
-    /* THE ENDING. They have the number and they have the map, so the only
-       thing left that they cannot do for themselves is have the leak plugged.
-       The nine remaining taps stay on the screen as the quiet second choice,
-       because "no call required" has to stay true in both directions. */
-    flash.appendChild(buildOffer(state.mirror, T, {
+    /* THE ENDING, LIFTED OUT OF THE RECEIPT. They have the number and they
+       have the map, so the only thing left they cannot do for themselves is
+       have the leak plugged. Nested inside the green receipt it read as part
+       of the confirmation, which is a thing you finish reading rather than a
+       thing you do, so it now sits on its own card directly under it. The nine
+       remaining taps stay on the screen as the quiet second choice, because
+       "no call required" has to stay true in both directions. */
+    const offer = buildOffer(state.mirror, T, {
       token: (!errorLine && pdf && pdf.token) ? String(pdf.token) : "",
       onFinish: startFinish,
-    }));
-    if (errorLine && T.ctaNote) flash.appendChild(el("p", "audit-flash__note", T.ctaNote));
+    });
+    offer.classList.add("audit-offer--solo");
+    if (errorLine && T.ctaNote) offer.appendChild(el("p", "audit-flash__note", T.ctaNote));
+    const ending = [flash, offer];
     /* the one real scarcity fact on this page, stated once, as a fact */
-    if (T.scarcity) flash.appendChild(el("p", "audit-flash__scarcity", T.scarcity));
+    if (T.scarcity) ending.push(el("p", "audit-flash__scarcity", T.scarcity));
     if (mapRefs) {
-      mapRefs.flashSlot.replaceChildren(flash);
+      mapRefs.flashSlot.replaceChildren.apply(mapRefs.flashSlot, ending);
       try { flash.focus({ preventScroll: true }); } catch (err) { /* older Safari */ }
       scrollToFlash();
     }
@@ -1629,22 +1652,33 @@
     }
 
     /* the primary act */
-    let times = null;
-    if (opts.token && Array.isArray(T.times) && T.times.length) {
+    if (state.book === "done") {
+      /* Already booked, this session. The button is gone because the thing it
+         asked for has happened; the confirmation stands in its place, and a
+         reload lands straight back here. */
+      sec.appendChild(bookedNote(T));
+    } else if (opts.token && Array.isArray(T.times) && T.times.length) {
       const btn = el("button", "btn btn--primary btn--lg audit-flash__cta", O.button || "");
       btn.type = "button";
       btn.setAttribute("aria-expanded", "false");
       sec.appendChild(btn);
-      times = buildTimes(opts.token, T);
-      times.hidden = true;
-      sec.appendChild(times);
-      btn.addEventListener("click", () => {
-        times.hidden = false;
+      const booking = buildBooking(opts.token, T);
+      booking.hidden = true;
+      sec.appendChild(booking);
+      const open = (focusIt) => {
+        booking.hidden = false;
         btn.setAttribute("aria-expanded", "true");
         btn.hidden = true;
-        const chip = times.querySelector(".chip-toggle");
-        if (chip) { try { chip.focus({ preventScroll: true }); } catch (e) { chip.focus(); } }
-      });
+        state.book = "open";
+        save();
+        mark("book_open");
+        if (!focusIt) return;
+        const first = booking.querySelector("input");
+        if (first) { try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); } }
+      };
+      btn.addEventListener("click", () => open(true));
+      /* a reload with the form already open lands with it already open */
+      if (state.book === "open") open(false);
     } else {
       const a_ = doc.createElement("a");
       a_.className = "btn btn--primary btn--lg audit-flash__cta";
@@ -1653,19 +1687,38 @@
       sec.appendChild(a_);
     }
     if (O.guarantee) sec.appendChild(el("p", "audit-offer__guarantee", O.guarantee));
-    /* The nine taps stay available, one rung quieter than the call. */
+    if (O.trust) sec.appendChild(el("p", "audit-offer__trust", O.trust));
+    /* The nine taps stay available, one rung quieter than the call, and BELOW
+       the trust line: who you are talking to belongs to the offer, and the
+       second choice belongs after the offer has finished making its case. */
     if (opts.onFinish && O.finishLink) {
       const fin = el("button", "audit-offer__finish", O.finishLink);
       fin.type = "button";
       fin.addEventListener("click", opts.onFinish);
       sec.appendChild(fin);
     }
-    if (O.trust) sec.appendChild(el("p", "audit-offer__trust", O.trust));
     return sec;
   }
 
-  /* The preferred-call-time row. An OPTIONAL extra on a screen whose whole job
-     is to feel like good news, which sets two rules it never breaks:
+  /* The confirmation, on its own. Built here as well as inside the booking
+     form so a reload after a booking can print it without the form. */
+  function bookedNote(T) {
+    const row = el("div", "audit-times chip-row is-done");
+    /* A reload keeps the number, so the confirmation keeps saying it. If the
+       store was lost the sentence still has to read, so it says "you". */
+    const msg = el("p", "audit-times__ok",
+      fill((T && T.timesSuccess) || "", { mobile: state.mobile || "you" }));
+    msg.setAttribute("role", "status");
+    row.appendChild(msg);
+    return row;
+  }
+
+  /* THE BOOKING STEP. The one place on the page that asks for a mobile, asked
+     of somebody who has just tapped a button asking for a phone call, with the
+     reason sitting next to the field. Above the same five time chips as ever.
+
+     An OPTIONAL extra on a screen whose whole job is to feel like good news,
+     which sets two rules it never breaks:
 
        · it never shows an error. Any failure at all (network down, non-200,
          a body that is not {success:true}) removes the row and says nothing.
@@ -1679,8 +1732,54 @@
      Chip language is lifted wholesale from the enquiry box on the home page
      (.chip-row__label / .chip-row__chips / .chip-toggle, aria-pressed, 44px),
      so it reads as the same offer in the same house voice. */
-  function buildTimes(token, T) {
+  function buildBooking(token, T) {
+    const G = A.gate || {};
+    const B = T.booking || {};
     const row = el("div", "audit-times chip-row");
+
+    /* ---- the mobile, above the chips, validated the way the gate's fields
+            are: our own message, announced, cleared the moment it is right --- */
+    const fieldWrap = el("div", "gate__field audit-times__field");
+    const labelEl = doc.createElement("label");
+    labelEl.appendChild(el("span", "gate__lab", B.mobileLabel || "Mobile"));
+    const mobile = doc.createElement("input");
+    mobile.id = "la-book-mobile";
+    mobile.name = "mobile";
+    mobile.type = "tel";
+    mobile.required = true;
+    mobile.setAttribute("autocomplete", "tel");
+    mobile.setAttribute("inputmode", "tel");
+    mobile.setAttribute("aria-describedby", "la-book-mobile-err");
+    labelEl.appendChild(mobile);
+    if (B.mobileWhy) labelEl.appendChild(el("span", "gate__why", B.mobileWhy));
+    const err = el("span", "gate__err");
+    err.id = "la-book-mobile-err";
+    fieldWrap.append(labelEl, err);
+    row.appendChild(fieldWrap);
+
+    const clearMobile = () => {
+      mobile.removeAttribute("aria-invalid");
+      err.textContent = "";
+      err.classList.remove("is-on");
+    };
+    const markMobile = () => {
+      mobile.setAttribute("aria-invalid", "true");
+      err.textContent = mobile.validity.valueMissing
+        ? (G.errorRequired || "Please fill this in.")
+        : (G.errorInvalid || "Please check this.");
+      err.classList.add("is-on");
+    };
+    mobile.addEventListener("input", () => { if (mobile.checkValidity()) clearMobile(); });
+    mobile.addEventListener("blur", () => {
+      if (mobile.checkValidity()) { clearMobile(); return; }
+      /* An empty field they have not typed in yet has not been got WRONG, it has
+         not been filled in yet. Shouting at it the moment focus leaves (which
+         this row's own "go and pick a time" focus move does) is an error message
+         for something the visitor was never given the chance to do. The submit
+         still says it, out loud, at the moment it actually matters. */
+      if (String(mobile.value || "").trim()) markMobile();
+    });
+
     const label = el("span", "chip-row__label audit-times__label", T.timesLabel || "");
     row.appendChild(label);
 
@@ -1692,10 +1791,22 @@
     }
     row.appendChild(chips);
 
+    /* The submit is NEVER disabled. A disabled button on a phone is a dead tap
+       that explains nothing: the visitor cannot tell a broken page from a rule
+       they have not met. So the button always answers, and when nothing is
+       picked it says so here and sends the thumb to the chips. */
+    const chipErr = el("span", "gate__err audit-times__err");
+    chipErr.id = "audit-times-err";
+    chips.setAttribute("aria-describedby", chipErr.id);
+    row.appendChild(chipErr);
+    const clearChips = () => {
+      chipErr.textContent = "";
+      chipErr.classList.remove("is-on");
+    };
+
     const foot = el("div", "audit-times__foot");
     const btn = el("button", "btn btn--ghost audit-times__btn", T.timesButton || "");
     btn.type = "button";
-    btn.disabled = true;
     foot.append(btn, el("p", "audit-times__note", T.timesNote || ""));
     row.appendChild(foot);
 
@@ -1717,7 +1828,7 @@
       c.addEventListener("click", () => {
         const on = c.classList.toggle("is-on");
         c.setAttribute("aria-pressed", on ? "true" : "false");
-        btn.disabled = picked().length === 0;
+        if (picked().length) clearChips();
       });
       chips.appendChild(c);
     });
@@ -1726,20 +1837,48 @@
 
     btn.addEventListener("click", () => {
       const times = picked();
-      if (!times.length) return;
+      if (!times.length) {
+        chipErr.textContent = T.timesRequired || "Pick a time that suits.";
+        chipErr.classList.add("is-on");
+        const firstChip = chips.querySelector(".chip-toggle");
+        if (firstChip) {
+          try { firstChip.focus({ preventScroll: true }); } catch (e) { firstChip.focus(); }
+        }
+        return;
+      }
+      clearChips();
+      /* A missing mobile is not a failure of ours, so it is the one thing this
+         row does say out loud. Everything else stays silent. */
+      if (!mobile.checkValidity()) {
+        markMobile();
+        try { mobile.focus({ preventScroll: true }); } catch (e) { mobile.focus(); }
+        return;
+      }
+      clearMobile();
       btn.disabled = true;
       fetch("/api/public/leak-audit/times", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: token, times: times }),
+        body: JSON.stringify({ token: token, times: times,
+                               mobile: String(mobile.value || "").trim() }),
       })
         .then((res) => (res.ok ? res.json() : null))
         .then((out) => {
           if (!out || !out.success) { drop(); return; }
           mark("time_tapped");
+          /* the one Meta event that says a call was asked for, no parameters
+             beyond the page name: never the time, never the number */
+          pixel("Schedule", { content_name: "leak-audit" });
+          /* the number is echoed back in the confirmation, so it is kept for
+             the reload that lands straight on the booked state */
+          state.mobile = String(mobile.value || "").trim();
+          state.book = "done";
+          save();
           row.classList.add("is-done");
-          [label, chips, foot].forEach((n) => { if (n.parentNode) n.parentNode.removeChild(n); });
-          msg.textContent = T.timesSuccess || "";
+          [fieldWrap, label, chips, chipErr, foot].forEach((n) => {
+            if (n.parentNode) n.parentNode.removeChild(n);
+          });
+          msg.textContent = fill(T.timesSuccess || "", { mobile: state.mobile });
         })
         .catch(drop);
     });
@@ -1810,14 +1949,16 @@
     if (state.token) {
       const slot = el("div", "audit-pdf");
       actions.appendChild(slot);
-      pollPdf(state.token, slot);
+      pollPdf(state.token, slot, state.email);
     }
     flash.appendChild(actions);
-    /* Same offer, same guarantee. The only thing missing is the second choice,
-       because there is nothing left to finish. */
-    flash.appendChild(buildOffer(state.mirror, T, { token: state.token, onFinish: null }));
-    if (T.scarcity) flash.appendChild(el("p", "audit-flash__scarcity", T.scarcity));
-    mapRefs.flashSlot.replaceChildren(flash);
+    /* Same offer, same guarantee, same card of its own. The only thing missing
+       is the second choice, because there is nothing left to finish. */
+    const offer = buildOffer(state.mirror, T, { token: state.token, onFinish: null });
+    offer.classList.add("audit-offer--solo");
+    const ending = [flash, offer];
+    if (T.scarcity) ending.push(el("p", "audit-flash__scarcity", T.scarcity));
+    mapRefs.flashSlot.replaceChildren.apply(mapRefs.flashSlot, ending);
     try { flash.focus({ preventScroll: true }); } catch (err) { /* older Safari */ }
   }
 
@@ -1828,18 +1969,21 @@
      200 with the PDF itself once it is ready. Every exit is honest: the button
      only ever appears once the file is genuinely downloadable, and a timeout
      falls back to the email line rather than leaving a dead button. */
-  function pollPdf(token, slot) {
+  function pollPdf(token, slot, email) {
     const T = A.thanks || {};
     const url = "/api/public/leak-audit/pdf/" + encodeURIComponent(token);
     const EVERY = 3000, MAX = 40;              // 40 x 3s is a touch under 2 min
     let tries = 0, stopped = false;
 
+    /* One quiet line, no spinner. A spinner on a page that has already given
+       them everything reads as something still going wrong; the copy is on its
+       way and that is the whole of what there is to say. The polling carries on
+       underneath it exactly as before, and swaps this for the download button
+       the moment the file is genuinely there. */
     const prep = el("p", "audit-pdf__prep");
     prep.setAttribute("role", "status");
     prep.setAttribute("aria-live", "polite");
-    const spin = el("span", "audit-pdf__spin");
-    spin.setAttribute("aria-hidden", "true");
-    prep.append(spin, doc.createTextNode(T.pdfPreparing || ""));
+    prep.textContent = fill(T.pdfPreparing || "", { email: email || "your inbox" });
     slot.replaceChildren(prep);
 
     const giveUp = () => {
@@ -1919,8 +2063,10 @@
      allowed to cost the visitor a single tap. */
   function resume() {
     const s = state.screen;
-    if (s === "reveal" && haveSeven()) { toReveal(); return; }
-    if (s === "gate" && haveSeven()) { toGate(); return; }
+    /* "reveal" is a screen this build no longer has. A tab left open across
+       the change still carries it, and the honest landing for it is the gate:
+       the number is built, and it has not been handed over yet. */
+    if ((s === "gate" || s === "reveal") && haveSeven()) { toGate(); return; }
     if ((s === "unlocked" || s === "done") && haveSeven()) {
       const full = QS().every((q) => state.answers[q.key] ||
         (q.skipWhen && state.answers[q.skipWhen.key] === q.skipWhen.value));
@@ -1963,6 +2109,8 @@
       state.step = typeof saved.step === "number" ? saved.step : 0;
       state.token = typeof saved.token === "string" ? saved.token : "";
       state.screen = typeof saved.screen === "string" ? saved.screen : "q";
+      state.book = (saved.book === "open" || saved.book === "done") ? saved.book : "";
+      state.mobile = typeof saved.mobile === "string" ? saved.mobile.slice(0, 24) : "";
       prune();
     }
     resume();
