@@ -723,13 +723,19 @@ window.SITE = {
        work than three, and the real trading name is captured on the call or on
        the last nine taps. */
     gate: {
+      // The kicker is built at render time from the worst leak the seven taps
+      // found, so the card opens on THEIR problem, not on our step count.
+      // `kicker` is only the fallback for a state where no leak ranks first.
+      kickerLead: "Your worst leak: ",
       kicker: "One step left",
-      title: "See where that money is going",
-      sub: "The two leaks behind your number, your own answers quoted back on each one, and the arithmetic written out so you can check it. We email you the PDF too, and it is yours to keep.",
+      title: "Now the part you can't guess: the fix.",
+      sub: "Your number was the easy bit. The map shows where each dollar goes. It shows the one change that stops your biggest leak first, written out so you can do it yourself or have it done. Tell us where to send it.",
+      // What they get, in the order it is worth: the document, the fix for the
+      // one leak that is costing them most, then the call they can take or leave.
       bullets: [
-        "Your own answers quoted back on each leak",
-        "A dollar range on each one, with the maths written out",
-        "Where your numbers sit against the published research",
+        "Your Leak Map: the five leaks, your own answers, the maths shown",
+        "The Leak Fix for your worst leak, in plain words, with what it should return",
+        "Fifteen minutes on the phone if you want it. A price on the spot. A straight answer if it isn't worth doing yet",
       ],
       fields: {
         name: "Your name",
@@ -739,20 +745,19 @@ window.SITE = {
       },
       // the reason line under each label, so no field is asked for silently
       reasons: {
-        name: "So the map is addressed to a person, not a trade.",
-        mobile: "So we can text you the map link and set up the fifteen minutes if you want it.",
-        email: "Where your PDF goes.",
+        name: "So the map is addressed to a person.",
+        // He rings every lead himself, so the field that asks for the number
+        // says so, next to the field, where it is actually read. The old
+        // version of this line sat under the button and was skipped.
+        mobile: "So Nicholas can give you one ring about the fix. One word stops it.",
+        email: "Where the map goes.",
       },
       errorRequired: "Please fill this in.",
       errorEmail: "Please enter a valid email address.",
       errorInvalid: "Please check this.",
-      button: "Show me the map",
-      sending: "Unlocking...",
+      button: "Send my map and the fix",
+      sending: "Sending...",
       note: "The map is yours to keep either way. No spam, no lock in.",
-      // He rings every lead himself, so the page says so. A page that says "we
-      // will give you one ring" and then rings is honest. The other way round
-      // is not.
-      privacy: "Your email is for the map. We will give you one ring to see if you want the fifteen minutes, and if you would rather we did not, one word stops it.",
       // A sceptical owner wants to look us up before typing a mobile number.
       // These two open in a new tab so the run behind them survives.
       site: {
@@ -813,6 +818,18 @@ window.SITE = {
       // page or in the PDF (Nicholas, explicit): this is an ad-driven lead
       // magnet, not a how-to.
       chain: "The map is yours to keep. Plugging the leaks is the part we do.",
+    },
+
+    /* THE LEAK FIX. One plain-words line per priced channel, printed on the
+       worst leak's card the moment the map opens. It is the thing the gate
+       promised and the one thing they could not guess from the number.
+       OUTCOME LANGUAGE ONLY: no product name, no "AI", no "worker", no
+       "agent". What changes in their week, not what we install to do it. */
+    fixes: {
+      label: "Your Leak Fix",
+      missed_calls: "Every missed call gets a ring back inside a minute. After hours as well. None of it lands on you.",
+      slow_reply: "Every web and social enquiry gets a real answer inside a minute. Day or night. Yours is the first one they read.",
+      note: "What it costs, and what it should give back. That is the fifteen minutes.",
     },
 
     /* Channel labels, the worker who plugs each one, and one honest note per
@@ -891,8 +908,8 @@ window.SITE = {
 
     /* "Start here" line per channel, and the honest all-clear version. */
     startLines: {
-      missed_calls:    "Start with the phone. Ada takes your after-hours calls first, which is the lowest-risk place to begin: a missed after-hours call is already a lost job, so there is nothing to lose.",
-      slow_reply:      "Start with reply speed. Zip answers every website and social enquiry in under a minute, day or night, before anyone else gets a look in.",
+      missed_calls:    "Start with the phone. Take the after hours calls first, which is the lowest-risk place to begin: a missed after hours call is already a lost job, so there is nothing to lose.",
+      slow_reply:      "Start with reply speed. Every website and social enquiry gets a real answer in under a minute, day or night, before anyone else gets a look in.",
       // Nudge's real capability, stated conditionally. With a fixed, written
       // price list it builds and sends the quote itself FROM that list; without
       // one it chases what the owner sends. It never invents a number either way.
@@ -904,8 +921,8 @@ window.SITE = {
 
     /* One action line per channel for the 12-week roadmap. */
     roadmapActions: {
-      missed_calls:    "Put Ada on after-hours calls first, then move her to full-time cover once you have read a week of transcripts.",
-      slow_reply:      "Zip replies to every website and social enquiry inside a minute and books the ones that are ready.",
+      missed_calls:    "Cover the after hours calls first, then the whole day once you have read a week of transcripts.",
+      slow_reply:      "Every website and social enquiry gets a reply inside a minute, and the ones that are ready get booked.",
       unchased_quotes: "Where you have a fixed price list, Nudge builds and sends the quote itself from that list. Where you don't, it chases the ones you send on day one, three and seven. It never invents a price.",
       reviews:         "Star asks every customer for a review once the job is done, the same way every time.",
       dormant:         "Boomer works your past-customer list with an opt-out on every message and books the ones who bite.",
@@ -935,6 +952,33 @@ window.SITE = {
       forkTitle: "Three leaks left to price",
       forkBody: "Your quotes, your reviews and your past customers. Nine more taps finishes the map on this screen, or we do those three with you on the fifteen minutes.",
       finishButton: "Finish the map. Nine taps.",
+
+      /* THE ENDING. The map is open, so the number is no longer news: the only
+         honest next step is the one thing they cannot do for themselves, which
+         is have the leak plugged. Headline keys are the two channels the seven
+         taps can price, and the copy speaks to the one that ranked worst.
+         NO scarcity claim, no trial, no promise of a result, and the mechanism
+         is never named here. The outcome is. */
+      offer: {
+        kickerLead: "Your worst leak: ",
+        headlines: {
+          missed_calls: "You can't answer the phone from a roof. Someone should.",
+          slow_reply: "The job goes to whoever answers first. It can be you.",
+        },
+        body: "That leak has a fix, and it isn't you working harder. On a fifteen minute call we take your map and pick the one leak worth fixing first. Then we show you what plugging it looks like. You get a price on the spot.",
+        walkTitle: "Walk away with",
+        walk: [
+          "The one change that stops your biggest leak, in plain words",
+          "What it costs and what it should return, from your own numbers",
+          "A straight answer if it isn't worth doing yet",
+        ],
+        button: "Book my Leak Fix call",
+        // The risk reversal. It promises a thing we control (what they leave
+        // the call holding), never a result we do not control.
+        guarantee: "If the fifteen minutes doesn't hand you at least one fix you could do yourself this week, that's on us.",
+        finishLink: "Finish the map first, nine taps",
+        trust: "You'll talk to Nicholas, who built this. No sales team, no lock in.",
+      },
       finishIntro: "Nice one. These nine price the other three leaks, then the map is complete.",
       finishDone: "That is the lot. All five leaks, priced or honestly refused.",
       // shown only when the send failed, where there is no row to book against
@@ -948,7 +992,7 @@ window.SITE = {
          landed (no token, no row). Same five windows as the enquiry box on the
          home page on purpose: the server validates against exactly these
          labels, so they are the contract, not decoration. */
-      timesLabel: "Or tap when suits and we will text you a time.",
+      timesLabel: "Tap when suits and we will text you a time.",
       times: ["Early morning", "Mid-morning", "Arvo", "After 5pm", "Whenever"],
       timesNote: "No cost, no obligation.",
       timesButton: "Text me a time",

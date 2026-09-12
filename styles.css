@@ -2437,9 +2437,89 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 .audit-fork__body { margin-top: .4rem; font-size: .95rem; line-height: 1.55; color: var(--ink-2); max-width: 54ch; }
 .audit-flash__alt-cta { background: var(--bg); }
 
+/* ---- The Leak Fix: what the gate traded for, on the worst leak's card ----
+   Outcome language only, so this panel never carries a product name. It sits
+   on the green payoff surface inside a white card: label #0b5c29 is 7.29:1
+   there, --muted on the note is 5.34:1. */
+.leak-fix {
+  display: block; margin-top: .95rem; padding: .85rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--green-soft);
+  border: 1px solid color-mix(in srgb, var(--green) 26%, transparent);
+}
+.leak-fix__label {
+  display: block; font-size: .68rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: #0b5c29;
+}
+.leak-fix__text {
+  margin-top: .35rem; font-size: 1rem; font-weight: 600; line-height: 1.5;
+  color: var(--ink); max-width: 52ch;
+}
+.leak-fix__note { margin-top: .4rem; font-size: .85rem; font-weight: 600; color: var(--muted); }
+
+/* ---- The ending: the offer ----------------------------------------------
+   Sits inside the green flash panel on its own white surface, so the small
+   type keeps a white background to be measured against (--muted is 5.97:1,
+   --muted-2 4.57:1, --accent-ink 6.68:1). One thumb: the button is full width
+   and everything under it is centred on the same axis. */
+.audit-offer {
+  margin-top: 1.4rem; padding: clamp(1.05rem, 4vw, 1.45rem);
+  border-radius: var(--radius); background: var(--bg); border: 1px solid var(--line);
+}
+.audit-offer__kicker {
+  display: block; font-size: .7rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted);
+}
+.audit-offer__title {
+  display: block; margin-top: .45rem;
+  font-size: clamp(1.28rem, 4.6vw, 1.55rem); font-weight: 800;
+  letter-spacing: -.025em; line-height: 1.18; color: var(--ink); text-wrap: balance;
+}
+.audit-offer__body {
+  margin-top: .65rem; font-size: 1rem; line-height: 1.55; color: var(--ink-2); max-width: 54ch;
+}
+.audit-offer__walk {
+  display: block; margin-top: 1.15rem; font-size: .7rem; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.audit-offer__list { margin-top: .6rem; gap: .5rem; }
+.audit-offer__list li { font-size: .95rem; }
+.audit-offer .audit-flash__cta { width: 100%; margin-top: 1.2rem; }
+/* .btn is display:inline-flex, which outguns the UA's [hidden] rule, so the
+   button that has opened the chips has to be told to go properly. */
+.audit-offer .audit-flash__cta[hidden] { display: none; }
+.audit-offer__guarantee {
+  max-width: 46ch; margin: .8rem auto 0;
+  font-size: .92rem; font-weight: 700; line-height: 1.5; color: var(--ink-2); text-align: center;
+}
+/* the nine taps stay available, one rung quieter than the call */
+.audit-offer__finish {
+  display: block; margin: .85rem auto 0; min-height: 44px; padding: .3rem .4rem;
+  background: none; border: 0; cursor: pointer; font: inherit;
+  font-size: .95rem; font-weight: 700; color: var(--accent-ink);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.audit-offer__finish:focus-visible { outline: 3px solid var(--accent-ink); outline-offset: 2px; border-radius: 8px; }
+.audit-offer__trust {
+  margin-top: .9rem; font-size: .86rem; font-weight: 600; color: var(--muted); text-align: center;
+}
+/* the chips open in place under the button, so they take the card's hairline
+   rather than the green one they use on the flash panel, and the confirm
+   becomes the primary act now that the button above it has done its job */
+.audit-offer .audit-times { margin-top: 1.15rem; border-top-color: var(--line); }
+.audit-offer .audit-times .chip-toggle { background: var(--bg-soft); }
+.audit-offer .audit-times__foot { justify-content: space-between; }
+.audit-offer .audit-times__btn {
+  background: var(--accent-ink); color: #fff; border-color: transparent; font-weight: 700;
+}
+.audit-offer .audit-times__btn:hover { border-color: transparent; }
+.audit-offer .audit-times__btn[disabled] { opacity: .45; }
+
 @media (max-width: 640px) {
   .audit-reveal__btn { min-height: 58px; }
   .audit-flash__cta { width: 100%; }
+  .audit-offer .audit-times__btn { width: 100%; }
+  .audit-offer .audit-times__note { text-align: center; width: 100%; }
 }
 
 /* ---- Reduced motion: the reveal never moves ------------------------------ */

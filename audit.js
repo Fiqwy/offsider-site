@@ -995,7 +995,7 @@
     state.mirror = state.mirror || partialScores(state.answers);
     save();
     renderMap(state.mirror, { locked: true });
-    scrollToStage();
+    scrollToGate();
   }
 
   /* The sticky chrome is the fixed bar plus the trust strip pinned under it, and it is
@@ -1012,6 +1012,35 @@
            strip.getBoundingClientRect().height + 12;
   }
 
+  /* The gate is the ask, so the ask is what the fold holds. Scrolling to the
+     top of the stage put the map masthead and the number they have already
+     seen in front of the card, and pushed all three fields below the fold on a
+     390 by 844 phone. Scroll to the card instead, one hairline of blurred map
+     still showing above it so it is obvious what is being unlocked. fitWell()
+     grows the well in a rAF, so wait a frame before measuring. */
+  function scrollToGate() {
+    const go = () => {
+      const card = doc.querySelector(".gate__card");
+      if (!card) { scrollToStage(); return; }
+      const y = card.getBoundingClientRect().top + window.scrollY - chromeHeight() - 10;
+      try { window.scrollTo({ top: Math.max(0, y), behavior: REDUCED ? "auto" : "smooth" }); }
+      catch (err) { window.scrollTo(0, Math.max(0, y)); }
+    };
+    requestAnimationFrame(() => requestAnimationFrame(go));
+  }
+
+  /* Same idea on the way out: the offer is the screen now, so put its top under
+     the chrome rather than leaving the visitor parked wherever the gate was. */
+  function scrollToFlash() {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const flash = doc.querySelector(".audit-flash");
+      if (!flash) return;
+      const y = flash.getBoundingClientRect().top + window.scrollY - chromeHeight() - 10;
+      try { window.scrollTo({ top: Math.max(0, y), behavior: REDUCED ? "auto" : "smooth" }); }
+      catch (err) { window.scrollTo(0, Math.max(0, y)); }
+    }));
+  }
+
   function scrollToStage() {
     if (!stage) return;
     const y = stage.getBoundingClientRect().top + window.scrollY - chromeHeight();
@@ -1020,6 +1049,25 @@
   }
 
   let mapRefs = null;   // { root, body, gate, flashSlot }
+
+  /* The one leak that is costing them most, out of the two the seven taps can
+     price. It names the gate, it names the ending, and it is the card that
+     carries the Leak Fix. Ties fall to missed calls, same rule the engine's
+     start_here uses, so the page and the server never disagree about which
+     leak is the worst one. A channel with no figure never wins. */
+  function worstLeak(scores) {
+    const list = (scores && scores.channels) || [];
+    const fig = (k) => {
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].key === k) return list[i].annual_high == null ? -1 : list[i].annual_high;
+      }
+      return -1;
+    };
+    return fig("slow_reply") > fig("missed_calls") ? "slow_reply" : "missed_calls";
+  }
+
+  const channelLabel = (key) =>
+    (((A.channels || {})[key]) || {}).label || "";
 
   function renderMap(scores, opts) {
     const R = A.result || {};
@@ -1060,7 +1108,8 @@
     const rows = el("div", "leak-rows");
     const figs = scores.channels.map((c) => (c.annual_high == null ? 0 : c.annual_high));
     const maxFig = Math.max.apply(null, figs.concat([1]));
-    scores.channels.forEach((c) => rows.appendChild(buildRow(c, maxFig, R)));
+    const worst = worstLeak(scores);
+    scores.channels.forEach((c) => rows.appendChild(buildRow(c, maxFig, R, c.key === worst)));
     body.appendChild(rows);
 
     body.appendChild(buildStart(scores, R));
@@ -1081,7 +1130,7 @@
     let gate = null;
     if (opts.locked) {
       lock(true);
-      gate = buildGate();
+      gate = buildGate(worst);
       lockwrap.appendChild(gate);
       mark("gate");
     }
@@ -1096,7 +1145,7 @@
     return h;
   }
 
-  function buildRow(c, maxFig, R) {
+  function buildRow(c, maxFig, R, isWorst) {
     const row = el("div", "leak-row");
     row.dataset.status = c.status || "none";
     if (c.not_priced) row.classList.add("is-unpriced");
@@ -1115,12 +1164,18 @@
     head.append(name, pills);
     row.appendChild(head);
 
-    const worker = el("p", "leak-row__worker");
-    worker.append(
-      el("span", "leak-row__wname", c.worker.name || ""),
-      doc.createTextNode(c.worker.role ? " · " + c.worker.role : "")
-    );
-    row.appendChild(worker);
+    /* The worst leak's card is the one the gate sold, so it carries the fix
+       rather than the name of the thing that does it. Every other card keeps
+       its crew line exactly as it was. */
+    const fixLine = isWorst && ((A.fixes || {})[c.key] || "");
+    if (!fixLine) {
+      const worker = el("p", "leak-row__worker");
+      worker.append(
+        el("span", "leak-row__wname", c.worker.name || ""),
+        doc.createTextNode(c.worker.role ? " · " + c.worker.role : "")
+      );
+      row.appendChild(worker);
+    }
 
     const track = el("div", "leak-row__track");
     track.setAttribute("aria-hidden", "true");
@@ -1154,6 +1209,17 @@
       rangeInto(fig, c.annual_low, c.annual_high, R.rangeSep);
       fig.appendChild(el("span", "leak-row__per", " " + (R.perYear || "")));
       row.appendChild(fig);
+    }
+
+    /* THE LEAK FIX. The thing the gate traded for: what actually changes in
+       their week, in plain words, on the leak that is costing them most. */
+    if (fixLine) {
+      const F = A.fixes || {};
+      const fix = el("aside", "leak-fix");
+      fix.appendChild(el("span", "leak-fix__label", F.label || "Your Leak Fix"));
+      fix.appendChild(el("p", "leak-fix__text", fixLine));
+      if (F.note) fix.appendChild(el("p", "leak-fix__note", F.note));
+      row.appendChild(fix);
     }
 
     /* their own answers, quoted back, above our read of them. The label owns
@@ -1289,12 +1355,16 @@
   /* ===========================================================================
      7. THE GATE
      ========================================================================= */
-  function buildGate() {
+  function buildGate(worst) {
     const G = A.gate || {};
     const wrap = el("div", "leakmap__gate");
     const card = el("div", "gate__card");
 
-    card.appendChild(el("span", "gate__kicker", G.kicker || ""));
+    /* Their problem, not our step count: the card opens by naming the leak the
+       seven taps found first. */
+    const lab = channelLabel(worst);
+    card.appendChild(el("span", "gate__kicker",
+      lab ? (G.kickerLead || "") + lab : (G.kicker || "")));
     card.appendChild(el("b", "gate__title", G.title || ""));
     card.appendChild(el("p", "gate__sub", G.sub || ""));
 
@@ -1501,49 +1571,97 @@
       mail.textContent = S.brand.email || "";
       flash.appendChild(mail);
     }
-    /* THE FORK. Two of five leaks are priced, and the visitor picks how the
-       other three get priced: nine more taps here, or fifteen minutes with us.
-       Both are offered on BOTH paths, because a failed send is our problem and
-       not a reason to drop somebody at a dead end. */
+    /* The PDF sits on its own row, directly under the confirmation it belongs
+       to, so the offer below it starts clean. */
     const actions = el("div", "audit-flash__actions");
-    if (T.forkTitle) flash.appendChild(el("b", "audit-fork__title", T.forkTitle));
-    if (T.forkBody) flash.appendChild(el("p", "audit-fork__body", T.forkBody));
-    const go = el("button", "btn btn--primary btn--lg audit-flash__cta", T.finishButton || "");
-    go.type = "button";
-    go.addEventListener("click", startFinish);
-    actions.appendChild(go);
     if (!errorLine) {
       const slot = el("div", "audit-pdf");
       actions.appendChild(slot);
       // no token means the audit row never landed, so no PDF is coming either
       if (pdf && pdf.token) pollPdf(String(pdf.token), slot);
       else slot.appendChild(el("p", "audit-pdf__fail", T.pdfFailed || ""));
-    } else {
-      /* nothing landed on our side, so there is no row to book against: the
-         only way through is the old-fashioned one */
-      const cta = doc.createElement("a");
-      cta.className = "btn btn--ghost btn--lg audit-flash__alt-cta";
-      cta.href = "index.html#book";
-      cta.textContent = T.cta || "Book your free call";
-      actions.appendChild(cta);
+      flash.appendChild(actions);
     }
-    flash.appendChild(actions);
-    /* The optional booking nudge sits directly under the call row: for the
-       visitor who wants the fifteen minutes but will not go and pick a slot,
-       three taps is the whole ask. Gated on the SAME token the PDF is gated
-       on, because the token IS the audit row: no token means there is nothing
-       on our side to attach a preferred time to, so nothing is offered. Also
-       never on the error path, where we have no row and no promise to keep. */
-    if (!errorLine && pdf && pdf.token && Array.isArray(T.times) && T.times.length) {
-      flash.appendChild(buildTimes(String(pdf.token), T));
-    }
+    /* THE ENDING. They have the number and they have the map, so the only
+       thing left that they cannot do for themselves is have the leak plugged.
+       The nine remaining taps stay on the screen as the quiet second choice,
+       because "no call required" has to stay true in both directions. */
+    flash.appendChild(buildOffer(state.mirror, T, {
+      token: (!errorLine && pdf && pdf.token) ? String(pdf.token) : "",
+      onFinish: startFinish,
+    }));
     if (errorLine && T.ctaNote) flash.appendChild(el("p", "audit-flash__note", T.ctaNote));
     /* the one real scarcity fact on this page, stated once, as a fact */
     if (T.scarcity) flash.appendChild(el("p", "audit-flash__scarcity", T.scarcity));
     if (mapRefs) {
       mapRefs.flashSlot.replaceChildren(flash);
       try { flash.focus({ preventScroll: true }); } catch (err) { /* older Safari */ }
+      scrollToFlash();
     }
+  }
+
+  /* THE OFFER. One block, used by both endings: the partial map and the
+     finished one. Their worst leak names it, the body says what the fifteen
+     minutes actually does, the three lines say what they walk away with, and
+     the guarantee underneath risks only a thing we control.
+
+     RAILS: the mechanism is never named here (no product name, no "AI", no
+     "worker", no "agent"), there is no scarcity claim, no trial and no promise
+     of a result. `opts.token` is the audit row: with one, the primary button
+     opens the time chips in place; without one there is nothing on our side to
+     attach a time to, so it falls back to the booking section on the home page.
+     `opts.onFinish` is omitted once the map is already finished. */
+  function buildOffer(scores, T, opts) {
+    const O = (T && T.offer) || {};
+    const worst = worstLeak(scores || {});
+    const lab = channelLabel(worst);
+    const sec = el("section", "audit-offer");
+
+    if (lab && O.kickerLead) sec.appendChild(el("span", "audit-offer__kicker", O.kickerLead + lab));
+    const head = (O.headlines || {})[worst] || (O.headlines || {}).missed_calls || "";
+    if (head) sec.appendChild(el("b", "audit-offer__title", head));
+    if (O.body) sec.appendChild(el("p", "audit-offer__body", O.body));
+    if (O.walkTitle) sec.appendChild(el("span", "audit-offer__walk", O.walkTitle));
+    if (Array.isArray(O.walk) && O.walk.length) {
+      const ul = el("ul", "check-list audit-offer__list");
+      O.walk.forEach((w) => ul.appendChild(el("li", null, w)));
+      sec.appendChild(ul);
+    }
+
+    /* the primary act */
+    let times = null;
+    if (opts.token && Array.isArray(T.times) && T.times.length) {
+      const btn = el("button", "btn btn--primary btn--lg audit-flash__cta", O.button || "");
+      btn.type = "button";
+      btn.setAttribute("aria-expanded", "false");
+      sec.appendChild(btn);
+      times = buildTimes(opts.token, T);
+      times.hidden = true;
+      sec.appendChild(times);
+      btn.addEventListener("click", () => {
+        times.hidden = false;
+        btn.setAttribute("aria-expanded", "true");
+        btn.hidden = true;
+        const chip = times.querySelector(".chip-toggle");
+        if (chip) { try { chip.focus({ preventScroll: true }); } catch (e) { chip.focus(); } }
+      });
+    } else {
+      const a_ = doc.createElement("a");
+      a_.className = "btn btn--primary btn--lg audit-flash__cta";
+      a_.href = "index.html#book";
+      a_.textContent = O.button || T.cta || "";
+      sec.appendChild(a_);
+    }
+    if (O.guarantee) sec.appendChild(el("p", "audit-offer__guarantee", O.guarantee));
+    /* The nine taps stay available, one rung quieter than the call. */
+    if (opts.onFinish && O.finishLink) {
+      const fin = el("button", "audit-offer__finish", O.finishLink);
+      fin.type = "button";
+      fin.addEventListener("click", opts.onFinish);
+      sec.appendChild(fin);
+    }
+    if (O.trust) sec.appendChild(el("p", "audit-offer__trust", O.trust));
+    return sec;
   }
 
   /* The preferred-call-time row. An OPTIONAL extra on a screen whose whole job
@@ -1695,9 +1813,9 @@
       pollPdf(state.token, slot);
     }
     flash.appendChild(actions);
-    if (state.token && Array.isArray(T.times) && T.times.length) {
-      flash.appendChild(buildTimes(state.token, T));
-    }
+    /* Same offer, same guarantee. The only thing missing is the second choice,
+       because there is nothing left to finish. */
+    flash.appendChild(buildOffer(state.mirror, T, { token: state.token, onFinish: null }));
     if (T.scarcity) flash.appendChild(el("p", "audit-flash__scarcity", T.scarcity));
     mapRefs.flashSlot.replaceChildren(flash);
     try { flash.focus({ preventScroll: true }); } catch (err) { /* older Safari */ }
