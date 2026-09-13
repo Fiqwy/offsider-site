@@ -735,6 +735,127 @@
     } catch (e) { /* never let telemetry touch the experience */ }
   }
 
+  /* ---- Engagement instrumentation (same mark() path, same silence) -------
+     `land` only proves a browser asked for the page. These prove the
+     instrument actually painted in front of somebody, how long they stayed,
+     and whether our own JS fell over on their device: the difference between
+     an instant bounce and a page that never rendered. Aggregate counters
+     only, once per pageload each, exactly like every other milestone.
+
+     `seen` — half of the first option of the first question is on screen.
+     That is the honest definition of "the audit rendered for them". */
+  function watchSeen() {
+    const first = doc.querySelector(".qopt");
+    if (!first) return;              // a resumed tab landing straight on the gate
+    if (typeof IntersectionObserver === "function") {
+      const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting && e.intersectionRatio >= 0.5) {
+            mark("seen");
+            obs.disconnect();
+          }
+        });
+      }, { threshold: 0.5 });
+      io.observe(first);
+      return;
+    }
+    /* No IntersectionObserver (an old in-app webview): one bounding-rect look
+       300ms after the render, and that is the whole fallback. */
+    window.setTimeout(() => {
+      const r = first.getBoundingClientRect();
+      const vh = window.innerHeight || doc.documentElement.clientHeight || 0;
+      const shown = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+      if (r.width > 0 && r.height > 0 && shown >= r.height / 2) mark("seen");
+    }, 300);
+  }
+
+  /* `dwell3` / `dwell10` / `dwell30` — time the page has been open AND
+     visible since the instrument painted. The clock pauses while the tab is
+     hidden, so a backgrounded tab never reads as attention. sendBeacon means
+     a close at five seconds still leaves the three-second mark behind. */
+  const DWELLS = [{ at: 3000, step: "dwell3" },
+                  { at: 10000, step: "dwell10" },
+                  { at: 30000, step: "dwell30" }];
+  let dwellMs = 0;        // visible milliseconds banked so far
+  let dwellSince = 0;     // start of the current visible run (0 = paused)
+  let dwellTimer = 0;
+
+  function dwellBank() {
+    if (!dwellSince) return;
+    const now = Date.now();
+    dwellMs += now - dwellSince;
+    dwellSince = now;
+  }
+  /* Bank the time, then send every threshold it has passed. Cheap to call
+     twice: mark() already refuses to send the same step again. */
+  function dwellFlush() {
+    dwellBank();
+    DWELLS.forEach((d) => { if (dwellMs >= d.at) mark(d.step); });
+  }
+  function dwellArm() {
+    window.clearTimeout(dwellTimer);
+    if (!dwellSince) return;                       // hidden: no clock to run
+    let next = null;
+    DWELLS.forEach((d) => { if (!next && !sentSteps[d.step]) next = d; });
+    if (!next) return;                             // all three are away
+    dwellTimer = window.setTimeout(() => {
+      dwellFlush();
+      dwellArm();
+    }, Math.max(0, next.at - dwellMs) + 15);
+  }
+  function dwellResume() {
+    if (dwellSince) return;
+    dwellSince = Date.now();
+    dwellArm();
+  }
+  function dwellPause() {
+    dwellFlush();                                  // whatever was earned, send it
+    dwellSince = 0;
+    window.clearTimeout(dwellTimer);
+  }
+  function watchDwell() {
+    if (doc.visibilityState !== "hidden") dwellResume();
+    doc.addEventListener("visibilitychange", () => {
+      if (doc.visibilityState === "hidden") dwellPause();
+      else dwellResume();
+    });
+    /* The tab going away is the last chance to post what they already gave us. */
+    window.addEventListener("pagehide", dwellFlush);
+  }
+
+  /* `error` — one of OUR scripts threw. One beacon, no message: the enum is
+     fixed server side, so the counter can say "it broke here" and nothing
+     else, ever. A third-party script (the pixel, Lenis) failing is not this
+     page failing, so it is ignored and the count stays honest. */
+  const OURS = /(^|\/)(audit|content|script)\.js(\?|#|:|$)/;
+  function fileIsOurs(file) {
+    const f = file == null ? "" : String(file);
+    if (!f) return true;                           // inline script, i.e. ours
+    if (f === String(window.location.href)) return true;
+    return OURS.test(f);
+  }
+  function reasonIsOurs(reason) {
+    let stack = "";
+    try { stack = (reason && reason.stack) ? String(reason.stack) : ""; }
+    catch (e) { stack = ""; }
+    if (!stack) return true;                       // nothing to blame: count it
+    if (OURS.test(stack)) return true;
+    return !/\.js[:?]/.test(stack);                // no file named at all: inline
+  }
+  function watchErrors() {
+    window.addEventListener("error", (e) => {
+      if (!e) return;
+      if (e.target && e.target !== window) return;  // a resource 404, not a throw
+      if (fileIsOurs(e.filename)) mark("error");
+    });
+    window.addEventListener("unhandledrejection", (e) => {
+      if (reasonIsOurs(e && e.reason)) mark("error");
+    });
+  }
+  /* Armed at module load, not in PAGE_INIT: a crash while the instrument is
+     building is exactly the failure this counter exists to catch. */
+  watchErrors();
+
   /* ---- Meta Pixel events (no personal data, ever) -----------------------
      Two events, at the same two milestones the first-party beacon marks: the
      audit starting, and a gate submission the API actually accepted. Both are
@@ -2153,6 +2274,10 @@
     /* the denominator this funnel has never had: somebody was here, and the
        instrument painted in front of them */
     mark("land");
+    /* and the two proofs behind it: the first option really painted in front
+       of them, and they stayed with it */
+    watchSeen();
+    watchDwell();
   };
 
   /* QA ONLY. The mirror is handed out when the page is opened with
