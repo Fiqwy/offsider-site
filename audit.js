@@ -724,6 +724,13 @@
         step: step,
         utm_source: (state.utm && (state.utm.utm_source || state.utm.source)) || "",
         utm_campaign: (state.utm && (state.utm.utm_campaign || state.utm.campaign)) || "",
+        // Placement. Meta fills utm_content from {{placement}} (Facebook_Mobile_Reels,
+        // Instagram_Feed, ...), already read off the query string at boot by readUtm().
+        // Trimmed and capped at 80 here as well as server side: the beacon body has a
+        // hard 500-byte limit at the endpoint, and a junk-long value must not be the
+        // reason a milestone is thrown away.
+        utm_content: String((state.utm && (state.utm.utm_content || state.utm.content)) || "")
+          .trim().slice(0, 80),
       });
       if (navigator.sendBeacon) {
         navigator.sendBeacon("/api/public/leak-audit/step",
