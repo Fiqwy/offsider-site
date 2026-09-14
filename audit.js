@@ -849,14 +849,100 @@
     if (OURS.test(stack)) return true;
     return !/\.js[:?]/.test(stack);                // no file named at all: inline
   }
+  /* ---- The detail behind that one mark ----------------------------------
+     The counter above is an enum and nothing else, which was enough right up
+     until it moved: 15 errors on 72 landings, almost all inside the Facebook
+     in-app browser on real phones, and only 2 first taps behind them. "It
+     broke" cannot be fixed. So the FIRST qualifying error of a page load also
+     sends one report carrying what threw, where in OUR files, which screen the
+     visitor was on and whether a tap was in flight.
+
+     What it never carries: an answer, a dollar figure, a name, an email or a
+     mobile. The fields below are the whole payload, and none of them can reach
+     one. The whole thing is inside a try/catch because a crash reporter that
+     can crash turns one broken device into a loop. */
+  const BUILD_V = (function () {
+    /* The cache-bust on our own <script src>. It is the one thing that tells a
+       report from a phone holding a stale copy apart from a report about the
+       build that is actually deployed. */
+    try {
+      const s = doc.currentScript || doc.querySelector('script[src*="audit.js"]');
+      const m = /[?&]v=([^&#"]+)/.exec((s && s.getAttribute("src")) || "");
+      return m ? decodeURIComponent(m[1]).slice(0, 24) : "";
+    } catch (e) { return ""; }
+  })();
+
+  let painted = false;      // the instrument has finished its first render
+  let tapping = false;      // an option tap handler is running RIGHT NOW
+
+  /* Raised on the way into the option handler and dropped on the next task,
+     NOT in a `finally`. A throw inside a listener unwinds the handler first and
+     only then reaches window.onerror, so a finally would have lowered the flag
+     before the one report that needed it was written. */
+  function tapMark() {
+    tapping = true;
+    window.setTimeout(() => { tapping = false; }, 0);
+  }
+
+  /* q1..q7 (or q1..q9 on the finishing run), gate, unlocked, booking, done. */
+  function screenName() {
+    try {
+      const s = state.screen;
+      if (s === "q") return "q" + (state.step + 1);
+      if (state.book === "open" && (s === "unlocked" || s === "done")) return "booking";
+      return String(s || "q").slice(0, 24);
+    } catch (e) { return ""; }
+  }
+
+  let reported = false;
+  function report(message, file, line, col, err) {
+    if (reported) return;
+    reported = true;                       // set FIRST: one report, whatever follows
+    try {
+      let stack = "";
+      try { stack = (err && err.stack) ? String(err.stack).slice(0, 600) : ""; }
+      catch (e) { stack = ""; }
+      let msg = "";
+      try { msg = String(message == null ? "" : message).slice(0, 240); }
+      catch (e) { msg = "(unreadable)"; }
+      const u = state.utm || {};
+      const body = JSON.stringify({
+        msg: msg,
+        src: String(file == null ? "" : file).slice(0, 160),
+        line: line == null ? "" : String(line).slice(0, 12),
+        col: col == null ? "" : String(col).slice(0, 12),
+        stack: stack,
+        screen: screenName(),
+        phase: tapping ? "tap" : (painted ? "idle" : "load"),
+        utm_source: String(u.utm_source || u.source || "").slice(0, 50),
+        utm_campaign: String(u.utm_campaign || u.campaign || "").slice(0, 50),
+        utm_content: String(u.utm_content || u.content || "").slice(0, 80),
+        v: BUILD_V,
+      });
+      const url = "/api/public/leak-audit/client-error";
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(url, new Blob([body], { type: "text/plain" }));
+      } else {
+        fetch(url, { method: "POST", body: body, keepalive: true }).catch(() => {});
+      }
+    } catch (e) { /* a reporter that throws is worse than no reporter */ }
+  }
+
   function watchErrors() {
     window.addEventListener("error", (e) => {
       if (!e) return;
       if (e.target && e.target !== window) return;  // a resource 404, not a throw
-      if (fileIsOurs(e.filename)) mark("error");
+      if (!fileIsOurs(e.filename)) return;
+      mark("error");
+      report(e.message, e.filename, e.lineno, e.colno, e.error);
     });
     window.addEventListener("unhandledrejection", (e) => {
-      if (reasonIsOurs(e && e.reason)) mark("error");
+      const reason = e && e.reason;
+      if (!reasonIsOurs(reason)) return;
+      mark("error");
+      /* A rejection names no file and no line: the stack, if there is one, is
+         the only place the answer can be. */
+      report(reason && reason.message ? reason.message : reason, "", null, null, reason);
     });
   }
   /* Armed at module load, not in PAGE_INIT: a crash while the instrument is
@@ -891,6 +977,7 @@
   }
 
   function choose(q, o, btn, group) {
+    tapMark();               // a throw from here reports as phase "tap"
     if (state.busy) return;
     state.answers[q.key] = o.key;
     Array.prototype.forEach.call(group.children, (c) => {
@@ -912,6 +999,9 @@
     const wait = REDUCED ? 0 : (last && state.phase === "pre" ? 700 : 190);
     state.busy = true;
     window.setTimeout(() => {
+      /* Still the tap's own work: this is where the next question is built and
+         where a device that falls over on a tap is most likely to do it. */
+      tapMark();
       state.busy = false;
       if (!last) { goTo(next); return; }
       if (state.phase === "finish") completeFinish();
@@ -2278,6 +2368,9 @@
       prune();
     }
     resume();
+    /* Everything above this line is the first paint, so a crash before it is
+       reported as phase "load" and everything after is "idle" or "tap". */
+    painted = true;
     /* the denominator this funnel has never had: somebody was here, and the
        instrument painted in front of them */
     mark("land");
