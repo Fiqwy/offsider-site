@@ -936,6 +936,34 @@ window.SITE = {
       forkBody: "Your quotes, your reviews and your past customers. Nine more taps finishes the map on this screen, or we do those three with you on the fifteen minutes.",
       finishButton: "Finish the map. Nine taps.",
 
+      /* THE TRADE, ASKED ONCE THE MAP IS OPEN. The seven pre-gate taps never
+         ask what they do, so until this row is tapped the page says nothing
+         that pictures anybody's day. Optional on purpose: it buys wording, not
+         a figure, so it sits between the receipt and the offer and never
+         stands in front of the call. One tap, no text field, and the row
+         collapses to a single quiet line the moment it is answered. */
+      tradeAsk: {
+        label: "What's your trade?",
+        micro: "One tap, so the map talks your language. Skip it if you like.",
+        // the eight most common, then the honest way out. Same enum keys as
+        // the finish run's trade question, so a tap here IS that answer.
+        chips: [
+          { key: "plumber",     label: "Plumber" },
+          { key: "electrician", label: "Electrician" },
+          { key: "builder",     label: "Builder" },
+          { key: "painter",     label: "Painter" },
+          { key: "landscaper",  label: "Landscaper" },
+          { key: "detailer",    label: "Car detailer" },
+          { key: "cleaner",     label: "Cleaner" },
+          { key: "roofing",     label: "Roofing" },
+          { key: "other",       label: "Something else" },
+        ],
+        done: "Sorted, {trade}.",
+        // "Sorted, Something else." is not a sentence, so the way out gets its
+        // own line rather than being fed through the template above.
+        doneOther: "Sorted. We'll keep it in plain English.",
+      },
+
       /* THE ENDING. The map is open, so the number is no longer news: the only
          honest next step is the one thing they cannot do for themselves, which
          is have the leak plugged. Headline keys are the two channels the seven
@@ -945,8 +973,19 @@ window.SITE = {
       offer: {
         kickerLead: "Your worst leak: ",
         headlines: {
-          missed_calls: "You can't answer the phone from a roof. Someone should.",
+          // NEUTRAL BY DEFAULT. The first seven taps never ask what they do, so
+          // any line that pictures a roof, a ladder or a van is us guessing at
+          // a stranger's day and getting it wrong in front of them. "Hands
+          // full" is true of every trade and of every office as well.
+          missed_calls: "You can't answer the phone with your hands full. Someone should.",
           slow_reply: "The job goes to whoever answers first. It can be you.",
+        },
+        /* Said ONLY once they have told us, by tapping their trade under the
+           receipt or by finishing the map. Keyed trade → channel, and anything
+           not listed falls back to the neutral line above, so a trade we have
+           no line for is never handed somebody else's. */
+        headlinesByTrade: {
+          roofing: { missed_calls: "You can't answer the phone from a roof. Someone should." },
         },
         body: "That leak has a fix, and it isn't you working harder. On a fifteen minute call we take your map and pick the one leak worth fixing first. Then we show you what plugging it looks like. You get a price on the spot.",
         walkTitle: "Walk away with",
@@ -960,9 +999,26 @@ window.SITE = {
         // the call holding), never a result we do not control.
         guarantee: "If the fifteen minutes doesn't show you exactly what plugging your worst leak would put back, that's on us.",
         finishLink: "Or price the last three leaks, nine taps.",
+        // the trade has already been tapped under the receipt, so the run is
+        // one question shorter and the promise has to say so
+        finishLinkShort: "Or price the last three leaks, eight taps.",
         trust: "You'll talk to Nicholas, who built this. No sales team, no lock in.",
+        /* The one way out of the ending, offered AFTER the offer has made its
+           case and never before the number. Same tab: the run is held in
+           sessionStorage, so Back lands them on the open map exactly as they
+           left it. */
+        more: {
+          before: "Have a look at ",
+          whoLabel: "who we are",
+          whoHref: "index.html",
+          between: " and ",
+          workLabel: "the work we've done",
+          workHref: "work.html",
+          after: ".",
+        },
       },
       finishIntro: "Nice one. These nine price the other three leaks, then the map is complete.",
+      finishIntroShort: "Nice one. These eight price the other three leaks, then the map is complete.",
       finishDone: "That is the lot. All five leaks, priced or honestly refused.",
       // shown only when the send failed, where there is no row to book against
       cta: "Book your free 15-minute call",

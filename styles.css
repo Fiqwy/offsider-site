@@ -2095,6 +2095,29 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px;
 }
 
+/* ---- the trade, asked once the map is open --------------------------------
+   Sits BETWEEN the receipt and the offer, so it reads as a quiet aside on the
+   way past rather than as another card to deal with: no shadow, no heading
+   weight, one hairline and a soft surface. It is optional, so it is styled to
+   be easy to walk past, and it collapses to a single line the moment it is
+   tapped. The chips are the enquiry box's chips, unchanged. */
+.audit-trade {
+  margin-top: .9rem; padding: .95rem clamp(1rem, 4vw, 1.3rem);
+  border-radius: var(--radius); background: var(--bg-soft); border: 1px solid var(--line);
+}
+.audit-trade__label { margin-bottom: .55rem; font-size: .88rem; color: var(--ink-2); }
+.audit-trade .chip-toggle { background: var(--bg); }
+.audit-trade__micro {
+  margin-top: .7rem; font-size: .84rem; font-weight: 600; line-height: 1.5;
+  color: var(--muted-2); max-width: 46ch;
+}
+/* answered: the question is gone and the receipt for it is all that is left */
+.audit-trade.is-done { padding: .75rem clamp(1rem, 4vw, 1.3rem); }
+.audit-trade__ok { font-size: .93rem; font-weight: 700; color: var(--ink-2); }
+@media (max-width: 640px) {
+  .audit-trade .chip-toggle { min-height: 48px; }
+}
+
 /* ---- optional preferred-call-time row (thank-you screen only) -------------
    A quiet extra under the call, never a second form: it reuses the enquiry
    box's chip language wholesale (.chip-row__label / .chip-row__chips /
@@ -2521,6 +2544,14 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 .audit-offer__finish:focus-visible { outline: 3px solid var(--accent-ink); outline-offset: 2px; border-radius: 8px; }
 .audit-offer__trust {
   margin-top: .9rem; font-size: .86rem; font-weight: 600; color: var(--muted); text-align: center;
+}
+/* the way out of the ending, under the trust line and quieter than it */
+.audit-offer__more {
+  margin-top: .45rem; font-size: .86rem; font-weight: 600; color: var(--muted); text-align: center;
+}
+.audit-offer__more a {
+  color: var(--accent-ink); font-weight: 700;
+  text-decoration: underline; text-underline-offset: 3px;
 }
 /* the chips open in place under the button, so they take the card's hairline
    rather than the green one they use on the flash panel, and the confirm

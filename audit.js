@@ -532,6 +532,11 @@
     mobile: "",           // taken at the gate, reused by the booking, echoed back
     utm: null,            // read once from the query string, never stored
     busy: false,
+    /* The trade was tapped on the optional row under the receipt rather than
+       on the last of the nine. It is a separate flag from answers.trade
+       because it is what tells the finish run to skip a question it already
+       has the answer to, and what keeps that answer alive through prune(). */
+    tradeTap: false,
   };
   let stage = null, panel = null, qBox = null, meter = null, meterLow = null, meterHigh = null;
   let progText = null, progFill = null, backBtn = null;
@@ -562,7 +567,12 @@
     const a = state.answers;
     const f = finish === undefined ? state.phase === "finish" : finish;
     return QS().filter((q) => inPhase(q, f))
-               .filter((q) => !(q.skipWhen && a[q.skipWhen.key] === q.skipWhen.value));
+               .filter((q) => !(q.skipWhen && a[q.skipWhen.key] === q.skipWhen.value))
+               /* A question we already have the answer to is not a question.
+                  The trade chips under the receipt are the same answer asked
+                  earlier, so the finish run is eight taps, not nine, and every
+                  count and every line of copy about it says eight. */
+               .filter((q) => !(q.key === "trade" && state.tradeTap));
   }
   /* A skipped question's answer must not survive: the API treats its absence
      as meaningful, so a stale value would be a lie about what they told us. */
@@ -570,6 +580,10 @@
     const live = {};
     applicable(false).forEach((q) => { live[q.key] = true; });
     applicable(true).forEach((q) => { live[q.key] = true; });
+    /* The trade is the one answer that can be held without its question being
+       on the list, because tapping the chip row under the receipt answers it
+       early. Pruning it here would throw away what they just told us. */
+    if (state.tradeTap) live.trade = true;
     QS().forEach((q) => { if (!live[q.key]) delete state.answers[q.key]; });
   }
 
@@ -592,6 +606,7 @@
         token: state.token,
         book: state.book,
         mobile: state.mobile,
+        tradeTap: state.tradeTap,
       }));
     } catch (e) { /* private mode, full quota: never break the run over it */ }
   }
@@ -1298,6 +1313,17 @@
   const channelLabel = (key) =>
     (((A.channels || {})[key]) || {}).label || "";
 
+  /* THE LEAK FIX LINE, for one channel. A trade-keyed version wins ONLY once
+     the visitor has told us what they do (the chips under the receipt, or the
+     last of the nine); before that there is nothing to key on and the neutral
+     line is the only honest one. Same shape as the ending's headline lookup,
+     so both read the trade in exactly one place each. */
+  function fixText(key) {
+    const F = A.fixes || {};
+    const byTrade = (F.byTrade || {})[state.answers.trade] || {};
+    return byTrade[key] || F[key] || "";
+  }
+
   function renderMap(scores, opts) {
     const R = A.result || {};
     const root = el("article", "leakmap");
@@ -1410,7 +1436,7 @@
     /* The worst leak's card is the one the gate sold, so it carries the fix
        rather than the name of the thing that does it. Every other card keeps
        its crew line exactly as it was. */
-    const fixLine = isWorst && ((A.fixes || {})[c.key] || "");
+    const fixLine = isWorst && fixText(c.key);
     if (!fixLine) {
       const worker = el("p", "leak-row__worker");
       worker.append(
@@ -1854,7 +1880,15 @@
     });
     offer.classList.add("audit-offer--solo");
     if (errorLine && T.ctaNote) offer.appendChild(el("p", "audit-flash__note", T.ctaNote));
-    const ending = [flash, offer];
+    /* The trade, asked once the map is open and never before it: under the
+       receipt, above the offer, one tap, and skippable in silence. */
+    const ending = [flash];
+    /* Same rule the time chips use: offered only when the audit row really
+       landed, because with no token there is nothing on our side to attach the
+       answer to. */
+    const trade = (!errorLine && pdf && pdf.token) ? buildTradeRow(T) : null;
+    if (trade) ending.push(trade);
+    ending.push(offer);
     /* the one real scarcity fact on this page, stated once, as a fact */
     if (T.scarcity) ending.push(el("p", "audit-flash__scarcity", T.scarcity));
     if (mapRefs) {
@@ -1862,6 +1896,121 @@
       try { flash.focus({ preventScroll: true }); } catch (err) { /* older Safari */ }
       scrollToFlash();
     }
+  }
+
+  /* ===========================================================================
+     6b. THE TRADE, ASKED ONCE THE MAP IS OPEN
+     The seven pre-gate taps never ask what they do, so nothing on this page may
+     picture anybody's day until they have told us. This row is where they can,
+     and it is genuinely optional: it buys WORDING, not a figure, so it sits
+     between the receipt and the offer, takes one tap, has no text field, and
+     collapses to a single quiet line the moment it is answered. Skipping it
+     costs the visitor nothing at all, and the offer and the booking below it
+     never wait on it.
+     ========================================================================= */
+  const tradeQuestion = () => QS().filter((q) => q.key === "trade")[0] || null;
+
+  /* The chips: content's short list if it has one, otherwise the finish run's
+     own question, whole. Either way the keys ARE that question's enum values,
+     so a tap here is the same answer given earlier. */
+  function tradeChips() {
+    const TA = (A.thanks || {}).tradeAsk || {};
+    if (Array.isArray(TA.chips) && TA.chips.length) return TA.chips;
+    const q = tradeQuestion();
+    return (q && q.options) || [];
+  }
+
+  function tradeLabel(key) {
+    const all = tradeChips().concat(((tradeQuestion() || {}).options) || []);
+    const hit = all.filter((o) => o.key === key)[0];
+    return (hit && hit.label) || "";
+  }
+
+  function tradeDoneText() {
+    const TA = (A.thanks || {}).tradeAsk || {};
+    /* "Sorted, Something else." is not a sentence, so the way out has its own
+       line rather than being fed through the template. */
+    if (state.answers.trade === "other") return TA.doneOther || "";
+    return fill(TA.done || "", { trade: tradeLabel(state.answers.trade) });
+  }
+
+  function tradeDoneLine() {
+    const done = el("p", "audit-trade__ok", tradeDoneText());
+    done.setAttribute("role", "status");
+    return done;
+  }
+
+  function buildTradeRow(T) {
+    const TA = (T && T.tradeAsk) || {};
+    const chips = tradeChips();
+    if (!TA.label || !chips.length) return null;
+    const row = el("div", "audit-trade chip-row");
+    /* Already answered, this session: the question is gone and what is left is
+       the receipt for it. A reload lands straight back on this line. */
+    if (state.tradeTap && state.answers.trade) {
+      row.classList.add("is-done");
+      row.appendChild(tradeDoneLine());
+      return row;
+    }
+    row.appendChild(el("span", "chip-row__label audit-trade__label", TA.label));
+    const group = el("div", "chip-row__chips");
+    group.setAttribute("role", "group");
+    group.setAttribute("aria-label", TA.label);
+    chips.forEach((c) => {
+      const b = el("button", "chip-toggle", c.label);
+      b.type = "button";
+      b.addEventListener("click", () => pickTrade(c.key, row));
+      group.appendChild(b);
+    });
+    row.appendChild(group);
+    if (TA.micro) row.appendChild(el("p", "audit-trade__micro", TA.micro));
+    return row;
+  }
+
+  function pickTrade(key, row) {
+    if (!key || state.tradeTap) return;
+    state.answers.trade = key;
+    state.tradeTap = true;
+    save();
+    mark("trade_tapped");
+    postTrade(key);
+    row.classList.add("is-done");
+    row.replaceChildren(tradeDoneLine());
+    retellTrade();
+  }
+
+  /* Fire and forget, exactly like the funnel beacon: the answer is already on
+     the page and in the store, so a failed post costs the visitor nothing and
+     is never shown to them. The server stores it only where the row is still
+     carrying the engine's neutral default. */
+  function postTrade(trade) {
+    if (!state.token) return;
+    try {
+      fetch("/api/public/leak-audit/trade", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: state.token, trade: trade }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch (e) { /* never let this touch the experience */ }
+  }
+
+  /* Say it again, now that we know who we are talking to. The map itself is
+     the SERVER's document and is not rebuilt from the mirror here: what is
+     rebuilt is every line that reads the trade, which is the worst leak's fix
+     line and the ending. Both go through the lookups below, so a trade-keyed
+     line added to either copy table later needs no new wiring. */
+  function retellTrade() {
+    const fixNode = doc.querySelector(".leak-fix__text");
+    if (fixNode) fixNode.textContent = fixText(worstLeak(state.mirror || {}));
+    const old = doc.querySelector(".audit-offer");
+    if (!old || !old.parentNode) return;
+    const fresh = buildOffer(state.mirror, A.thanks || {}, {
+      token: state.token || "",
+      onFinish: state.screen === "done" ? null : startFinish,
+    });
+    fresh.className = old.className;
+    old.parentNode.replaceChild(fresh, old);
   }
 
   /* THE OFFER. One block, used by both endings: the partial map and the
@@ -1882,7 +2031,12 @@
     const sec = el("section", "audit-offer");
 
     if (lab && O.kickerLead) sec.appendChild(el("span", "audit-offer__kicker", O.kickerLead + lab));
-    const head = (O.headlines || {})[worst] || (O.headlines || {}).missed_calls || "";
+    /* A trade-keyed headline is only ever reached once they have TOLD us what
+       they do. Until then the neutral line stands: the first seven taps never
+       ask, so a line that puts them on a roof is a guess made out loud. */
+    const byTrade = (O.headlinesByTrade || {})[state.answers.trade] || {};
+    const head = byTrade[worst] || (O.headlines || {})[worst]
+              || (O.headlines || {}).missed_calls || "";
     if (head) sec.appendChild(el("b", "audit-offer__title", head));
     if (O.body) sec.appendChild(el("p", "audit-offer__body", O.body));
     if (O.walkTitle) sec.appendChild(el("span", "audit-offer__walk", O.walkTitle));
@@ -1929,11 +2083,33 @@
     }
     if (O.guarantee) sec.appendChild(el("p", "audit-offer__guarantee", O.guarantee));
     if (O.trust) sec.appendChild(el("p", "audit-offer__trust", O.trust));
+    /* The only way out of the ending, and it is offered AFTER the offer has
+       made its case, never at the gate and never in front of the number. Same
+       tab on purpose: the whole run lives in sessionStorage, so Back lands
+       them on the open map exactly as they left it. */
+    const M = O.more || {};
+    if (M.whoLabel && M.workLabel) {
+      const more = el("p", "audit-offer__more", M.before || "");
+      const link = (href, label) => {
+        const a_ = doc.createElement("a");
+        a_.href = href;
+        a_.textContent = label;
+        return a_;
+      };
+      more.appendChild(link(M.whoHref || "index.html", M.whoLabel));
+      more.appendChild(doc.createTextNode(M.between || " and "));
+      more.appendChild(link(M.workHref || "work.html", M.workLabel));
+      more.appendChild(doc.createTextNode(M.after || "."));
+      sec.appendChild(more);
+    }
     /* The nine taps stay available, one rung quieter than the call, and BELOW
        the trust line: who you are talking to belongs to the offer, and the
        second choice belongs after the offer has finished making its case. */
     if (opts.onFinish && O.finishLink) {
-      const fin = el("button", "audit-offer__finish", O.finishLink);
+      /* The count has to be true: a trade already tapped under the receipt is
+         a question the run no longer asks, so it is eight taps, not nine. */
+      const fin = el("button", "audit-offer__finish",
+        (state.tradeTap && O.finishLinkShort) || O.finishLink);
       fin.type = "button";
       fin.addEventListener("click", opts.onFinish);
       sec.appendChild(fin);
@@ -2147,6 +2323,14 @@
      anything else. Nobody has to do them: the fifteen minutes does the same
      job, which is what keeps "no call required" true in both directions.
      ========================================================================= */
+  /* The line that heads the finish run. Eight taps rather than nine once the
+     trade has already been tapped under the receipt: a promise about how long
+     this takes has to survive the visitor counting. */
+  const finishIntroText = () => {
+    const T = A.thanks || {};
+    return (state.tradeTap && T.finishIntroShort) || T.finishIntro || "";
+  };
+
   function startFinish() {
     mark("finish_start");
     state.phase = "finish";
@@ -2154,7 +2338,7 @@
     state.step = 0;
     state.busy = false;
     save();
-    mountPanel((A.thanks || {}).finishIntro);
+    mountPanel(finishIntroText());
     scrollToStage();
   }
 
@@ -2331,7 +2515,7 @@
       return;
     }
     state.screen = "q";
-    mountPanel(state.phase === "finish" ? (A.thanks || {}).finishIntro : null);
+    mountPanel(state.phase === "finish" ? finishIntroText() : null);
   }
 
   window.PAGE_INIT = function (ctx) {
@@ -2365,6 +2549,10 @@
       state.screen = typeof saved.screen === "string" ? saved.screen : "q";
       state.book = (saved.book === "open" || saved.book === "done") ? saved.book : "";
       state.mobile = typeof saved.mobile === "string" ? saved.mobile.slice(0, 24) : "";
+      /* Only ever true alongside a trade that survived readStore's enum check,
+         so a restored tab can never skip the trade question without holding
+         the answer to it. */
+      state.tradeTap = saved.tradeTap === true && !!state.answers.trade;
       prune();
     }
     resume();
