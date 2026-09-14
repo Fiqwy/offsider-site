@@ -718,9 +718,9 @@ window.SITE = {
       // the unit that sits under the sharp range at the top of the card
       figLead: "Your leak, from your own answers",
       figUnit: "a year",
-      kicker: "Your map is ready",
-      title: "Three boxes and the blur comes off.",
-      sub: "You watched it build. Say where to send the map and the blur comes off.",
+      kicker: "That number has a fix",
+      title: "Now the part that shrinks it.",
+      sub: "Put your details in and two things happen. The map opens with the fix for your worst leak, from your own numbers. And Nicholas gives you one ring to talk about plugging it, if you want it. Fifteen minutes, a price on the spot, one word stops it.",
       fields: {
         name: "First name",
         mobile: "Mobile",
@@ -729,14 +729,14 @@ window.SITE = {
       },
       // the reason line under each label, so no field is asked for silently
       reasons: {
-        name: "So the map is addressed to a person",
+        name: "So the fix is addressed to a person",
         mobile: "So Nicholas can give you one ring about the fix. One word stops it.",
         email: "So you keep a copy when this page is gone.",
       },
       errorRequired: "Please fill this in.",
       errorEmail: "Please enter a valid email address.",
       errorInvalid: "Please check this.",
-      button: "Show me the map",
+      button: "Show me the fix",
       sending: "One moment...",
       note: "No spam, no lock in. The map is yours to keep.",
       // Who is asking. The two outbound links are GONE: this card's whole job
