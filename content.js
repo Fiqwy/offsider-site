@@ -354,6 +354,25 @@ window.SITE = {
       homeAria: "Applied Intelligence home page",
       right: "Free audit",
       trust: "Free. Sixteen taps all up. No call required.",
+      /* Message match for paid visitors. Keyed by utm_campaign; the strip's
+         line becomes the hook of the ad that sent them, one line, 34
+         characters or fewer so it never wraps above question one. The trust
+         line drops underneath, minus any claim the hook already makes. An
+         unknown or absent campaign leaves the page exactly as it is. */
+      hooks: {
+        "leak-audit-why-free":        "Finding leaks is free.",
+        "leak-audit-why-free-plain":  "Finding leaks is free.",
+        "leak-audit-answer-or-ring":  "Answer it, or let it ring?",
+        "leak-audit-not-the-price":   "They went with whoever rang back.",
+        "leak-audit-clear-answer":    "What is the phone costing you?",
+        "leak-audit-sixteen-taps":    "Your leak number. Sixteen taps.",
+        "leak-audit-sixty-two":       "Nobody has studied your business.",
+        "leak-audit-three-quotes":    "What are your drafts worth?",
+        "leak-audit-two-tuesdays":    "How many of yours went cold?",
+        "leak-audit-the-question":    "Which one costs you most?",
+        "leak-audit-your-score":      "Which leak is biggest?",
+        "leak-audit-plain-control":   "Five leaks. One number.",
+      },
     },
 
     /* The visible h1 IS the trust strip. The page opens on question one, so
@@ -407,12 +426,12 @@ window.SITE = {
       /* ---- The seven, in front of the gate ---- */
       {
         key: "missed", section: "phone",
-        title: "You are on the tools. The phone rings. What usually happens?",
-        help: "Tap the one that sounds like your week. Nobody sees this but you.",
+        title: "On the tools. The phone rings. What usually happens?",
+        help: "Tap the one that sounds like your week.",
         micro: "Seven taps and you see your number. No typing until then.",
         options: [
           { key: "office",    label: "Someone in the office answers" },
-          { key: "callback",  label: "I see the missed call and ring back later" },
+          { key: "callback",  label: "I ring back later" },
           { key: "voicemail", label: "It goes to voicemail" },
           { key: "rings_out", label: "It rings out" },
         ],

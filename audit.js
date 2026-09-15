@@ -2475,6 +2475,33 @@
     return out;
   }
 
+  /* Message match. For a visitor who arrived from a known ad, the trust
+     strip's line becomes that ad's hook (A.chrome.hooks, keyed by
+     utm_campaign) and the trust line drops to a smaller second line, minus
+     any claim the hook already makes ("free", "sixteen taps"). Nothing new is
+     added above question one and an unknown campaign changes nothing. */
+  function applyHook() {
+    const hooks = A && A.chrome && A.chrome.hooks;
+    const camp = state.utm && state.utm.utm_campaign;
+    const hook = hooks && camp && hooks[camp];
+    if (!hook) return;
+    const line = doc.querySelector(".audit-trust__line");
+    if (!line || line.dataset.hooked) return;
+    const parts = String(line.textContent || "").split(/(?<=\.)\s+/).filter(Boolean);
+    const said = (part) => (/free/i.test(hook) && /^free\b/i.test(part)) ||
+                           (/sixteen taps/i.test(hook) && /sixteen taps/i.test(part));
+    const rest = parts.filter((part) => !said(part)).join(" ");
+    line.textContent = hook;
+    line.classList.add("audit-trust__line--hook");
+    line.dataset.hooked = "1";
+    if (rest) {
+      const sub = doc.createElement("p");
+      sub.className = "audit-trust__sub";
+      sub.textContent = rest;
+      line.insertAdjacentElement("afterend", sub);
+    }
+  }
+
   /* Mount the stepper on the stage and paint whichever question we are up to.
      `intro` is the one line that heads the finish run, and nothing else. */
   function mountPanel(intro) {
@@ -2517,6 +2544,7 @@
     if (!A) return;
     REDUCED = !!(ctx && ctx.REDUCED);
     state.utm = readUtm();
+    applyHook();
     QS().forEach((q) => { QMAP[q.key] = q; });
 
     /* the honesty block below the instrument */

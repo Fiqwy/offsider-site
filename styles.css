@@ -1233,6 +1233,18 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   letter-spacing: 0; color: var(--accent-ink);
 }
 @media (max-width: 360px) { .audit-trust__line { font-size: .8rem; } }
+/* Message match (audit.js applyHook): the ad's hook as the strip's line, the
+   trust claims as a smaller second line. One line each at 375px. */
+.audit-trust__line--hook {
+  padding: .38rem 0 0;
+  font-size: 1.05rem; font-weight: 800; line-height: 1.2;
+  letter-spacing: -.01em; color: var(--ink);
+}
+.audit-trust__sub {
+  margin: 0; padding: 0 0 .32rem;
+  font-size: .78rem; font-weight: 700; line-height: 1.4; color: var(--accent-ink);
+}
+@media (max-width: 360px) { .audit-trust__line--hook { font-size: .98rem; } }
 
 /* ---- The honesty block (was the hero, now below the instrument) ---------- */
 .audit-honesty {
