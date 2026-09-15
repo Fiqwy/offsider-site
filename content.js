@@ -366,7 +366,7 @@ window.SITE = {
         "leak-audit-not-the-price":   "They went with whoever rang back.",
         "leak-audit-clear-answer":    "What's the phone costing you?",
         "leak-audit-sixteen-taps":    "Your leak number. Sixteen taps.",
-        "leak-audit-sixty-two":       "Nobody has studied your business.",
+        "leak-audit-sixty-two":       "What do your missed calls cost?",
         "leak-audit-three-quotes":    "Unsent quotes don't win jobs.",
         "leak-audit-two-tuesdays":    "How many of yours went cold?",
         "leak-audit-the-question":    "Which one costs you most?",
