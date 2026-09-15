@@ -2088,17 +2088,12 @@
        tab on purpose: the whole run lives in sessionStorage, so Back lands
        them on the open map exactly as they left it. */
     const M = O.more || {};
-    if (M.whoLabel && M.workLabel) {
+    if (M.whoLabel) {
       const more = el("p", "audit-offer__more", M.before || "");
-      const link = (href, label) => {
-        const a_ = doc.createElement("a");
-        a_.href = href;
-        a_.textContent = label;
-        return a_;
-      };
-      more.appendChild(link(M.whoHref || "index.html", M.whoLabel));
-      more.appendChild(doc.createTextNode(M.between || " and "));
-      more.appendChild(link(M.workHref || "work.html", M.workLabel));
+      const a_ = doc.createElement("a");
+      a_.href = M.whoHref || "index.html";
+      a_.textContent = M.whoLabel;
+      more.appendChild(a_);
       more.appendChild(doc.createTextNode(M.after || "."));
       sec.appendChild(more);
     }

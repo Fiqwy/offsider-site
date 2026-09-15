@@ -28,13 +28,11 @@ Hard guardrails are enforced in code: spend caps, quiet hours, a tool allowlist 
 
 - Statistics quoted on the site about missed calls and lead response times are published industry research by third parties, attributed on the page. They are not Applied Intelligence's own client results.
 - The activity feed and dashboard shown on the homepage are clearly labelled simulated sample data, not live client activity.
-- Businesses shown on the work page hired Applied Intelligence to design and build a website. They are not customers of The Never Miss System, and nothing on that page is a claim about AI results.
 
 ## Key URLs
 
 - Home: https://appliedintelligence.biz/
 - Free online Leak Audit: https://appliedintelligence.biz/audit.html
-- Our work: https://appliedintelligence.biz/work.html
 - Terms: https://appliedintelligence.biz/terms.html
 - Privacy: https://appliedintelligence.biz/privacy.html
 - Client login: https://donny.appliedintelligence.biz/login

@@ -43,7 +43,7 @@
     const fe = $("[data-footer-email]"); if (fe) { fe.textContent = email; fe.href = "mailto:" + email; }
     const bl = $("[data-book-link]"); if (bl) bl.href = "mailto:" + email + "?subject=Free%20Leak%20Audit";
     // NOTE: the document title is NOT set here. Each page's own <title> is
-    // authoritative, so work.html / terms.html / privacy.html keep theirs.
+    // authoritative, so audit.html / terms.html / privacy.html keep theirs.
   }
 
   /* ---- booking section (calendar embed or interim card) ------------------ */
@@ -385,43 +385,6 @@
         `<button class="faq-q" aria-expanded="false" aria-controls="${id}"><span>${f.q}</span><span class="faq-q__icon" aria-hidden="true"></span></button>
          <div class="faq-a" id="${id}" aria-hidden="true"><div class="faq-a__inner">${f.a}</div></div>`;
       fq.appendChild(item);
-    });
-
-    // proof band (home): three recent builds, each linking into work.html
-    renderProof();
-  }
-
-  /* ---- Proof band (three recent builds) ----------------------------------
-     No-ops until the home page grows a [data-proof] mount. Copy strings go in
-     via textContent: these are business names we do not control. */
-  function renderProof() {
-    const mount = $("[data-proof]");
-    if (!mount || !S.work) return;
-    (S.work.projects || []).slice(0, 3).forEach((p) => {
-      const card = el("a", "proof-card reveal");
-      card.href = "work.html#" + p.slug;
-      // the client's own accent (content.js `tone`), which the dark band uses
-      // as a single mark above their name. Anything that is not a plain hex
-      // value is ignored and the card falls back to the house accent.
-      if (/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(p.tone || "")) card.style.setProperty("--chapter", p.tone);
-
-      const media = el("div", "proof-card__media");
-      const img = doc.createElement("img");
-      img.src = p.card;
-      img.alt = p.name + " website";
-      img.loading = "lazy";
-      img.decoding = "async";
-      media.appendChild(img);
-
-      const body = el("div", "proof-card__body");
-      const name = el("div", "proof-card__name");
-      name.textContent = p.name;
-      const line = el("p", "proof-card__line");
-      line.textContent = p.proofLine || p.oneLiner || "";
-      body.append(name, line);
-
-      card.append(media, body);
-      mount.appendChild(card);
     });
   }
 
@@ -1161,7 +1124,7 @@
   function boot() {
     bind();
     renderLists();
-    // Page modules (work.html and friends) hook in here, after the shared
+    // Page modules (audit.html and friends) hook in here, after the shared
     // render pass and before the wiring, so anything they build still gets
     // picked up by wireReveals()/wireAnchors() below.
     if (typeof window.PAGE_INIT === "function") window.PAGE_INIT({ $, $$, el, ital, REDUCED, NO_HOVER, DESKTOP });
