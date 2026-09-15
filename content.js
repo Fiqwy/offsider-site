@@ -196,11 +196,11 @@ window.SITE = {
   /* ---- How it works ------------------------------------------------------ */
   how: {
     kicker: "From here",
-    heading: "Live within {i:two weeks}, not months.",
+    heading: "Live in {i:one week}, not months.",
     steps: [
       { n: "01", title: "Your free Leak Audit", text: "A quick call where we map every place a call, lead or quote is leaking, and show you which AI worker pays for itself first." },
       { n: "02", title: "We build and connect", text: "One 30-minute handover from you, then we wire your AI staff into your phone, calendar and tools. You review everything before it goes live." },
-      { n: "03", title: "Live within two weeks", text: "Your staff start in a supervised warm-up, usually inside the first week, so you trust every message before they run solo." },
+      { n: "03", title: "Live in one week", text: "Your staff start in a supervised warm-up, so you trust every message before they run solo. A bigger or more complicated setup takes two." },
       { n: "04", title: "We manage it for you", text: "We tune, monitor and report. You get the results and never touch the controls." },
     ],
   },
@@ -225,7 +225,7 @@ window.SITE = {
         "A fraction of the cost, every month",
         "Never sick, never on leave, never quits",
         "Every call at once, 24/7/365",
-        "Live within two weeks, tuned every week",
+        "Live in one week, tuned every week",
       ],
     },
     note: "No lock-in contracts. No setup you have to do yourself.",
@@ -288,7 +288,7 @@ window.SITE = {
     { q: "Is this right for my type of business?",
       a: "If you answer calls and book jobs, yes. It works for trades and local service businesses of every kind. The free Leak Audit shows exactly which staff will pay for themselves first." },
     { q: "How long until it's live?",
-      a: "Within two weeks, and usually inside the first week. We map the leaks on the call, build your staff, run a supervised warm-up, then go live." },
+      a: "One week. We map the leaks on the call, build your staff, run a supervised warm-up, then go live. If your setup is complicated or a bigger job, allow two." },
   ],
 
   /* ---- Final CTA + booking section ---------------------------------------- */
