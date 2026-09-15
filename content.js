@@ -360,18 +360,18 @@ window.SITE = {
          line drops underneath, minus any claim the hook already makes. An
          unknown or absent campaign leaves the page exactly as it is. */
       hooks: {
-        "leak-audit-why-free":        "Finding leaks is free.",
-        "leak-audit-why-free-plain":  "Finding leaks is free.",
+        "leak-audit-why-free":        "Jobs leak. Finding them is free.",
+        "leak-audit-why-free-plain":  "Jobs leak. Finding them is free.",
         "leak-audit-answer-or-ring":  "Answer it, or let it ring?",
         "leak-audit-not-the-price":   "They went with whoever rang back.",
-        "leak-audit-clear-answer":    "What is the phone costing you?",
+        "leak-audit-clear-answer":    "What's the phone costing you?",
         "leak-audit-sixteen-taps":    "Your leak number. Sixteen taps.",
         "leak-audit-sixty-two":       "Nobody has studied your business.",
-        "leak-audit-three-quotes":    "What are your drafts worth?",
+        "leak-audit-three-quotes":    "Unsent quotes don't win jobs.",
         "leak-audit-two-tuesdays":    "How many of yours went cold?",
         "leak-audit-the-question":    "Which one costs you most?",
         "leak-audit-your-score":      "Which leak is biggest?",
-        "leak-audit-plain-control":   "Five leaks. One number.",
+        "leak-audit-plain-control":   "Five places your business leaks.",
       },
     },
 
