@@ -33,10 +33,68 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 # ---------------------------------------------------------------------------
+# The worked maths line for each example, byte for byte. audit.js mirrors
+# leak_audit.py's _missed_maths and _slow_reply_maths so the working can be shown at
+# the seventh tap instead of waiting for a send. Two prose implementations with
+# nothing comparing them drift, so this compares them; the same strings are asserted
+# against the Python side in backend/tests/test_leak_audit.py.
+MATHS = {
+    "1": {
+        "missed_calls":
+            "You told us you miss about 4 calls in a normal week. Another 1.5 a week land after "
+            "5pm or on the weekend, which makes 5.5. You already win 50 in every 100 of those "
+            "back when you ring, which leaves roughly 2.75 a week gone. We count 35 in every 100 "
+            "of those as jobs you would have won, at your $1,000 average job, across 52 weeks. "
+            "That lands near $50,000, shown as $33,000 to $68,000 because it is an estimate, not "
+            "a forecast.",
+        "slow_reply":
+            "Of your 17 enquiries a week, we count 35 in every 100 as web or social, which is "
+            "about 5.95 a week. 50 in every 100 of those go out later than they should, and 50 in "
+            "every 100 of the late ones have already sorted it with someone else, so about 1.49 a "
+            "week go cold. We count 35 in every 100 of those as jobs you would have won, at your "
+            "$1,000 average job, across 52 weeks. That lands near $27,000, shown as $18,000 to "
+            "$37,000 because it is an estimate, not a forecast.",
+    },
+    "2": {
+        "missed_calls":
+            "You told us you miss about 4 calls in a normal week. Another 1.5 a week land after "
+            "5pm or on the weekend, which makes 5.5. You already win 25 in every 100 of those "
+            "back when you ring, which leaves roughly 4.13 a week gone. We count 35 in every 100 "
+            "of those as jobs you would have won, at your $1,000 average job, across 52 weeks. "
+            "That lands near $75,000, shown as $49,000 to $101,000 because it is an estimate, not "
+            "a forecast.",
+        "slow_reply":
+            "Of your 17 enquiries a week, we count 35 in every 100 as web or social, which is "
+            "about 5.95 a week. 50 in every 100 of those go out later than they should, and 50 in "
+            "every 100 of the late ones have already sorted it with someone else, so about 1.49 a "
+            "week go cold. We count 35 in every 100 of those as jobs you would have won, at your "
+            "$1,000 average job, across 52 weeks. That lands near $27,000, shown as $18,000 to "
+            "$37,000 because it is an estimate, not a forecast.",
+    },
+    "3": {
+        "missed_calls":
+            "You were not sure how many calls you miss, so from the way the phone is handled we "
+            "used a conservative 1.37 a week. You were not sure about after hours either, so we "
+            "added a conservative 0.41 a week, which makes 1.77. You already win 25 in every 100 "
+            "of those back when you ring, which leaves roughly 1.33 a week gone. We count 35 in "
+            "every 100 of those as jobs you would have won, at your $350 average job, across 52 "
+            "weeks. That lands near $8,000, shown as $6,000 to $11,000 because it is an estimate, "
+            "not a forecast.",
+        "slow_reply":
+            "Of your 7 enquiries a week, we count 35 in every 100 as web or social, which is "
+            "about 2.45 a week. 90 in every 100 of those go out later than they should, and 70 in "
+            "every 100 of the late ones have already sorted it with someone else, so about 1.54 a "
+            "week go cold. We count 35 in every 100 of those as jobs you would have won, at your "
+            "$350 average job, across 52 weeks. That lands near $10,000, shown as $6,000 to "
+            "$13,000 because it is an estimate, not a forecast.",
+    },
+}
+
 # PARTIAL-CONTRACT.md section 6, verbatim.
 # ---------------------------------------------------------------------------
 EXAMPLES = [
     {
+        "id": "1",
         "name": "1. VERIFY-v2 answer set A (the statics set)",
         "answers": {
             "missed": "rings_out", "missed_week": "3_5", "winback": "about_half",
@@ -51,6 +109,7 @@ EXAMPLES = [
         },
     },
     {
+        "id": "2",
         "name": "2. VERIFY-v2 video set (set A with winback=a_few)",
         "answers": {
             "missed": "rings_out", "missed_week": "3_5", "winback": "a_few",
@@ -65,6 +124,7 @@ EXAMPLES = [
         },
     },
     {
+        "id": "3",
         "name": "3. Both fallbacks, and start_here moving to Zip",
         "answers": {
             "missed": "voicemail", "missed_week": "no_idea", "winback": "a_few",
@@ -143,6 +203,7 @@ def main() -> int:
                     checks.append((key + " high", c["annual_high"], high))
                     checks.append((key + " status", c["status"], status))
                     checks.append((key + " estimated", bool(c["estimated"]), est))
+                    checks.append((key + " maths", c.get("maths"), MATHS[ex["id"]][key]))
                 checks.append(("total low", got["total"]["annual_low"], e["total_low"]))
                 checks.append(("total high", got["total"]["annual_high"], e["total_high"]))
                 checks.append(("weekly mid", got["total"]["weekly_mid"], e["weekly"]))

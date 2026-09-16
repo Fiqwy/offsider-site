@@ -252,8 +252,8 @@ window.SITE = {
     heading: "If your AI staff aren't earning their keep, you get your money {i:back}.",
     promise: {
       badge: "Our promise, in writing",
-      statement: "Run your AI staff for 60 days. If they aren't earning their keep, tell us and we refund your service fees for that period.",
-      finePrint: "Your service fees for the first 60 days, refunded in full, no questions and no exit interview. Setup is excluded, because that work is already done and yours to keep. Month to month either way, cancel any time on 14 days notice.",
+      statement: "Run your AI staff for 60 days. If they aren't earning their keep, tell us and we refund every dollar you have paid us.",
+      finePrint: "Setup and service fees both, back in full. No questions, no exit interview and nothing held back. We switch your AI staff off, your number goes back to how it was, and you carry on exactly as you were. Month to month either way, cancel any time on 14 days notice.",
     },
     points: [
       { title: "You see it work first", text: "Every worker starts in a supervised warm-up. You approve the messages before anything goes live in front of a customer." },
@@ -276,7 +276,7 @@ window.SITE = {
     { q: "What if it gets something wrong?",
       a: "Every worker starts in a supervised warm-up so you catch anything before it goes live. Once running, spend caps and quiet hours keep it safe, and we monitor it for you." },
     { q: "What's the 60-day money-back guarantee?",
-      a: "Run your AI staff for 60 days from go-live. If they aren't earning their keep, tell us and we refund your service fees for that period. Setup is excluded, because that work is already done and yours to keep. No lock-in, and you can cancel any time on 14 days notice." },
+      a: "Run your AI staff for 60 days from go-live. If they aren't earning their keep, tell us and we refund every dollar you have paid us, setup and service fees both. We switch the staff off, your number goes back to what it was, and you are back where you started. No lock-in, and you can cancel any time on 14 days notice." },
     { q: "Can it really send quotes for me?",
       a: "You build the quote in your portal from your own price list, in a couple of clicks, and Nudge does the chasing: a follow-up on day 1, day 3 and day 7 until the customer answers. Same with invoices: raised in the portal, then politely chased until they're paid. Nudge will answer a price question by quoting your price list word for word, and it will never invent a number or add anything up, that stays yours." },
     { q: "How much does it cost?",
@@ -877,6 +877,11 @@ window.SITE = {
          default reading load. */
       showWorking: "Show the working",
       hideWorking: "Hide the working",
+      /* Said instead on a card whose figure the server priced and the page
+         cannot yet re-derive. Offering "the working" and then not having any
+         is the bug that put this label here in the first place. */
+      showAnswer: "Show your answer",
+      hideAnswer: "Hide your answer",
       /* The three leaks the seven taps cannot price used to be three cards
          apologising. One line and a button instead: an offer, not an apology. */
       unpricedLead: "Three more leaks, not priced yet",

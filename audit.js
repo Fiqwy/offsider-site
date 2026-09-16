@@ -92,6 +92,100 @@
   };
   const money = (n) => "$" + Math.round(n).toLocaleString("en-AU");
 
+  /* ===========================================================================
+     THE WORKED LINE, MIRRORED
+     These build the SAME sentence leak_audit.py builds (_missed_maths at :694,
+     _slow_reply_maths at :732, and the helpers above them). They exist because
+     the server only sees the answers once somebody has handed over their
+     details, so until now "Show the working" showed no working: we un-gated the
+     number and the map and left the arithmetic behind the ask, which is the one
+     thing that should never have been behind it.
+
+     LOCKSTEP. Two prose implementations with nothing comparing them will drift.
+     PARTIAL-CONTRACT.md section 6 holds the expected strings, tools/qa-audit-
+     mirror.py asserts these against it, and a Python test asserts the server's
+     against the same. Change the wording in one place and all three fail, which
+     is the point. The server's version still replaces this one after a
+     successful send: it can admit things the mirror cannot see.
+     ========================================================================= */
+
+  /* A weekly count for prose. The epsilon is doing real work: 2.45 * 0.30 lands
+     at 0.7349999999999999 in binary floating point, and without it this prints
+     0.73 for an exact 0.735 and the owner's own arithmetic stops matching
+     ours. Same guard, same reason, as _fmt_qty. */
+  const fmtQty = (x) => {
+    const r = Math.floor(x * 100 + 0.5 + 1e-9) / 100;
+    if (r === Math.trunc(r)) return String(Math.trunc(r));
+    return r.toFixed(2).replace(/0+$/, "");
+  };
+  /* "35 in every 100", never "35%". A percent sign in a maths line reads as a
+     claim; this reads as arithmetic, which is what it is. */
+  const perHundred = (share) => Math.floor(share * 100 + 0.5 + 1e-9) + " in every 100";
+  const mathsTail = (mid, low, high) =>
+    "That lands near " + money(roundMoney(mid)) + ", shown as " + money(low) +
+    " to " + money(high) + " because it is an estimate, not a forecast.";
+  /* A worked line is only worth showing where there is a real figure to work to. */
+  const showsMaths = (mid, low, high) => mid > 0 && (low > 0 || high > 0);
+
+  /* Their phone numbers, added up in front of them. Every figure is one the
+     engine actually used, including the cap and both fallbacks, which are
+     admitted in the line rather than buried in a flag. */
+  function missedMaths(a, E, J, M, AH, lost, mid, low, high) {
+    const parts = [];
+    if (a.missed_week === "no_idea") {
+      parts.push("You were not sure how many calls you miss, so from the way the phone is " +
+                 "handled we used a conservative " + fmtQty(M) + " a week.");
+    } else {
+      parts.push("You told us you miss about " + fmtQty(M) + " calls in a normal week.");
+    }
+    const raw = M + AH;
+    /* after_hours_calls is optional and usually absent on the seven, and the
+       scoring treats an absence as "no idea". The prose has to agree. */
+    const ah = a.after_hours_calls == null ? "no_idea" : a.after_hours_calls;
+    if (ah === "no_idea") {
+      parts.push("You were not sure about after hours either, so we added a conservative " +
+                 fmtQty(AH) + " a week, which makes " + fmtQty(raw) + ".");
+    } else if (AH > 0) {
+      parts.push("Another " + fmtQty(AH) + " a week land after 5pm or on the weekend, which makes " +
+                 fmtQty(raw) + ".");
+    } else {
+      parts.push("You answer the ones that come in after hours, so it stays at " + fmtQty(raw) + ".");
+    }
+    if (raw > E) {
+      parts.push("That is more than the " + fmtQty(E) + " enquiries a week you get in total, so we hold it " +
+                 "at " + fmtQty(E) + ".");
+    }
+    parts.push("You already win " + perHundred(F.winback[a.winback]) + " of those back when you ring, " +
+               "which leaves roughly " + fmtQty(lost) + " a week gone.");
+    parts.push("We count " + perHundred(K.CAPTURE) + " of those as jobs you would have won, at your " +
+               money(J) + " average job, across " + K.WEEKS + " weeks.");
+    parts.push(mathsTail(mid, low, high));
+    return parts.join(" ");
+  }
+
+  /* Web and social enquiries, from how many arrive to how many go cold. */
+  function slowReplyMaths(a, E, J, late, gone, mid, low, high) {
+    const webWeek = E * K.WEB_SHARE;
+    const coldWeek = webWeek * late * gone;
+    /* the enquiry count prints raw here, not through fmtQty: the server does
+       the same and the band midpoints are whole numbers either way */
+    const parts = ["Of your " + E + " enquiries a week, we count " + perHundred(K.WEB_SHARE) +
+                   " as web or social, which is about " + fmtQty(webWeek) + " a week."];
+    if (late >= 1) {
+      parts.push("Every one of those goes out later than it should, and " + perHundred(gone) +
+                 " of them have already sorted it with someone else, so about " +
+                 fmtQty(coldWeek) + " a week go cold.");
+    } else {
+      parts.push(perHundred(late) + " of those go out later than they should, and " + perHundred(gone) +
+                 " of the late ones have already sorted it with someone else, so about " +
+                 fmtQty(coldWeek) + " a week go cold.");
+    }
+    parts.push("We count " + perHundred(K.CAPTURE) + " of those as jobs you would have won, at your " +
+               money(J) + " average job, across " + K.WEEKS + " weeks.");
+    parts.push(mathsTail(mid, low, high));
+    return parts.join(" ");
+  }
+
   /* Channel order is fixed and load-bearing: the API returns exactly these
      five, in exactly this order. */
   const ORDER = ["missed_calls", "slow_reply", "unchased_quotes", "reviews", "dormant"];
@@ -148,6 +242,9 @@
        Their own miss count drives it. "No idea" falls back to the v1 process
        assumption and flags the whole channel as an estimate. */
     let mMissed = 0, sMissed = "ok", estMissed = false;
+    /* the working needs the figures the scoring walks through, not just the
+       total it lands on, so they are kept rather than discarded */
+    const mathsIn = {};
     if (sized && channelReady("missed_calls", a)) {
       const noIdeaM  = a.missed_week === "no_idea";
       const noIdeaAH = a.after_hours_calls === "no_idea";
@@ -162,6 +259,7 @@
       if (mMissed < K.DOWNGRADE_AT) sMissed = downgrade(sMissed);
       estMissed = noIdeaM || noIdeaAH;
       if (estMissed) sMissed = floorAt(sMissed, "medium");   // never "all good" on a guess
+      mathsIn.missed_calls = { M: M, AH: AH, lost: lostWeek, E: E, J: J };
     }
 
     /* ---- C2 slow replies → Zip -------------------------------------------- */
@@ -173,6 +271,7 @@
       const sev = ls * g;
       sSlow = sev >= 0.45 ? "critical" : sev >= 0.25 ? "high" : sev >= 0.10 ? "medium" : "ok";
       if (mSlow < K.DOWNGRADE_AT) sSlow = downgrade(sSlow);
+      mathsIn.slow_reply = { late: ls, gone: g, E: E, J: J };
     }
 
     /* ---- C3 unchased quotes → Nudge --------------------------------------- */
@@ -247,16 +346,28 @@
       if (isReviews && cfg.countNotes && cfg.countNotes[a.review_count]) {
         note = (note ? note + " " : "") + cfg.countNotes[a.review_count];
       }
+      const lo = noDollars ? null : roundMoney(mids[k] * K.RANGE_LOW);
+      const hi = noDollars ? null : roundMoney(mids[k] * K.RANGE_HIGH);
+      /* Only the two channels whose working is mirrored carry one here. The
+         other three are priced by the server alone, so their cards offer the
+         answer rather than claiming a working they do not hold. */
+      const mi = mathsIn[k];
+      const worked = (mi && !noDollars && showsMaths(mids[k], lo, hi))
+        ? (k === "missed_calls"
+            ? missedMaths(a, mi.E, mi.J, mi.M, mi.AH, mi.lost, mids[k], lo, hi)
+            : slowReplyMaths(a, mi.E, mi.J, mi.late, mi.gone, mids[k], lo, hi))
+        : "";
       return {
         key: k,
         label: cfg.label || k,
         status: statuses[k],
-        annual_low:  noDollars ? null : roundMoney(mids[k] * K.RANGE_LOW),
-        annual_high: noDollars ? null : roundMoney(mids[k] * K.RANGE_HIGH),
+        annual_low:  lo,
+        annual_high: hi,
         worker: cfg.worker || { name: "", role: "" },
         note: note,
         echo: buildEcho(k, a, estimates[k]),
         estimated: estimates[k],
+        maths: worked || undefined,
         /* `benchmark` is SERVER-ONLY enrichment (a sourced comparison of their
            answer against the published research, attribution inside the
            string). The mirror never invents one, so the pre-gate map simply
@@ -443,6 +554,13 @@
       base.note = (cfg.notes && cfg.notes[notes[k]]) || "";
       base.echo = k === "missed_calls" ? partialPhoneEcho(a) : buildEcho(k, a, false);
       base.estimated = k === "missed_calls" ? estimated : false;
+      /* The working, built here rather than waited for. The server sends a
+         richer one after a successful send and it replaces this. */
+      if (showsMaths(mids[k], r[0], r[1])) {
+        base.maths = k === "missed_calls"
+          ? missedMaths(a, E, J, M, AH, lost, mids[k], r[0], r[1])
+          : slowReplyMaths(a, E, J, late, gone, mids[k], r[0], r[1]);
+      }
       return base;
     });
 
@@ -1513,7 +1631,14 @@
        five, so Nicholas moved it in here with the rest of the working. */
     if (c.maths) inner.push(buildMaths(c, R));
 
-    const more = buildDisclosure(R.showWorking, R.hideWorking, inner);
+    /* A card with arithmetic offers the working. A card without offers what it
+       actually holds, which is their own answer. Never the other way round:
+       promising a working and not having one is what put this here. */
+    const hasMaths = !!c.maths;
+    const more = buildDisclosure(
+      hasMaths ? R.showWorking : R.showAnswer,
+      hasMaths ? R.hideWorking : R.hideAnswer,
+      inner);
     if (more) row.appendChild(more);
     return row;
   }
