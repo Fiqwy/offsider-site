@@ -1876,7 +1876,6 @@
       });
       sec.appendChild(steps);
     }
-    if (C.guarantee) sec.appendChild(el("p", "audit-offer__guarantee", C.guarantee));
     if (C.trust) sec.appendChild(el("p", "audit-offer__trust", C.trust));
 
     sec.appendChild(buildConvertForm(C));
@@ -2023,7 +2022,57 @@
     /* the one real scarcity fact on this page, stated once, as a fact */
     if (T.scarcity) ending.push(el("p", "audit-flash__scarcity", T.scarcity));
     mapRefs.flashSlot.replaceChildren.apply(mapRefs.flashSlot, ending);
+    showJump();
     mark("gate");
+  }
+
+  /* ---- THE SIGNPOST ------------------------------------------------------
+     The call card sits under the number, the breakdown and the fix block, which
+     is the right order to read them in and a long way down. Somebody who reads
+     their figure and stops never learns there is a next step at all.
+     A slim bar says what it is and goes straight there. It takes itself off the
+     screen the moment the card is actually in view, so it never sits over the
+     fields somebody is filling in, and it never appears once they have
+     submitted, because by then the next step is the booking they are looking at. */
+  let jumpBar = null, jumpWatch = null;
+
+  function clearJump() {
+    if (jumpWatch) { try { jumpWatch.disconnect(); } catch (e) { /* older Safari */ } jumpWatch = null; }
+    if (jumpBar && jumpBar.parentNode) jumpBar.parentNode.removeChild(jumpBar);
+    jumpBar = null;
+  }
+
+  function showJump() {
+    clearJump();
+    const C = A.convert || {};
+    if (!C.jump) return;
+    const card = doc.querySelector(".audit-convert");
+    if (!card) return;
+
+    jumpBar = el("button", "audit-jump", C.jump);
+    jumpBar.type = "button";
+    jumpBar.setAttribute("aria-label", C.jumpAria || C.jump);
+    jumpBar.addEventListener("click", () => {
+      const y = card.getBoundingClientRect().top + window.scrollY - chromeHeight() - 10;
+      try { window.scrollTo({ top: Math.max(0, y), behavior: REDUCED ? "auto" : "smooth" }); }
+      catch (err) { window.scrollTo(0, Math.max(0, y)); }
+      /* send focus with the scroll, or a keyboard visitor is left at the bar */
+      const title = card.querySelector(".callname__title") || card;
+      title.tabIndex = -1;
+      try { title.focus({ preventScroll: true }); } catch (err) { /* older Safari */ }
+    });
+    doc.body.appendChild(jumpBar);
+
+    /* Hide it whenever the card it points at is on screen. Without an observer
+       it would sit across the form. */
+    if (typeof IntersectionObserver !== "function") return;
+    jumpWatch = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!jumpBar) return;
+        jumpBar.classList.toggle("is-away", e.isIntersecting);
+      });
+    }, { threshold: 0.12 });
+    jumpWatch.observe(card);
   }
 
   function submit(form, btn, msg) {
@@ -2108,6 +2157,7 @@
   function showCalendar(email, errorLine, pdf) {
     const T = A.thanks || {};
     if (!mapRefs) return;
+    clearJump();
     const token = (!errorLine && pdf && pdf.token) ? String(pdf.token) : (state.token || "");
 
     const flash = el("section", "audit-flash" + (errorLine ? " audit-flash--warn" : ""));
@@ -2568,6 +2618,7 @@
   function finishFlash() {
     const T = A.thanks || {};
     if (!mapRefs) return;
+    clearJump();
     const flash = el("section", "audit-flash");
     flash.tabIndex = -1;
     flash.appendChild(el("b", "audit-flash__title", T.finishDone || ""));

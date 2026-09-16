@@ -814,12 +814,14 @@ window.SITE = {
       /* Set in caps by CSS and given its arrow by CSS, so the DOM text stays a
          readable sentence for a screen reader. */
       button: "Show me what I could fix",
+      /* The sticky signpost, shown once the map is open and taken away the
+         moment the card it points at is on screen, so it never sits over the
+         fields somebody is filling in. */
+      jump: "Next step: your free Revenue Recovery Call",
+      jumpAria: "Go to the Revenue Recovery Call",
       sending: "One moment...",
       note: "No spam, no lock in. Your map stays on this page either way.",
       trust: "You'll talk to Nicholas, who built this. No sales team, no lock in.",
-      // Promises a thing we control (what they leave the call holding), never a
-      // result we do not control.
-      guarantee: "If the fifteen minutes doesn't show you what plugging your worst leak could be worth, that's on us.",
       site: {
         text: "Applied Intelligence is Australian owned and founder led.",
         links: [],

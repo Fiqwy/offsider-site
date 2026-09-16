@@ -13,7 +13,7 @@ The Never Miss System is a set of AI workers covering the front office of a smal
 - Review Engine: requests a Google review after a completed job and handles replies.
 - Reactivation (optional): contacts dormant past customers, checked against the opt-out list.
 
-Everything reports into one dashboard. Pricing is anchored against a salary and comes in well under one. Engagements are month to month with no lock-in, and there is a 60-day money-back guarantee: if the AI staff are not earning their keep, the service fees for that period are refunded in full. Setup is excluded.
+Everything reports into one dashboard. Pricing is anchored against a salary and comes in well under one. Engagements are month to month with no lock-in, and there is a 60-day money-back guarantee: if the AI staff are not earning their keep, every dollar paid is refunded in full, setup included, and the build is unwound so the client reverts to what they had before.
 
 ## How it is delivered
 

@@ -2276,3 +2276,30 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 .audit-build__dots i.is-on { background: var(--accent); transform: scale(1.2); }
 @media (max-width: 360px) { .audit-build__label { font-size: .74rem; } }
 @media (prefers-reduced-motion: reduce) { .audit-build__dots i { transition: none; } }
+
+/* ---- The signpost to the call ---------------------------------------------
+   The call card is below the number, the breakdown and the fix block, which is
+   the right reading order and a long way down. This says what the next step is
+   without moving anything above the fold, and removes itself the moment the
+   card is on screen so it never covers the form. */
+.audit-jump {
+  position: fixed; left: 50%; bottom: 0; z-index: 90;
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 1.6rem));
+  margin-bottom: calc(.8rem + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 52px; padding: .7rem 1.1rem;
+  border: 0; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: .92rem; font-weight: 800; letter-spacing: -.01em;
+  color: #fff; background: var(--accent-ink);
+  box-shadow: 0 6px 24px rgba(11, 18, 32, .28);
+  transition: opacity .25s ease, transform .25s ease;
+}
+.audit-jump::after { content: "\2193"; font-size: 1em; }
+.audit-jump:hover { background: var(--accent-ink-2); }
+.audit-jump:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+/* the card is on screen, so the bar has nothing left to say */
+.audit-jump.is-away {
+  opacity: 0; transform: translateX(-50%) translateY(120%); pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) { .audit-jump { transition: none; } }
