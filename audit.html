@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Free Leak Audit: find what your business is losing each year | Applied Intelligence</title>
-  <meta name="description" content="Free, no call required. The Leak Audit opens on question one: seven taps and you see your number, before we ask your name. Say where to send the map and the breakdown opens as well. Sixteen taps all up. An estimate from your answers, not a forecast." />
+  <title>Free Revenue Leak Audit: find where your business is losing revenue | Applied Intelligence</title>
+  <meta name="description" content="Free, no call required. The Revenue Leak Audit opens on question one: seven taps and the whole map is yours, the number and the breakdown, before we ask your name. An estimate from your answers, not a forecast." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/logo/favicon.svg" />
@@ -13,17 +13,17 @@
   <!-- Open Graph (URLs point at the production domain; harmless on the Pages preview) -->
   <meta property="og:site_name" content="Applied Intelligence" />
   <meta property="og:locale" content="en_AU" />
-  <meta property="og:title" content="The free Leak Audit | Applied Intelligence" />
-  <meta property="og:description" content="Seven taps and you see your number. We ask for a name after you have seen it, and that is what opens the map: where it is going, and the fix for the worst one. Built on your own numbers." />
+  <meta property="og:title" content="The free Revenue Leak Audit | Applied Intelligence" />
+  <meta property="og:description" content="Seven taps and the whole map is yours: your number, where it is going, and the fix for the worst one. Nothing is held back and no name is asked for it. Built on your own numbers." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://appliedintelligence.biz/audit.html" />
   <meta property="og:image" content="https://appliedintelligence.biz/assets/og/audit-og.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="The free Leak Audit: seven taps and you see your number before we ask your name. Sample audit shown." />
+  <meta property="og:image:alt" content="The free Revenue Leak Audit: seven taps and you see your number before we ask your name. Sample audit shown." />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="The free Leak Audit | Applied Intelligence" />
-  <meta name="twitter:description" content="Seven taps and you see your number. We ask for a name after you have seen it, and that is what opens the map: where it is going, and the fix for the worst one. Built on your own numbers." />
+  <meta name="twitter:title" content="The free Revenue Leak Audit | Applied Intelligence" />
+  <meta name="twitter:description" content="Seven taps and the whole map is yours: your number, where it is going, and the fix for the worst one. Nothing is held back and no name is asked for it. Built on your own numbers." />
   <meta name="twitter:image" content="https://appliedintelligence.biz/assets/og/audit-og.jpg" />
 
   <!-- Fonts: self-hosted, latin subset, OFL (see assets/fonts/OFL.txt).
@@ -33,7 +33,7 @@
        well after first paint. -->
   <link rel="preload" href="assets/fonts/hanken-grotesk-latin-var.woff2" as="font" type="font/woff2" crossorigin />
 
-  <link rel="stylesheet" href="styles.css?v=20260915f" />
+  <link rel="stylesheet" href="styles.css?v=20260916a" />
 
   <!-- The page itself plus the trail back to home. Static so it is in the
        source for crawlers that do not run JS. Deliberately thin: no ratings,
@@ -43,9 +43,9 @@
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "The free Leak Audit",
+      "name": "The free Revenue Leak Audit",
       "url": "https://appliedintelligence.biz/audit.html",
-      "description": "A sixteen-question self-assessment that uses the owner's own numbers to estimate where calls, leads, quotes and past customers are leaking out of an Australian trade business, and what that is worth over a year. The first seven questions price the phone and the leads, and the figure is shown on the page as soon as it is worked out, before the visitor is asked for a name. Saying where to send the map is what opens the per-leak breakdown.",
+      "description": "A self-assessment that uses the owner's own numbers to estimate where calls, leads, quotes and past customers are leaking out of an Australian trade business, and what that could be worth over a year. Seven questions price the phone and the leads, and the whole map, the figure and the per-leak breakdown alike, is shown on the page before the visitor is asked for anything. A further nine questions price the remaining leaks. An optional 15-minute Revenue Recovery Call is offered after the map is open.",
       "inLanguage": "en-AU",
       "isPartOf": {
         "@type": "WebSite",
@@ -63,7 +63,7 @@
       "@type": "BreadcrumbList",
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://appliedintelligence.biz/" },
-        { "@type": "ListItem", "position": 2, "name": "Free Leak Audit", "item": "https://appliedintelligence.biz/audit.html" }
+        { "@type": "ListItem", "position": 2, "name": "Free Revenue Leak Audit", "item": "https://appliedintelligence.biz/audit.html" }
       ]
     }
   ]
@@ -93,7 +93,7 @@
            thing the visitor was just told. The optional 15-minute call is offered
            once, after the map is open. What sits here is a plain word, not a
            button, and only on the widths where the nav links are hidden. -->
-      <span class="nav__note" data-bind="audit.chrome.right">Free audit</span>
+      <span class="nav__note" data-bind="audit.chrome.right">Revenue Leak Audit</span>
     </div>
   </header>
 
@@ -101,13 +101,19 @@
 
     <!-- ============ TRUST STRIP ============
          The page's visible h1. There is no hero: the instrument opens on
-         question one, so the only thing above it is the one line that answers
-         the two questions a sceptical owner has in the first second (what does
-         this cost me, and will someone ring me). Static so it paints with the
-         document and nothing shifts when the module mounts. -->
+         question one, so the only thing above it is the audit's name, the
+         promise under it, and the one line that answers the two questions a
+         sceptical owner has in the first second (what does this cost me, and
+         will someone ring me). Static so it paints with the document and
+         nothing shifts when the module mounts.
+         For a visitor who arrived from an ad, applyHook() in audit.js swaps
+         ONLY the h1 for that ad's hook. The promise and the micro line are
+         true whichever ad sent them, so they never move. -->
     <div class="audit-trust">
       <div class="wrap">
-        <h1 class="audit-trust__line" data-bind="audit.chrome.trust">Free. Sixteen taps all up. No call required.</h1>
+        <h1 class="audit-trust__line" data-bind="audit.chrome.name">Free Revenue Leak Audit</h1>
+        <p class="audit-trust__sub" data-bind="audit.chrome.promise">Find out where your business is losing revenue, and what it could be costing you.</p>
+        <p class="audit-trust__micro" data-bind="audit.chrome.micro">Seven taps. No typing. No call required.</p>
       </div>
     </div>
 
@@ -116,11 +122,11 @@
          The mount keeps a reserved minimum height so the page does not jump
          when the module paints. Question one is the first thing on the page:
          nothing is allowed above it except the bar and the trust strip. -->
-    <section class="audit-stage" aria-label="The Leak Audit">
+    <section class="audit-stage" aria-label="The Revenue Leak Audit">
       <div class="wrap">
         <div class="audit-stage__mount" data-audit-stage>
           <noscript>
-            <p class="audit-noscript">This audit needs JavaScript switched on. If you would rather just talk it through, <a href="index.html#book">book a free 15-minute call</a> instead and we will map it with you on the phone.</p>
+            <p class="audit-noscript">This audit needs JavaScript switched on. If you would rather just talk it through, <a href="index.html#book">book a free 15-minute Revenue Recovery Call</a> instead and we will map it with you on the phone.</p>
           </noscript>
         </div>
       </div>
@@ -132,11 +138,11 @@
          trust paragraph only matters to someone who has already started. -->
     <section class="audit-honesty" aria-label="How this audit works">
       <div class="wrap audit-honesty__inner">
-        <span class="kicker" data-bind="audit.kicker">The free Leak Audit</span>
-        <p class="audit-honesty__sub" data-bind="audit.sub">Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your week, and put a dollar range on each one. No call required, no sales pitch.</p>
+        <span class="kicker" data-bind="audit.kicker">The free Revenue Leak Audit</span>
+        <p class="audit-honesty__sub" data-bind="audit.sub">Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your business, and put a dollar range on each one. No call required, no sales pitch.</p>
         <ul class="audit-meta" data-audit-meta>
-          <li>Sixteen taps, no typing</li>
-          <li>About three minutes</li>
+          <li>Seven taps, no typing</li>
+          <li>About a minute</li>
           <li>Built on your numbers</li>
         </ul>
         <p class="audit-honesty__note" data-bind="audit.metaNote"></p>
@@ -183,8 +189,8 @@
        window.PAGE_INIT, which script.js calls inside boot(). defer keeps that
        order (deferred scripts execute in document order, before
        DOMContentLoaded), so the chain holds and nothing blocks the parser. -->
-  <script src="content.js?v=20260915f" defer></script>
-  <script src="audit.js?v=20260915f" defer></script>
-  <script src="script.js?v=20260915f" defer></script>
+  <script src="content.js?v=20260916a" defer></script>
+  <script src="audit.js?v=20260916a" defer></script>
+  <script src="script.js?v=20260916a" defer></script>
 </body>
 </html>

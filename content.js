@@ -22,7 +22,7 @@ window.SITE = {
 
   /* ---- Primary + secondary calls to action ------------------------------- */
   cta: {
-    primary: "Book your free Leak Audit",
+    primary: "Book your free Revenue Leak Audit",
     secondary: "Meet the crew",
   },
 
@@ -43,7 +43,7 @@ window.SITE = {
     ],
     sub: "A team of AI staff answering your phone, chasing every lead and booking the job around the clock. You employ them, we build and run them, and you just turn up and do what you do best.",
     // hero micro-proof line (a live stat, not the diagnosis promise)
-    proof: "Set to reply in under a minute. Your first month, refundable in full.",
+    proof: "Every call answered, day or night. 60-day money-back guarantee.",
     // crew-at-work feed: glass cards cycling over the hero video.
     // Late-night/early timestamps on purpose: the crew works while you sleep.
     // These are SIMULATED events (no live clients yet); the visible feedNote
@@ -198,7 +198,7 @@ window.SITE = {
     kicker: "From here",
     heading: "Live in {i:one week}, not months.",
     steps: [
-      { n: "01", title: "Your free Leak Audit", text: "A quick call where we map every place a call, lead or quote is leaking, and show you which AI worker pays for itself first." },
+      { n: "01", title: "Your free Revenue Leak Audit", text: "A quick call where we map every place a call, lead or quote is leaking, and show you which AI worker pays for itself first." },
       { n: "02", title: "We build and connect", text: "One 30-minute handover from you, then we wire your AI staff into your phone, calendar and tools. You review everything before it goes live." },
       { n: "03", title: "Live in one week", text: "Your staff start in a supervised warm-up, so you trust every message before they run solo. A bigger or more complicated setup takes two." },
       { n: "04", title: "We manage it for you", text: "We tune, monitor and report. You get the results and never touch the controls." },
@@ -209,7 +209,7 @@ window.SITE = {
   pricing: {
     kicker: "The Never Miss System",
     heading: "A fraction of a wage. Round-the-clock {i:coverage}.",
-    sub: "The Never Miss System is your whole front office in one place, priced against a salary and coming in well under it. Take the full system, or start with a single worker, like the AI receptionist after hours, and add the rest as you grow. The free Leak Audit works out exactly what you need.",
+    sub: "The Never Miss System is your whole front office in one place, priced against a salary and coming in well under it. Take the full system, or start with a single worker, like the AI receptionist after hours, and add the rest as you grow. The free Revenue Leak Audit works out exactly what you need.",
     human: {
       title: "One human hire",
       points: [
@@ -248,12 +248,12 @@ window.SITE = {
 
   /* ---- Guarantee / risk removal ------------------------------------------ */
   guarantee: {
-    kicker: "The 30-Day Promise",
-    heading: "If your first month doesn't pay for itself, you don't {i:pay}.",
+    kicker: "The 60-Day Money-Back Guarantee",
+    heading: "If your AI staff aren't earning their keep, you get your money {i:back}.",
     promise: {
       badge: "Our promise, in writing",
-      statement: "Run your AI staff for 30 days. If it hasn't paid for itself by the end of your first month, tell us and we refund that month in full.",
-      finePrint: "Your first month's fee, refunded in full, no questions and no exit interview. Month to month after that, cancel any time on 14 days notice.",
+      statement: "Run your AI staff for 60 days. If they aren't earning their keep, tell us and we refund your service fees for that period.",
+      finePrint: "Your service fees for the first 60 days, refunded in full, no questions and no exit interview. Setup is excluded, because that work is already done and yours to keep. Month to month either way, cancel any time on 14 days notice.",
     },
     points: [
       { title: "You see it work first", text: "Every worker starts in a supervised warm-up. You approve the messages before anything goes live in front of a customer." },
@@ -275,18 +275,18 @@ window.SITE = {
       a: "Yes. Your data stays yours, isolated to your business, and your AI staff run with strict guardrails on what they can see and do." },
     { q: "What if it gets something wrong?",
       a: "Every worker starts in a supervised warm-up so you catch anything before it goes live. Once running, spend caps and quiet hours keep it safe, and we monitor it for you." },
-    { q: "What's the 30-Day Promise?",
-      a: "Run your AI staff for a month. If it hasn't paid for itself by the end of that first month, tell us and we refund it in full. No lock-in, and you can cancel any time after that." },
+    { q: "What's the 60-day money-back guarantee?",
+      a: "Run your AI staff for 60 days from go-live. If they aren't earning their keep, tell us and we refund your service fees for that period. Setup is excluded, because that work is already done and yours to keep. No lock-in, and you can cancel any time on 14 days notice." },
     { q: "Can it really send quotes for me?",
       a: "You build the quote in your portal from your own price list, in a couple of clicks, and Nudge does the chasing: a follow-up on day 1, day 3 and day 7 until the customer answers. Same with invoices: raised in the portal, then politely chased until they're paid. Nudge will answer a price question by quoting your price list word for word, and it will never invent a number or add anything up, that stays yours." },
     { q: "How much does it cost?",
-      a: "It depends on which staff your business needs, which is exactly what the free Leak Audit works out. It is always a fraction of the salary of the person it replaces." },
+      a: "It depends on which staff your business needs, which is exactly what the free Revenue Leak Audit works out. It is always a fraction of the salary of the person it replaces." },
     { q: "Do I have to change my phone number?",
       a: "No. We route your existing number, so your customers keep calling the number they already know. Nothing on your end changes." },
     { q: "What happens when the AI cannot handle something?",
       a: "It hands straight to you, or whoever you nominate, every time. And during the supervised warm-up you approve how it handles things before it ever runs on its own." },
     { q: "Is this right for my type of business?",
-      a: "If you answer calls and book jobs, yes. It works for trades and local service businesses of every kind. The free Leak Audit shows exactly which staff will pay for themselves first." },
+      a: "If you answer calls and book jobs, yes. It works for trades and local service businesses of every kind. The free Revenue Leak Audit shows exactly which staff will pay for themselves first." },
     { q: "How long until it's live?",
       a: "One week. We map the leaks on the call, build your staff, run a supervised warm-up, then go live. If your setup is complicated or a bigger job, allow two." },
   ],
@@ -294,7 +294,7 @@ window.SITE = {
   /* ---- Final CTA + booking section ---------------------------------------- */
   finalCta: {
     heading: "Find out what your business is {i:leaking}.",
-    sub: "The Leak Audit is free, and you keep your Leak Map even if you never hire us. Worst case, you walk away knowing exactly where you are losing jobs. Best case, you hire your first AI worker this week. We only take one business per trade in each area, so the sooner we talk the more likely yours is still open.",
+    sub: "The Revenue Leak Audit is free, and you keep your Leak Map even if you never hire us. Worst case, you walk away knowing exactly where you are losing jobs. Best case, you hire your first AI worker this week. We only take one business per trade in each area, so the sooner we talk the more likely yours is still open.",
   },
   booking: {
     label: "What happens on the call",
@@ -306,7 +306,7 @@ window.SITE = {
     note: "No cost. No obligation. One business per trade, per area.",
     // enquiry box (posts to the platform's own /api/public/contact; no third party)
     form: {
-      title: "Lock in your free Leak Audit",
+      title: "Lock in your free Revenue Leak Audit",
       fields: {
         name: "Your name",
         mobile: "Mobile (so we can text you a time if you want the call)",
@@ -324,9 +324,17 @@ window.SITE = {
       // the limit is keyed per connection, so the goes that used it up may not be theirs.
       errorBusy: "Steady on, that is a few too many tries from your connection. Give it a few minutes, or ring or email us and we will sort you out today.",
     },
+    // /hire runs the SAME form to the same endpoint, but ad traffic asked to hire
+    // AI staff, not to book a Revenue Leak Audit, and the button must not say otherwise.
+    // Overrides only: validation, error and success copy stay in one place above.
+    formHire: {
+      title: "Hire your first AI staff member",
+      button: "Text me a time to talk",
+      note: "We text you today to lock in a time. No spam, no obligation.",
+    },
   },
 
-  /* ---- The Leak Audit (audit.html) ----------------------------------------
+  /* ---- The Revenue Leak Audit (audit.html) ----------------------------------------
      The interactive lead magnet. Nine tap-only questions, a live leak counter,
      then the Leak Map behind a name/mobile/email gate.
 
@@ -343,7 +351,7 @@ window.SITE = {
      ---------------------------------------------------------------------- */
   audit: {
     navLabel: "Free audit",
-    kicker: "The free Leak Audit",
+    kicker: "The free Revenue Leak Audit",
 
     /* ---- Chrome (sits above every question screen) ----------------------
        The ads that point here are all signed Applied Intelligence, so the bar
@@ -352,8 +360,15 @@ window.SITE = {
     chrome: {
       home: "Applied Intelligence",
       homeAria: "Applied Intelligence home page",
-      right: "Free audit",
-      trust: "Free. Sixteen taps all up. No call required.",
+      right: "Revenue Leak Audit",
+      /* The page's h1 is the audit's NAME, and the promise sits under it. The
+         three objection-killers drop to a third, smaller line. For a visitor
+         who arrived from an ad applyHook() swaps ONLY the name line for that
+         ad's hook: the promise and the micro line are true either way, so they
+         never move and nothing is added above question one. */
+      name: "Free Revenue Leak Audit",
+      promise: "Find out where your business is losing revenue, and what it could be costing you.",
+      micro: "Seven taps. No typing. No call required.",
       /* Message match for paid visitors. Keyed by utm_campaign; the strip's
          line becomes the hook of the ad that sent them, one line, 34
          characters or fewer so it never wraps above question one. The trust
@@ -365,7 +380,7 @@ window.SITE = {
         "leak-audit-answer-or-ring":  "Answer it, or let it ring?",
         "leak-audit-not-the-price":   "They went with whoever rang back.",
         "leak-audit-clear-answer":    "What's the phone costing you?",
-        "leak-audit-sixteen-taps":    "Your leak number. Sixteen taps.",
+        "leak-audit-sixteen-taps":    "Your leak number. Seven taps.",
         "leak-audit-sixty-two":       "What do your missed calls cost?",
         "leak-audit-three-quotes":    "Unsent quotes don't win jobs.",
         "leak-audit-two-tuesdays":    "How many of yours went cold?",
@@ -378,14 +393,14 @@ window.SITE = {
     /* The visible h1 IS the trust strip. The page opens on question one, so
        there is no hero to headline: the old hero copy survives below the
        instrument, where the people who actually started can read it. */
-    heading: "Free. Sixteen taps all up. No call required.",
+    heading: "Free Revenue Leak Audit",
     honestyTitle: "Before you ask, yes, we made the number up out of your answers",
-    sub: "Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your week, and put a dollar range on each one. No call required, no sales pitch.",
-    meta: ["Sixteen taps, no typing", "About three minutes", "Built on your numbers", "Australian owned, founder-led"],
+    sub: "Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your business, and put a dollar range on each one. No call required, no sales pitch.",
+    meta: ["Seven taps, no typing", "About a minute", "Built on your numbers", "Australian owned, founder-led"],
     // The trust play: the sting lands BEFORE we ask for anything. Say it out loud.
-    metaNote: "The number lands once the phone is priced, then it moves with every tap after. The maths is the same for everyone and written out at the bottom of this page, not made up for you. If your answers come back clean, the map says so and we tell you that plainly, because a map that always finds a problem is not a map.",
+    metaNote: "The number lands once the phone is priced, then it moves with every tap after, and the whole map opens on the seventh without you giving us anything. The maths is the same for everyone and written out at the bottom of this page, not made up for you. If your answers come back clean, the map says so and we tell you that plainly, because a map that always finds a problem is not a map.",
     // no-JS / pre-JS fallback line under the chrome
-    noscript: "This audit needs JavaScript switched on. If you would rather just talk it through, book a free 15-minute call instead.",
+    noscript: "This audit needs JavaScript switched on. If you would rather just talk it through, book a free 15-minute Revenue Recovery Call instead.",
 
     progress: { label: "Question", of: "of", back: "Back", change: "Change an answer" },
 
@@ -399,6 +414,20 @@ window.SITE = {
       hint: "Keep going. The number moves as each part of your week is mapped.",
       // shown once, on the screen where the counter first appears
       revealLine: "That is the phone on its own, from the numbers you just gave us. Two taps left and we price your leads.",
+      /* THE BUILD STRIP. The number cannot honestly appear until five separate
+         answers are in. Before this strip existed, the first four taps changed
+         nothing on the screen except the question: a man was asked to answer
+         four times on the promise of a number, with no evidence one was
+         coming. Indexed by how many of the five are in, so it counts DOWN to
+         the payoff. Never a dollar figure, because there is not an honest one
+         yet. That is the whole point of it. */
+      build: [
+        "Five answers and your number lands.",
+        "One in. Four to go.",
+        "Two in. Three to go.",
+        "Three in. Two to go.",
+        "One more and your number lands.",
+      ],
     },
 
     /* ---- Sections -------------------------------------------------------
@@ -414,8 +443,10 @@ window.SITE = {
     },
 
     /* The sixteen questions, in two runs. The first seven price the phone and
-       the leads and sit in front of the gate. The nine marked `deferred` are
-       offered after the map opens, so the audit is still sixteen taps all up.
+       the leads and OPEN THE MAP: nothing is asked for in between. The nine
+       marked `deferred` are offered under the open map as the quiet second
+       choice, so the audit is still sixteen taps for anyone who wants all five
+       leaks priced, and seven for everyone else.
        `key` and every option `key` are the API enum values: the server
        validates them strictly and recomputes the maths from them, so renaming
        one breaks the contract. `skipWhen` is the conditional-absence rule:
@@ -439,7 +470,7 @@ window.SITE = {
       {
         key: "missed_week", section: "phone",
         title: "In a normal week, how many calls do you miss?",
-        help: "Best guess is fine. If you genuinely do not know, say so. That matters too.",
+        help: "Best guess is fine. Or take a normal day and times it by five.",
         micro: "Your count, not ours.",
         options: [
           { key: "none",     label: "Barely any" },
@@ -476,9 +507,9 @@ window.SITE = {
         ],
       },
       {
-        key: "enquiries", section: "sizing",
+        key: "enquiries", section: "sizing", micro: "This is the one that lands your number.",
         title: "In a normal week, how many calls and enquiries come in?",
-        help: "Everything, not just the ones that booked.",
+        help: "Everything, not just the ones that booked. Easier in days? Take a normal day and times it by five.",
         options: [
           { key: "under_10", label: "Under 10" },
           { key: "10_25",    label: "10 to 25" },
@@ -500,7 +531,7 @@ window.SITE = {
         ],
       },
       {
-        key: "late_outcome", section: "leads",
+        key: "late_outcome", section: "leads", micro: "Last tap. Then the whole map opens.",
         title: "By the time that reply goes out, how many have already sorted it?",
         help: "Rung someone else, booked it in, moved on.",
         options: [
@@ -725,43 +756,70 @@ window.SITE = {
       },
     },
 
-    /* The gate: a claim, not a toll. The number is already theirs and it is
-       printed SHARP inside this card, above the kicker, so the card opens by
-       handing something over rather than by holding something back. What the
-       two fields buy is the map underneath: the per-leak breakdown, the fix for
-       the worst one, and the copy that outlives this page. The mobile is NOT
-       asked here: it is asked once, later, by the visitor who wants the call.
-       No bullets, no list of contents: every extra line pushed the button past
-       the fold on a phone, and the fold is what this card is for. */
-    gate: {
-      // the unit that sits under the sharp range at the top of the card
+    /* THE CONVERSION STEP. The map is ALREADY open above this card: the number,
+       the per-leak breakdown and the fix for the worst one are all on the
+       screen and none of it was paid for. So this card is not a toll, it is the
+       next step, and the three fields buy a CALL rather than a reveal. Their
+       range is repeated inside the card because the ask reads differently sat
+       directly under the loss it is about.
+       NO GUARANTEED RECOVERY anywhere in here: "could", "potential", never
+       "will". We do not control what their business does after the call. */
+    convert: {
+      // the range, restated at the moment of the ask
       figLead: "Your leak, from your own answers",
       figUnit: "a year",
-      kicker: "That number has a fix",
-      title: "Now the part that shrinks it.",
-      sub: "Put your details in and two things happen. The map opens with the fix for your worst leak, from your own numbers. And Nicholas gives you one ring to talk about plugging it, if you want it. Fifteen minutes, a price on the spot, one word stops it.",
+      kickerLead: "Your worst leak: ",
+      /* Said instead, when the map came back clean. Naming a "worst leak" on a
+         map that just said there is not one is the page calling itself a liar
+         at the exact moment it asks for the call. */
+      allClearKicker: "Nothing broken",
+      allClearTitle: "Want to keep it that way?",
+      title: "Want to see what you could do about it?",
+      /* The heading directly above already says "Free Revenue Recovery Call"
+         and the badge beside it already says 15 minutes, so saying both again
+         here was the card introducing itself twice in a row. */
+      sub: "We'll look at your results together and show you where automation could recover some of what you are losing.",
+      /* The call gets its own name and its own badge, because "a call" is a
+         thing people dodge and a named, timeboxed thing is a thing they book. */
+      callName: "Free Revenue Recovery Call",
+      callBadge: "15 minutes",
+      stepsTitle: "What happens on the call",
+      steps: [
+        { n: "01", title: "We walk your map",
+          text: "The one you just built. We check it against your actual week and see which numbers hold up." },
+        { n: "02", title: "We pick one leak",
+          text: "The one worth plugging first for your business, which is not always the biggest number on the screen." },
+        { n: "03", title: "You get a price",
+          text: "On the spot, for that one thing. Or a straight \u201cyou do not need us yet\u201d, which happens often enough to be worth saying." },
+      ],
+      /* The "Walk away with" list is gone: the three steps above it said the
+         same thing from the other end, and two lists selling one call read as
+         padding. Its third line (the honest "not yet") survives inside step
+         three, which is the line that was actually doing the work. */
+      /* Three fields, in the order Nicholas specified. Each carries the reason
+         it is asked, so no field is taken silently. */
       fields: {
-        name: "First name",
-        mobile: "Mobile",
+        name: "Name",
         email: "Email",
-        tradeOther: "What do you do?",
+        mobile: "Phone",
       },
-      // the reason line under each label, so no field is asked for silently
       reasons: {
-        name: "So the fix is addressed to a person",
-        mobile: "So Nicholas can give you one ring about the fix. One word stops it.",
-        email: "So you keep a copy when this page is gone.",
+        name: "So we know what to call you",
+        email: "So we can send you a copy of your map",
+        mobile: "So Nicholas can ring you at the time you pick. One word stops it.",
       },
       errorRequired: "Please fill this in.",
       errorEmail: "Please enter a valid email address.",
       errorInvalid: "Please check this.",
-      button: "Show me the fix",
+      /* Set in caps by CSS and given its arrow by CSS, so the DOM text stays a
+         readable sentence for a screen reader. */
+      button: "Show me what I could fix",
       sending: "One moment...",
-      note: "No spam, no lock in. The map is yours to keep.",
-      // Who is asking. The two outbound links are GONE: this card's whole job
-      // is the fold, and a link out of it at the moment of the ask is an exit
-      // dressed as reassurance. The wordmark in the top bar is the way to the
-      // rest of the site, and it is there on every screen of the run.
+      note: "No spam, no lock in. Your map stays on this page either way.",
+      trust: "You'll talk to Nicholas, who built this. No sales team, no lock in.",
+      // Promises a thing we control (what they leave the call holding), never a
+      // result we do not control.
+      guarantee: "If the fifteen minutes doesn't show you what plugging your worst leak could be worth, that's on us.",
       site: {
         text: "Applied Intelligence is Australian owned and founder led.",
         links: [],
@@ -798,10 +856,10 @@ window.SITE = {
       notPricedLabel: "Not priced yet",
       // what those rows say instead of a figure
       notPriced: {
-        unchased_quotes: "We have not asked about your quotes yet. There is no figure here.",
-        reviews: "We have not asked about your reviews yet. This one never gets a figure.",
-        dormant: "We have not asked about your past customers yet. There is no figure here.",
-        slow_reply: "We have not asked about your leads yet. No figure yet.",
+        unchased_quotes: "Not asked yet, so no figure.",
+        reviews: "Not asked yet, and this one never carries a figure.",
+        dormant: "Not asked yet, so no figure.",
+        slow_reply: "Not asked yet, so no figure.",
       },
       partialNote: "Two of the five leaks are priced. The other three are still yours to finish.",
       // v2: the "You told us: ..." quote sits above the note on every card.
@@ -812,11 +870,98 @@ window.SITE = {
       // It is server-built and deterministic, so it only ever appears on the
       // unlocked map, never on the pre-gate mirror.
       mathsLabel: "The maths",
+      /* The per-card disclosure. Everything that used to sit open on the card
+         (their own answer echoed back, the note, the benchmark and the worked
+         maths) now lives behind this. Nothing was deleted: the number stays
+         checkable, which is the whole honesty claim, it just stops being the
+         default reading load. */
+      showWorking: "Show the working",
+      hideWorking: "Hide the working",
+      /* The three leaks the seven taps cannot price used to be three cards
+         apologising. One line and a button instead: an offer, not an apology. */
+      unpricedLead: "Three more leaks, not priced yet",
+      unpricedLine: "Nine more taps prices the ones that can be priced.",
       // The honest hand-off. The diagnosis is the free value; the fix is what
       // we sell. NO DIY content, tips, templates or cadences anywhere on this
       // page or in the PDF (Nicholas, explicit): this is an ad-driven lead
       // magnet, not a how-to.
       chain: "The map is yours to keep. Plugging the leaks is the part we do.",
+    },
+
+    /* ======================================================================
+       HOW IT GETS FIXED. The block that answers the only question the map
+       leaves open: "right, so how would you actually fix that?" Without it the
+       page shows a man five holes in his business and then asks him for a
+       call, and the honest reading of that is "you are going to tell me to
+       reply faster".
+
+       RAILS, and they matter more here than anywhere else on the page:
+       · The before/after is a SEQUENCE OF EVENTS, never a second dollar
+         figure. A number in the right-hand column is a promised recovery, and
+         that is the one claim on this page we could not defend.
+       · Outcome first, staff named second (Nicholas, explicit). The promise
+         has to land before the mechanism.
+       · No "AI" in the outcome lines themselves. The worker roles carry it.
+       ====================================================================== */
+    system: {
+      title: "How it gets fixed",
+      lead: "Not by you answering faster or working later. By something else picking up the parts of the week you cannot get to.",
+      beforeLabel: "What happens now",
+      afterLabel: "What happens instead",
+      /* Keyed by channel. Only the two the seven taps can price have a pair,
+         because the worst leak is always one of those two. */
+      pairs: {
+        missed_calls: {
+          before: [
+            "Two in the afternoon. You are under a sink with both hands full.",
+            "The phone rings out.",
+            "They ring the next bloke on the list, and he picks up.",
+            "You never find out the job existed.",
+          ],
+          after: [
+            "The same call gets answered, in your business name.",
+            "They get asked what they need and where they are.",
+            "A time gets offered from your calendar and locked in.",
+            "You get a text with the job and the time. You did not have to ring anyone back.",
+            "It is in your dashboard before you are out from under the sink.",
+          ],
+        },
+        slow_reply: {
+          before: [
+            "An enquiry lands from your website at ten past eight at night.",
+            "You see it the next morning. Or Monday.",
+            "By then they have messaged a few others, and one of them answered.",
+            "By the time your price lands, the job is gone.",
+          ],
+          after: [
+            "The enquiry gets a real answer in under a minute, day or night.",
+            "They get asked what the job is and whether they want a time.",
+            "The ones who are ready get booked. The rest reach you warm.",
+            "Yours is the first reply they read. Every time.",
+            "The whole thread is in your dashboard, whether you read it tonight or Monday.",
+          ],
+        },
+      },
+      /* THE ALL CLEAR. This page promises that a clean set of answers gets
+         told so plainly, "because a map that always finds a problem is not a
+         map". That promise is worth nothing if the block underneath then
+         paints the man losing a job he never hears about. On an all clear
+         there is no "before", so there is no before/after at all: what is left
+         is what the system would be protecting. */
+      allClearTitle: "What it would protect",
+      allClearLead: "Nothing here needs plugging, so there is nothing to fix. This is what would be running in the background anyway, so a tight ship stays tight on the week everything lands at once.",
+      fixTitle: "What changes, leak by leak",
+      allClearFixTitle: "What it would cover",
+      /* OUTCOME FIRST. The worker name and role are read off channels.<key>
+         .worker at render time, so they are stated in exactly one place. */
+      lines: {
+        missed_calls:    "Every call gets answered, after hours as well, and the job gets booked while they are still on the phone.",
+        slow_reply:      "Every website and social enquiry gets a real answer inside a minute, before anyone else gets a look in.",
+        unchased_quotes: "Every quote gets chased on day one, day three and day seven, from your own price list, until you get a yes or a no.",
+        reviews:         "Every finished job gets asked for a review, the same way, every time.",
+        dormant:         "Your past customers get worked through, and the ones who are ready get booked back in.",
+      },
+      close: "It is one system, and it runs while you are on the tools, asleep, or on a job. You employ it. You do not operate it.",
     },
 
     /* THE LEAK FIX. One plain-words line per priced channel, printed on the
@@ -948,7 +1093,8 @@ window.SITE = {
          thing as the PDF line under it, which put a paragraph of acknowledgement
          between the number and the offer. What happened, and where the copy went.
          Nothing else: the map itself is directly below and speaks for itself. */
-      title: "Unlocked. The whole map is below.",
+      title: "Your audit is complete.",
+      lead: "Let's look at your results together.",
       /* The fork. Three leaks are still unpriced, and the visitor picks how
          they get priced: nine more taps here, or fifteen minutes with us. */
       forkTitle: "Three leaks left to price",
@@ -989,43 +1135,18 @@ window.SITE = {
          taps can price, and the copy speaks to the one that ranked worst.
          NO scarcity claim, no trial, no promise of a result, and the mechanism
          is never named here. The outcome is. */
+      /* What survives of the old ending. The headline, body, walk-away list
+         and button all moved into `convert` above, because the ask and the
+         reason for the ask are now one card instead of two screens. These are
+         the two quiet links that sit under it. */
+      finishLink: "Or price the last three leaks, nine taps.",
+      // the trade has already been tapped under the receipt, so the run is
+      // one question shorter and the promise has to say so
+      finishLinkShort: "Or price the last three leaks, eight taps.",
       offer: {
-        kickerLead: "Your worst leak: ",
-        headlines: {
-          // NEUTRAL BY DEFAULT. The first seven taps never ask what they do, so
-          // any line that pictures a roof, a ladder or a van is us guessing at
-          // a stranger's day and getting it wrong in front of them. "Hands
-          // full" is true of every trade and of every office as well.
-          missed_calls: "You can't answer the phone with your hands full. Someone should.",
-          slow_reply: "The job goes to whoever answers first. It can be you.",
-        },
-        /* Said ONLY once they have told us, by tapping their trade under the
-           receipt or by finishing the map. Keyed trade → channel, and anything
-           not listed falls back to the neutral line above, so a trade we have
-           no line for is never handed somebody else's. */
-        headlinesByTrade: {
-          roofing: { missed_calls: "You can't answer the phone from a roof. Someone should." },
-        },
-        body: "That leak has a fix, and it isn't you working harder. On a fifteen minute call we take your map and pick the one leak worth fixing first. Then we show you what plugging it looks like. You get a price on the spot.",
-        walkTitle: "Walk away with",
-        walk: [
-          "What stops your biggest leak, and what it looks like running in your business",
-          "What it costs and what it should return, from your own numbers",
-          "A straight answer if it isn't worth doing yet",
-        ],
-        button: "Book a call to fix my worst leak",
-        // The risk reversal. It promises a thing we control (what they leave
-        // the call holding), never a result we do not control.
-        guarantee: "If the fifteen minutes doesn't show you exactly what plugging your worst leak would put back, that's on us.",
-        finishLink: "Or price the last three leaks, nine taps.",
-        // the trade has already been tapped under the receipt, so the run is
-        // one question shorter and the promise has to say so
-        finishLinkShort: "Or price the last three leaks, eight taps.",
-        trust: "You'll talk to Nicholas, who built this. No sales team, no lock in.",
-        /* The one way out of the ending, offered AFTER the offer has made its
-           case and never before the number. Same tab: the run is held in
-           sessionStorage, so Back lands them on the open map exactly as they
-           left it. */
+        /* The one way out, offered AFTER the card has made its case and never
+           before the number. Same tab: the run is held in sessionStorage, so
+           Back lands them on the open map exactly as they left it. */
         more: {
           before: "Have a look at ",
           whoLabel: "who we are",
@@ -1033,11 +1154,23 @@ window.SITE = {
           after: ".",
         },
       },
+
+      /* THE BOOKING STEP, reached only once the details are in, so the audit
+         really is complete by the time this renders. If brand.bookingUrl is a
+         real URL the calendar is embedded here. Until it is, the five time
+         windows below are the booking and we text them. */
+      calendar: {
+        title: "Free Revenue Recovery Call",
+        line: "15 minutes.",
+        embedTitle: "Pick a time for your Revenue Recovery Call",
+        embedFallback: "The calendar did not load. Tap a time that suits instead and we will text you.",
+      },
+
       finishIntro: "Nice one. These nine price the other three leaks, then the map is complete.",
       finishIntroShort: "Nice one. These eight price the other three leaks, then the map is complete.",
       finishDone: "That is the lot. All five leaks, priced or honestly refused.",
       // shown only when the send failed, where there is no row to book against
-      cta: "Book your free 15-minute call",
+      cta: "Book your free Revenue Recovery Call",
       ctaNote: "Fifteen minutes, no slideshow. We walk your map with you and tell you which worker pays for itself first, or an honest “you do not need us yet”.",
       // instant download, polled while the engine renders the PDF
       pdfPreparing: "Your copy is on the way to {email}.",
@@ -1065,9 +1198,12 @@ window.SITE = {
       // The site's ONE real scarcity fact, stated as a fact, once, here.
       scarcity: "We build and run every crew ourselves, so we only take on one business per trade in each area. It is also why we will tell you straight if you do not need us yet.",
     },
-    /* If the send fails we unlock anyway. Never punish the visitor. */
-    sendErrorTitle: "Here is your Leak Map anyway.",
-    sendError: "That did not send, so we have unlocked the whole map here instead. Ring or email us and we will get the PDF to you.",
+    /* If the send fails, the map is unaffected: it was never being held back.
+       What failed is the one thing they asked for, so that is what this says.
+       Never punish the visitor, and never claim to have handed over something
+       they already had. */
+    sendErrorTitle: "That did not send.",
+    sendError: "Your details did not reach us, so nobody is going to ring you yet. Your map is above and it stays yours either way. Ring or email us and we will sort it out today.",
   },
 
   footer: {

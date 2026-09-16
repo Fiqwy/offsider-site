@@ -29,6 +29,22 @@
 
   const META_PIXEL_ID = "2525223994650279";
 
+  /* PRODUCTION ONLY. This file is loaded by every page, so it also runs on a
+     local server, on a preview tunnel and on anything else serving these
+     files. Meta silently drops events from an origin it does not recognise,
+     so localhost has never polluted anything, but a preview on a real https
+     host is exactly the case it would accept: fake PageViews, fake
+     ViewContents and fake Leads landing in the live pixel and teaching the ad
+     optimiser to chase traffic that was never real.
+     Suffix match, so the apex and every subdomain count, and a lookalike
+     domain ending in something else does not. */
+  try {
+    const host = String(window.location.hostname || "").toLowerCase();
+    if (host !== "appliedintelligence.biz" && !host.endsWith(".appliedintelligence.biz")) return;
+  } catch (e) {
+    return;
+  }
+
   /* Either signal is enough, and either one stops the pixel dead. Read defensively:
      browsers have shipped this on window and with an ms prefix, and "yes" as well
      as "1". Anything we cannot read at all is treated as an opt-out. */

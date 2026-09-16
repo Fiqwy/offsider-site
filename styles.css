@@ -773,6 +773,16 @@ input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border: 3px s
   box-shadow: none;
 }
 
+/* Link out to the guarantee in full. On the ink band --accent is only 4.3:1,
+   so this uses --accent-lift like every other link in the dark register. */
+.guarantee__link { margin-top: clamp(1.8rem, 4vw, 2.6rem); }
+.guarantee--dark .guarantee__link a {
+  color: var(--accent-lift);
+  text-underline-offset: .22em;
+  text-decoration-thickness: 1px;
+}
+.guarantee--dark .guarantee__link a:hover { color: #fff; }
+
 /* ---- FAQ ----------------------------------------------------------------- */
 .faq-list { margin-top: 2.2rem; border-top: 1px solid var(--line); max-width: 760px; }
 .faq-item { border-bottom: 1px solid var(--line); }
@@ -1095,6 +1105,31 @@ input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border: 3px s
   .legal-rail a.is-current::before { color: var(--accent-ink); }
 }
 
+/* ---- Hire landing page (/hire) -------------------------------------------
+   Ad traffic lands here. Everything below reuses the existing tokens and the
+   generic .section/.wrap/.steps/.booking kit; only the hero clearance and the
+   video frame are new, because no other page puts a 16:9 player on white. */
+.hire-hero { padding-top: clamp(7rem, 14vh, 9.5rem); }
+.hire-hero__title { max-width: 18ch; margin-inline: auto; }
+/* The headline is swapped by an inline script on utm_campaign, so the two
+   variants must not reflow the page differently. Both are two lines at every
+   width this clamp produces. */
+.hire-hero .section__lead { margin-inline: auto; }
+
+.hire-video { margin-top: clamp(2.4rem, 5vw, 3.6rem); max-width: 860px; }
+.hire-video__el {
+  display: block; width: 100%; aspect-ratio: 16 / 9;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  /* the ad is white-on-white with the page, so the frame does the separating */
+  object-fit: cover;
+}
+/* Captions: the default UA cue box is a black slab. Keep it, but stop it
+   colliding with the controls bar on short viewports. */
+.hire-video__el::cue { font-size: .9em; line-height: 1.4; }
+
 /* ---- Scroll reveal (gated behind .is-ready so no-JS shows everything) ----- */
 .js.is-ready .reveal { opacity: 0; transform: translateY(26px); }
 .js.is-ready .reveal.in { opacity: 1; transform: none; transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
@@ -1227,24 +1262,42 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   background: var(--accent-soft);
   border-bottom: 1px solid var(--line);
 }
+/* The strip carries three things: the audit's NAME, the promise under it, and
+   the micro line answering the two questions a sceptical owner has in the first
+   second. The caps live HERE and not in the copy, so the DOM text stays a
+   readable sentence for a screen reader. */
 .audit-trust__line {
-  margin: 0; padding: .35rem 0;
-  font-size: .84rem; font-weight: 700; line-height: 1.5;
-  letter-spacing: 0; color: var(--accent-ink);
+  margin: 0; padding: .34rem 0 .08rem;
+  font-size: .9rem; font-weight: 800; line-height: 1.25;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink);
 }
-@media (max-width: 360px) { .audit-trust__line { font-size: .8rem; } }
-/* Message match (audit.js applyHook): the ad's hook as the strip's line, the
-   trust claims as a smaller second line. One line each at 375px. */
+@media (max-width: 360px) { .audit-trust__line { font-size: .84rem; letter-spacing: .04em; } }
+/* Message match (audit.js applyHook): the ad's hook replaces the NAME only. A
+   hook is a sentence, not a label, so the caps come straight back off. */
 .audit-trust__line--hook {
-  padding: .38rem 0 0;
+  padding: .38rem 0 .08rem;
   font-size: 1.05rem; font-weight: 800; line-height: 1.2;
-  letter-spacing: -.01em; color: var(--ink);
+  letter-spacing: -.01em; text-transform: none; color: var(--ink);
 }
 .audit-trust__sub {
-  margin: 0; padding: 0 0 .32rem;
-  font-size: .78rem; font-weight: 700; line-height: 1.4; color: var(--accent-ink);
+  margin: 0; padding: 0 0 .1rem;
+  font-size: .79rem; font-weight: 700; line-height: 1.4; color: var(--accent-ink);
 }
-@media (max-width: 360px) { .audit-trust__line--hook { font-size: .98rem; } }
+/* This strip is sticky, so every line in it is a line the visitor pays for on
+   every screen of the run. On a short phone the two that carry the offer win
+   and this one goes: the same three claims are in the meta list below the
+   instrument, and question one matters more than a reassurance read twice. */
+.audit-trust__micro {
+  margin: 0; padding: 0 0 .34rem;
+  font-size: .72rem; font-weight: 600; line-height: 1.35;
+  color: var(--accent-ink); opacity: .82;
+}
+@media (max-height: 700px) { .audit-trust__micro { display: none; } }
+@media (max-width: 360px) {
+  .audit-trust__line--hook { font-size: .98rem; }
+  .audit-trust__sub { font-size: .76rem; }
+  .audit-trust__micro { font-size: .69rem; }
+}
 
 /* ---- The honesty block (was the hero, now below the instrument) ---------- */
 .audit-honesty {
@@ -2000,3 +2053,226 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 @media (prefers-reduced-motion: reduce) {
   .leakmap__body { transition: none !important; }
 }
+
+
+/* =========================================================================
+   THE CONVERSION CARD + THE BOOKING STEP                      (2026-09-16)
+   The map is no longer gated, so what used to be the gate is now a card that
+   sits UNDER the open map and asks for a call rather than for a reveal. It
+   reuses the .gate__ form furniture wholesale; only the frame is new.
+   ========================================================================= */
+.audit-convert { border-color: var(--accent); }
+.audit-convert .gate__form { margin-top: .9rem; }
+/* The figure, restated inside the card. Tighter than it was in the gate well:
+   the same number is already sharp at the top of the map, so this is a
+   reminder at the moment of the ask, not the reveal. */
+.audit-convert .gate__fig { margin-bottom: .55rem; }
+
+/* The primary act. Caps and the arrow are CSS so the DOM text stays a plain
+   readable sentence for a screen reader. */
+.gate__btn--convert { text-transform: uppercase; letter-spacing: .04em; }
+.gate__btn--convert::after { content: " \2192"; }
+/* ...but not while it says "One moment...", which is not a call to action. */
+.gate__btn--convert:disabled { text-transform: none; letter-spacing: 0; }
+.gate__btn--convert:disabled::after { content: ""; }
+
+/* ---- The booking step ---------------------------------------------------
+   Reached only once the details are in. An embedded calendar when one is
+   configured (brand.bookingUrl), otherwise the five time windows. */
+.audit-cal__title {
+  display: block; margin: 0 0 .2rem;
+  font-size: 1.18rem; font-weight: 800; line-height: 1.25; letter-spacing: -.01em;
+  color: var(--ink);
+}
+.audit-cal__line {
+  margin: 0 0 .9rem;
+  font-size: .95rem; font-weight: 700; color: var(--accent-ink);
+}
+/* A third-party calendar sizes itself badly inside a narrow card, so it gets a
+   tall, scrollable box of its own rather than a ratio that clips the month. */
+.audit-cal__frame {
+  display: block; width: 100%; min-height: 620px; border: 0; border-radius: 12px;
+  background: var(--paper);
+}
+@media (max-width: 560px) { .audit-cal__frame { min-height: 700px; } }
+
+/* =========================================================================
+   THE MAP, REBUILT                                            (2026-09-16)
+   Measured before this change: 3,845 px on a 390 px phone, 4.6 screens, and
+   40% of the leak cards carried no dollar figure at all. The money is now the
+   card, the working sits one tap away, the leaks with no figure share one
+   short block, and the question the map used to leave open ("so how would you
+   fix that?") gets answered before the ask.
+   ========================================================================= */
+
+/* ---- The card: the number is the card ---------------------------------- */
+.leak-row { padding: 1rem clamp(.95rem, 3vw, 1.3rem); }
+/* The one the call is about. It earns the accent; nothing else does. */
+.leak-row.is-worst {
+  border-color: color-mix(in srgb, var(--st) 45%, var(--line));
+  background: linear-gradient(180deg, var(--st-bg) 0%, var(--bg) 62%);
+}
+/* Was 1.05-1.35rem and sat below the bar, under the worker line. It is the
+   only reason the card exists, so it now leads and it is the biggest thing on
+   it after their annual total. */
+.leak-row__fig {
+  margin-top: .45rem;
+  font-size: clamp(1.55rem, 6.2vw, 2.1rem); line-height: 1.1;
+}
+.leak-row__per { font-size: .8rem; }
+.leak-row__track { margin-top: .7rem; height: 6px; }
+/* One plain sentence: the fix on the worst leak, the crew line on the rest. */
+.leak-row__lead {
+  margin-top: .7rem; font-size: .95rem; line-height: 1.5;
+  font-weight: 600; color: var(--ink-2); max-width: 54ch;
+}
+.leak-row__worker { margin-top: .7rem; }
+
+/* ---- "Show the working" -------------------------------------------------
+   Real button, aria-expanded, and the panel is `hidden` when closed so its
+   contents leave the tab order. Nothing is deleted by this, only folded. */
+.leak-row__more { margin-top: .8rem; }
+.leak-row__morebtn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  min-height: 44px; padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: .82rem; font-weight: 800; letter-spacing: .01em;
+  color: var(--accent-ink); text-decoration: underline; text-underline-offset: .22em;
+  text-decoration-thickness: 1px;
+}
+/* inline-block keeps the button's underline from running through the chevron,
+   which rendered it as a stray dot on the end of the label */
+.leak-row__morebtn::after {
+  content: "▾"; display: inline-block; font-size: .85em; line-height: 1;
+  text-decoration: none; transition: transform .18s ease;
+}
+.leak-row__morebtn[aria-expanded="true"]::after { transform: rotate(180deg); }
+.leak-row__morebtn:hover { color: var(--accent-ink-2); }
+.leak-row__panel { padding-top: .2rem; }
+.leak-row__panel > * + * { margin-top: .55rem; }
+@media (prefers-reduced-motion: reduce) { .leak-row__morebtn::after { transition: none; } }
+
+/* ---- The leaks with no figure ------------------------------------------ */
+.leak-unpriced {
+  margin-top: 1rem; padding: 1rem clamp(.95rem, 3vw, 1.3rem);
+  background: var(--bg-soft); border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+}
+.leak-unpriced__lead {
+  display: block; font-size: .72rem; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+.leak-unpriced__list { margin: .6rem 0 0; padding: 0; list-style: none; }
+.leak-unpriced__item { display: block; }
+.leak-unpriced__item + .leak-unpriced__item {
+  margin-top: .45rem; padding-top: .45rem; border-top: 1px solid var(--line);
+}
+.leak-unpriced__name { font-size: .95rem; font-weight: 800; color: var(--ink); }
+.leak-unpriced__why {
+  display: block; margin-top: .1rem;
+  font-size: .82rem; line-height: 1.45; color: var(--muted); max-width: 52ch;
+}
+.leak-unpriced__note { margin-top: .75rem; font-size: .85rem; font-weight: 700; color: var(--ink-2); }
+.leak-unpriced__btn { margin-top: .55rem; width: 100%; min-height: 48px; }
+
+/* ---- How it gets fixed -------------------------------------------------- */
+.fixsys { margin-top: 2rem; }
+.fixsys__h { margin-top: 0; }
+.fixsys__lead {
+  margin-top: .5rem; font-size: 1rem; line-height: 1.55;
+  font-weight: 600; color: var(--ink-2); max-width: 56ch;
+}
+
+/* The before/after. Two columns where there is room, stacked on a phone with
+   the "now" column first, because that is the order it happens in. */
+.beforeafter { display: grid; gap: .7rem; margin-top: 1.1rem; }
+@media (min-width: 720px) { .beforeafter { grid-template-columns: 1fr 1fr; gap: 1rem; } }
+.beforeafter__col { padding: 1rem 1.1rem; border-radius: var(--radius-sm); border: 1px solid var(--line); }
+.beforeafter__col--now { background: color-mix(in srgb, #e0533d 6%, var(--bg)); border-color: color-mix(in srgb, #e0533d 22%, var(--line)); }
+.beforeafter__col--new { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 26%, var(--line)); }
+.beforeafter__lbl {
+  display: block; font-size: .7rem; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase;
+}
+.beforeafter__col--now .beforeafter__lbl { color: #b42318; }
+.beforeafter__col--new .beforeafter__lbl { color: var(--accent-ink); }
+.beforeafter__steps { margin: .6rem 0 0; padding: 0 0 0 1.1rem; }
+.beforeafter__steps li {
+  font-size: .92rem; line-height: 1.5; color: var(--ink-2);
+}
+.beforeafter__steps li + li { margin-top: .4rem; }
+.beforeafter__col--new .beforeafter__steps li { color: var(--ink); font-weight: 600; }
+
+/* One line per leak: what changes, then who does it. */
+.fixsys__subh {
+  display: block; margin-top: 1.6rem;
+  font-size: .72rem; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted);
+}
+.fixsys__list { margin: .7rem 0 0; padding: 0; list-style: none; }
+.fixsys__item { padding: .8rem 0; border-top: 1px solid var(--line); }
+.fixsys__item:last-child { border-bottom: 1px solid var(--line); }
+.fixsys__item.is-worst .fixsys__what { color: var(--ink); font-weight: 700; }
+.fixsys__what { margin: 0; font-size: .95rem; line-height: 1.5; color: var(--ink-2); max-width: 56ch; }
+.fixsys__who { margin: .3rem 0 0; font-size: .8rem; font-weight: 600; color: var(--muted-2); }
+.fixsys__wname { font-weight: 800; color: var(--ink-2); }
+.fixsys__start {
+  margin-top: 1.1rem; padding: .9rem 1.1rem;
+  background: var(--bg-soft); border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: .92rem; line-height: 1.55; font-weight: 600; color: var(--ink-2);
+}
+.fixsys__close {
+  margin-top: 1rem; font-size: 1rem; line-height: 1.5;
+  font-weight: 700; color: var(--ink); max-width: 52ch;
+}
+
+/* ---- The call, named and explained -------------------------------------- */
+.callname {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .7rem;
+  margin-top: .9rem;
+}
+.callname__title {
+  font-size: 1.12rem; font-weight: 800; letter-spacing: -.015em; color: var(--accent-ink);
+}
+.callname__badge {
+  flex: none; font-size: .7rem; font-weight: 800; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--accent-ink); background: var(--accent-soft);
+  padding: .28rem .65rem; border-radius: 999px;
+}
+/* .steps ships with a 2.8rem top margin and 1.7rem padding for a full-width
+   band. Inside this card it needs to be a list, not a band. */
+.callsteps {
+  margin-top: .6rem; gap: .55rem; grid-template-columns: 1fr;
+  /* it is a real <ol>, so it needs the list furniture taken off */
+  list-style: none; padding: 0;
+}
+.callsteps .step { padding: .85rem 1rem; box-shadow: none; }
+/* .step__n and .step__title are inline elements here. On the home page they
+   are block-level by construction; inside this card they ran together and the
+   step read "01We walk your map". */
+.callsteps .step__n { display: block; font-size: 1.1rem; line-height: 1.2; }
+.callsteps .step__title { display: block; margin-top: .15rem; font-size: 1rem; }
+.callsteps .step__text { margin-top: .25rem; font-size: .9rem; line-height: 1.5; }
+
+/* ---- The build strip ------------------------------------------------------
+   Five separate answers are needed before a dollar figure can honestly exist.
+   Before this, the first four taps changed nothing on screen but the question,
+   so a man was answering on faith. It counts down to the number, and it never
+   shows a figure, because there is not an honest one to show yet. */
+/* Deliberately cheap: it sits directly above the answers on a screen that
+   already struggles for height on a 667px phone, so it is a line of text and
+   five dots, not a card. It bought 52px as a pill and is worth about 22px. */
+.audit-build {
+  display: flex; align-items: center; justify-content: space-between; gap: .8rem;
+  margin-top: .35rem; padding: 0;
+}
+.audit-build.is-gone { display: none; }
+.audit-build__label { font-size: .78rem; font-weight: 700; color: var(--accent-ink); }
+.audit-build__dots { flex: none; display: inline-flex; align-items: center; gap: .32rem; }
+.audit-build__dots i {
+  width: 7px; height: 7px; border-radius: 999px; background: var(--line);
+  transition: background .3s ease, transform .3s ease;
+}
+.audit-build__dots i.is-on { background: var(--accent); transform: scale(1.2); }
+@media (max-width: 360px) { .audit-build__label { font-size: .74rem; } }
+@media (prefers-reduced-motion: reduce) { .audit-build__dots i { transition: none; } }

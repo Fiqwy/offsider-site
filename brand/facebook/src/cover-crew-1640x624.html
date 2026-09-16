@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="_fonts.css">
+<style>
+html,body{margin:0;width:1640px;height:624px;overflow:hidden;background:#0a0e1a;
+  font-family:"Hanken Grotesk",system-ui,sans-serif;color:#f6f8fc;-webkit-font-smoothing:antialiased}
+.stage{position:relative;width:1640px;height:624px;overflow:hidden;
+  background:
+    radial-gradient(620px 420px at 1180px 440px, rgba(47,107,255,.34), rgba(47,107,255,0) 70%),
+    radial-gradient(900px 500px at 220px 120px, rgba(122,162,255,.10), rgba(122,162,255,0) 70%),
+    linear-gradient(180deg,#0e1424 0%,#0a0e1a 100%)}
+/* fine dot grid, very faint, gives the plate texture without noise */
+.grid{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.075) 1px,transparent 1.2px);
+  background-size:28px 28px;mask-image:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.25) 80%,transparent)}
+/* mobile-safe zone = central 1280px. All copy + crew live inside x 180..1460 */
+.brand{position:absolute;left:180px;top:60px;display:flex;align-items:center;gap:16px}
+.brand .mark{width:46px;height:46px}
+.brand span{font-weight:600;font-size:29px;letter-spacing:-.01em;color:#f6f8fc}
+.copy{position:absolute;left:180px;top:156px;width:760px}
+h1{margin:0;font-weight:800;font-size:88px;line-height:.96;letter-spacing:-.035em;color:#fff}
+h1 .ital{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-weight:400;color:#7aa2ff;letter-spacing:-.01em}
+.sub{margin:26px 0 0;font-size:27px;line-height:1.28;color:#c7cede;font-weight:500;max-width:720px}
+.sub b{color:#f6f8fc;font-weight:600}
+.cta{position:absolute;right:180px;top:52px;display:inline-flex;align-items:center;gap:18px;
+  background:#fff;color:#0b1220;border-radius:999px;padding:0 30px 0 26px;height:62px;
+  font-weight:700;font-size:23px;letter-spacing:-.01em;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.cta .dot{width:12px;height:12px;border-radius:50%;background:#16a34a;box-shadow:0 0 0 5px rgba(22,163,74,.22)}
+.cta .url{font-weight:500;color:#5b6474;padding-left:18px;border-left:1.5px solid rgba(11,18,32,.14)}
+/* crew cluster: back row smaller + dimmer, front row full size */
+.crew{position:absolute;left:900px;top:0;width:560px;height:624px}
+.crew img{position:absolute;bottom:56px;height:270px;width:auto;filter:drop-shadow(0 26px 30px rgba(0,0,0,.55))}
+.crew .b{height:225px;bottom:150px;filter:brightness(.7) drop-shadow(0 16px 20px rgba(0,0,0,.5))}
+.crew .b1{left:90px}.crew .b2{left:255px}.crew .b3{left:420px}
+.crew .f1{left:0}.crew .f2{left:165px}.crew .f3{left:330px}
+.floor{position:absolute;left:930px;right:140px;top:568px;height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.22) 30%,rgba(255,255,255,.22) 70%,rgba(255,255,255,0))}
+.glow{position:absolute;left:1000px;top:528px;width:420px;height:80px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(47,107,255,.45),rgba(47,107,255,0));filter:blur(6px)}
+</style></head><body><div class="stage"><div class="grid"></div>
+<div class="brand"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#2f6bff"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"><rect x="13" y="13" width="24" height="24" rx="6"/><rect x="27" y="27" width="24" height="24" rx="6"/><path d="M21 37 L31 37"/></g></svg><span>Applied Intelligence</span></div>
+<div class="copy">
+  <h1>Hire a crew that<br>never clocks <span class="ital">off.</span></h1>
+  <p class="sub">Done-for-you AI staff for Australian businesses. <b>Every call answered, every lead chased, every job booked.</b></p>
+</div>
+<div class="cta"><span class="dot"></span>Book your free Leak Audit<span class="url">appliedintelligence.biz/audit</span></div>
+<div class="glow"></div><div class="floor"></div>
+<div class="crew">
+  <img class="b b1" src="star.webp" alt=""><img class="b b2" src="boomer.webp" alt=""><img class="b b3" src="leo.webp" alt="">
+  <img class="f1" src="zip.webp" alt=""><img class="f2" src="ada.webp" alt=""><img class="f3" src="nudge.webp" alt="">
+</div>
+</div></body></html>

@@ -19,7 +19,40 @@
   const DESKTOP  = window.innerWidth >= 1025 && !NO_HOVER;
 
   /* ---- small helpers ----------------------------------------------------- */
-  const ital = (str) => String(str).replace(/\{i:([^}]+)\}/g, '<em class="ital">$1</em>');
+  /* Ad attribution. Read off the query string only, never a cookie or storage,
+   exactly as audit.js does (readUtm there). Meta fills utm_content from
+   {{placement}}. Values are trimmed and capped so a junk-long query string can
+   never be the reason an enquiry is refused. */
+const readUtm = () => {
+  const keys = ["utm_source", "utm_medium", "utm_campaign", "utm_content"];
+  const out = {};
+  try {
+    const params = new URLSearchParams(window.location.search);
+    keys.forEach((k) => {
+      // Allowlist, not a blocklist. Real Meta/Google values are alphanumerics with
+      // _ - . | / and spaces (utm_content is {{placement}}, e.g. Instagram_Reels).
+      // Anything else is either junk or someone probing, and neither belongs in
+      // Nicholas's inbox. This is defence in depth: the value never reaches the DOM
+      // here, and the admin surface escapes it on render.
+      const v = String(params.get(k) || "")
+        .trim().replace(/[^A-Za-z0-9_\-.|/ ]/g, "").slice(0, 100);
+      if (v) out[k] = v;
+    });
+  } catch { /* no URLSearchParams: attribution is optional, carry on */ }
+  return out;
+};
+
+/* One conversion event, fired once, never with personal data in it. The house
+   rule in meta-pixel.js applies here too: no name, mobile, email or dollar
+   figure ever reaches Meta. Wrapped so a blocked or absent pixel is silent. */
+let sentLead = false;
+const pixelLead = () => {
+  if (sentLead) return;
+  sentLead = true;
+  try { if (typeof fbq === "function") fbq("track", "Lead", { content_name: "enquiry" }); } catch { /* blocked */ }
+};
+
+const ital = (str) => String(str).replace(/\{i:([^}]+)\}/g, '<em class="ital">$1</em>');
   // same {i:...} marker, stripped back to plain text (schema.org, alt text, etc.)
   const plain = (str) => String(str).replace(/\{i:([^}]+)\}/g, "$1");
   const get  = (path) => path.split(".").reduce((o, k) => (o == null ? o : o[k]), S);
@@ -71,7 +104,10 @@
       // COORDINATED CHANGE: backend/routes/comms.py _HONEYPOT_FIELDS still accepts `website`
       // for one deploy, so a CDN-cached copy of this file keeps working. Do not rename either
       // side alone.
-      const f = S.booking.form;
+      // Shallow merge on purpose: formHire carries only the keys that differ, so
+      // there is exactly one copy of the error, success and validation wording.
+      const f = Object.assign({}, S.booking.form,
+        doc.body.dataset.page === "hire" ? (S.booking.formHire || {}) : {});
       // Each field carries its own error node. The form is novalidate, so the
       // browser bubble never appears; we own the message instead, and it is
       // real text in the DOM (WCAG 3.3.1) wired to the input by
@@ -159,6 +195,22 @@
         try {
           const data = Object.fromEntries(new FormData(form).entries());
           const times = $$(".chip-toggle.is-on", form).map((c) => c.textContent.trim());
+          const utm = readUtm();
+          // WHY THE UTMs GO IN THE MESSAGE AS WELL AS IN THEIR OWN FIELDS:
+          // /api/public/contact reads a fixed set of keys and ignores the rest, and
+          // _store_contact_submission has no UTM column, so the top-level fields below
+          // are forward-compatible only — today the backend drops them. The message is
+          // stored and shown in the inbox and the admin Enquiries surface, so that is
+          // the one place attribution actually survives. Remove the message line once
+          // the backend grows a column, not before.
+          const utmLine = Object.keys(utm).length
+            ? "\nCampaign: " + Object.keys(utm).map((k) => k.replace("utm_", "") + "=" + utm[k]).join(", ")
+            : "";
+          // Which page the enquiry came from. The homepage box is a Revenue Leak Audit request;
+          // /hire is someone asking to hire, and the two must not look the same in the inbox.
+          const source = doc.body.dataset.page === "hire"
+            ? "AI staff enquiry from /hire."
+            : "Free Revenue Leak Audit request from the website.";
           const res = await fetch("/api/public/contact", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -169,9 +221,11 @@
               business: data.trade,
               contact_ref2: data.contact_ref2,   // honeypot: empty for humans
               preferred_times: times,  // structured chip labels (platform stores + shows these)
-              message: "Free Leak Audit request from the website.\nPreferred times: "
+              ...utm,
+              message: source + "\nPreferred times: "
                 + (times.length ? times.join(", ") : "No preference")
-                + "\nMobile: " + data.mobile,
+                + "\nMobile: " + data.mobile
+                + utmLine,
             }),
           });
           // Check the STATUS first. This used to go straight to res.json(), so a 403, a 429
@@ -196,6 +250,9 @@
           msg.textContent = f.success;
           msg.classList.add("is-ok");
           msg.focus();
+          // Only after the backend confirmed success:true. A Lead on submit-click
+          // would count 429s and validation failures as conversions.
+          pixelLead();
           // .booking__field (not label) — the field wrapper is the flex item,
           // so hiding the label alone would leave four empty rows of gap.
           form.querySelectorAll(".booking__field, .chip-row, button, .booking__form-note").forEach((n) => { n.style.display = "none"; });
@@ -217,7 +274,7 @@
       const f = doc.createElement("iframe");
       f.className = "booking__frame";
       f.src = src;
-      f.title = "Book your free Leak Audit";
+      f.title = "Book your free Revenue Leak Audit";
       f.loading = "lazy";
       f.setAttribute("allow", "payment");
       cal.appendChild(f);
@@ -295,12 +352,12 @@
     const gu = $("[data-guarantee]"); if (gu) S.guarantee.points.forEach((s, i) =>
       gu.appendChild(el("div", "step reveal", `<div class="step__n">0${i + 1}</div><h3 class="step__title"${STEP_TITLE}>${s.title}</h3><div class="step__text">${s.text}</div>`)));
 
-    // guarantee promise band (the headline 30-Day Promise)
+    // guarantee promise band (the headline 60-day money-back guarantee)
     const gp = $("[data-guarantee-promise]");
     if (gp && S.guarantee.promise) {
       const p = S.guarantee.promise;
       gp.innerHTML =
-        `<div class="guarantee__seal" aria-hidden="true"><b>30</b><span>days</span></div>
+        `<div class="guarantee__seal" aria-hidden="true"><b>60</b><span>days</span></div>
          <div class="guarantee__body">
            <span class="guarantee__badge">${p.badge}</span>
            <p class="guarantee__statement">${ital(p.statement)}</p>

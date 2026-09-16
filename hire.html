@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Hire your first AI staff member | Applied Intelligence</title>
+  <meta name="description" content="Hire AI staff that answer every call, day or night, and book the job. Australian, done-for-you, with a 60-day money-back guarantee." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="icon" href="assets/logo/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/logo/favicon.svg" />
+  <link rel="canonical" href="https://appliedintelligence.biz/hire" />
+
+  <!-- Open Graph (URLs point at the production domain; harmless on the Pages preview) -->
+  <meta property="og:site_name" content="Applied Intelligence" />
+  <meta property="og:locale" content="en_AU" />
+  <meta property="og:title" content="Hire your first AI staff member | Applied Intelligence" />
+  <meta property="og:description" content="Hire AI staff that answer every call, day or night, and book the job. Australian, done-for-you, with a 60-day money-back guarantee." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://appliedintelligence.biz/hire" />
+  <meta property="og:image" content="https://appliedintelligence.biz/assets/video/hero-poster.jpg" />
+  <meta property="og:image:width" content="1920" />
+  <meta property="og:image:height" content="1080" />
+  <meta property="og:image:alt" content="Applied Intelligence: The Never Miss System" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Hire your first AI staff member | Applied Intelligence" />
+  <meta name="twitter:description" content="Hire AI staff that answer every call, day or night, and book the job. Australian, done-for-you, with a 60-day money-back guarantee." />
+  <meta name="twitter:image" content="https://appliedintelligence.biz/assets/video/hero-poster.jpg" />
+
+  <!-- Fonts: self-hosted, latin subset, OFL (see assets/fonts/OFL.txt).
+       Preload the two faces that paint above the fold: the Hanken variable file
+       (the h1 is weight 800) and the Instrument Serif italic accent word. -->
+  <link rel="preload" href="assets/fonts/hanken-grotesk-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+  <link rel="stylesheet" href="styles.css?v=20260916a" />
+
+  <!-- Organisation + site identity. Kept static so it is in the HTML source
+       for crawlers that do not run JS. The FAQPage block is injected by
+       script.js from the same data the visible FAQ renders. -->
+  <!-- Meta Pixel. One shared loader (meta-pixel.js), deferred like every other
+       script on this site so it never blocks paint. It returns without loading
+       anything at all if the browser sends Do Not Track or Global Privacy
+       Control. Disclosed in full in privacy.html section 04. -->
+  <script defer src="meta-pixel.js"></script>
+</head>
+<body data-page="hire">
+  <a href="#top" class="skip-link">Skip to main content</a>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav nav--solid" id="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="#top" aria-label="Applied Intelligence"><img class="brand-mark" src="assets/logo/favicon.svg" alt="" width="34" height="34" /><span class="brand-word" data-bind="brand.name">Applied Intelligence</span><span class="brand-short" data-bind="brand.short" aria-hidden="true">AISA</span></a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="index.html#staff">The staff</a>
+        <a href="index.html#how">How it works</a>
+        <a href="audit.html">Free audit</a>
+        <a href="guarantee">Guarantee</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="https://donny.appliedintelligence.biz/login">Client login</a>
+      </nav>
+      <a class="btn btn--primary nav__cta" href="#book">Hire AI staff</a>
+    </div>
+  </header>
+
+  <!-- tabindex="-1" so the skip link can actually move focus here (WCAG 2.4.1) -->
+    <main id="top" tabindex="-1">
+
+    <!-- ============ HERO — the ad's closing line, verbatim ============ -->
+    <section class="section hire-hero">
+      <div class="wrap center">
+        <span class="eyebrow">Done-for-you AI staff</span>
+        <h1 class="section__title center hire-hero__title" id="hire-headline">Never miss another call.</h1>
+        <!-- MESSAGE MATCH. The headline and the video must be the ones the visitor
+             just watched, or the page reads as a different product. Inline and
+             synchronous ON PURPOSE: in PAGE_INIT (deferred) this would paint ad 1's
+             headline first and visibly swap it, which is worse than no match at all.
+             An unknown or absent campaign changes nothing. -->
+        <script>
+          (function () {
+            try {
+              var c = new URLSearchParams(location.search).get("utm_campaign") || "";
+              if (c.toLowerCase().indexOf("clock-off") === -1) return;
+              document.getElementById("hire-headline").textContent = "You clock off. Your phone doesn't.";
+              document.documentElement.setAttribute("data-ad", "clock-off");
+            } catch (e) { /* attribution is optional: keep ad 1's headline */ }
+          })();
+        </script>
+        <p class="section__lead center">AI staff that answer every call, in any language, twenty-four seven. They book the job, chase the lead and log everything in one dashboard. You don't operate them. You employ them.</p>
+      </div>
+
+      <!-- ============ THE AD ============ -->
+      <div class="wrap hire-video reveal">
+        <video class="hire-video__el" id="hire-ad"
+               poster="assets/video/ad-never-miss-poster.webp"
+               muted loop playsinline controls preload="none"
+               aria-label="Applied Intelligence ad: never miss another call">
+          <track kind="captions" src="assets/video/ad-never-miss.vtt" srclang="en-AU" label="English" default />
+        </video>
+      </div>
+
+      <div class="wrap center">
+        <a class="btn btn--primary btn--lg" href="#book">Hire your first AI staff member</a>
+      </div>
+    </section>
+
+    <!-- ============ THREE PROOF ROWS — the ad's own checklist ============ -->
+    <section class="section section--tight">
+      <div class="wrap">
+        <div class="steps steps--3">
+          <div class="step reveal">
+            <div class="step__n">01</div>
+            <h2 class="step__title">Every call answered</h2>
+            <div class="step__text">Day, night, weekends and while you are under a house. Your existing number, routed. Nothing changes for your customers.</div>
+          </div>
+          <div class="step reveal" data-delay="1">
+            <div class="step__n">02</div>
+            <h2 class="step__title">Every job in your calendar</h2>
+            <div class="step__text">They book it, reschedule it and follow up on the quote. You turn up and do the work.</div>
+          </div>
+          <div class="step reveal" data-delay="2">
+            <div class="step__n">03</div>
+            <h2 class="step__title">Everything in one dashboard</h2>
+            <div class="step__text">Every call, message and booking in one place, with a transcript you can read. Nothing hidden in someone else's inbox.</div>
+          </div>
+        </div>
+        <p class="stat-note center">62% of calls to small businesses go unanswered. Source: 411 Locals small-business call study, 2016.</p>
+      </div>
+    </section>
+
+    <!-- ============ GUARANTEE (short form, links to the full terms) ============ -->
+    <section class="section guarantee guarantee--dark">
+      <div class="wrap center">
+        <span class="kicker">The 60-Day Money-Back Guarantee</span>
+        <h2 class="section__title center">If your AI staff aren't earning their keep, you get your money <em class="ital">back</em>.</h2>
+        <p class="section__lead center">Run them for 60 days from go-live. If they aren't earning their keep, tell us and we refund your service fees for that period. No questions and no exit interview. Setup is excluded, because that work is already done and yours to keep.</p>
+        <p class="guarantee__link center"><a href="guarantee">Read the guarantee in full</a></p>
+      </div>
+    </section>
+
+    <!-- ============ THE ONE ACTION ============ -->
+    <section class="section final-cta" id="book">
+      <div class="wrap center">
+        <h2 class="final-cta__title">Tell us when suits, and we'll ring you.</h2>
+        <p class="section__lead center">One short call. We work out which AI staff member pays for itself first in your business, and give you a price on the spot. If you don't need us yet, we'll say so.</p>
+      </div>
+      <div class="wrap booking reveal">
+        <div class="booking__info">
+          <span class="booking__label">What happens next</span>
+          <ul class="booking__points">
+            <li>We ring you at the time you pick, not whenever suits us.</li>
+            <li>Fifteen minutes, no slideshow and no tech talk.</li>
+            <li>A price on the spot, or an honest "you don't need us yet".</li>
+          </ul>
+          <p class="booking__note">Australian owned, founder-led, Gold Coast. You talk to Nicholas, not a call centre.</p>
+        </div>
+        <!-- renderBooking() in script.js mounts the enquiry form here. It runs from
+             boot() on every page and no-ops when this element is absent, so there is
+             no init call to add. Posts to /api/public/contact. -->
+        <div class="booking__cal" data-booking-cal></div>
+      </div>
+    </section>
+
+    <!-- ============ SECONDARY — below the fold only ============ -->
+    <section class="section section--tight">
+      <div class="wrap center">
+        <p class="section__lead center">Not ready to talk? See what last month's missed calls actually cost you.</p>
+        <p class="center-cta"><a class="btn btn--ghost" href="audit.html">Take the free Revenue Leak Audit</a></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div>
+        <span class="footer__brand"><img class="brand-mark" src="assets/logo/favicon.svg" alt="" width="30" height="30" /><span class="brand-word" data-bind="brand.name">Applied Intelligence</span></span>
+        <p class="footer__blurb" data-bind="footer.blurb"></p>
+      </div>
+      <div class="footer__meta">
+        <span class="footer__legal" data-bind="brand.fullName"></span>
+        <span data-bind="brand.location"></span>
+        <a data-footer-email href="mailto:nickjmatthews@pm.me"></a>
+        <a href="https://donny.appliedintelligence.biz/login">Client login</a>
+        <!-- mirrors content.js footer.legal; static like the rest of the footer chrome.
+             "Free audit" rides in this row rather than as a sibling of "Client
+             login": the desktop footer grid pins `.footer__meta > a` to one
+             explicit cell (2 / 2), so a second bare <a> would stack on top of
+             the login link. .footer__links is a plain flex row, so it just
+             flows, and this is the mobile-reachable placement (nav links are
+             display:none <= 960px). -->
+        <div class="footer__links">
+          <a href="audit.html">Free audit</a>
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- libs (vendored, local). GSAP and ScrollTrigger are deliberately NOT loaded
+       here, the same call audit.html makes: the only real ScrollTrigger on the
+       site is wireBookItself(), whose mount does not exist on this page, and
+       wireScroll() falls back to its own rAF loop when gsap is undefined. That
+       is ~90KB of JS a landing page does not need. -->
+  <script defer src="vendor/lenis.min.js"></script>
+
+  <!-- Page module. script.js calls window.PAGE_INIT after its shared render pass
+       and before wiring, so anything built here is still picked up by
+       wireReveals(). Defined in a synchronous script so it exists before the
+       deferred script.js runs. -->
+  <script>
+    window.PAGE_INIT = function (ctx) {
+      var v = document.getElementById("hire-ad");
+      if (!v) return;
+
+      // Message match, part two: the visitor watches the ad they clicked.
+      if (document.documentElement.getAttribute("data-ad") === "clock-off") {
+        v.poster = "assets/video/ad-clock-off-poster.webp";
+        v.setAttribute("aria-label", "Applied Intelligence ad: you clock off, your phone doesn't");
+        var tr = v.querySelector("track");
+        if (tr) tr.src = "assets/video/ad-clock-off.vtt";
+      }
+      var file = document.documentElement.getAttribute("data-ad") === "clock-off"
+        ? "assets/video/ad-clock-off.mp4" : "assets/video/ad-never-miss.mp4";
+
+      // Lazy, exactly as wireHeroVideo does for the homepage: never fetch 2MB on
+      // a metered connection or for someone who asked for less motion. They keep
+      // the poster and the controls, and can still press play themselves.
+      var load = function (autoplay) {
+        if (v.src) return;
+        v.src = file;
+        v.load();
+        if (autoplay) v.play().catch(function () { /* blocked: poster + controls remain */ });
+      };
+      v.addEventListener("click", function () { load(false); }, { once: true });
+
+      var saveData = navigator.connection && navigator.connection.saveData;
+      if (ctx.REDUCED || saveData) return;   // poster only until they ask for it
+
+      if (!("IntersectionObserver" in window)) { load(true); return; }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          io.disconnect();
+          var go = function () { load(true); };
+          if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 3000 });
+          else setTimeout(go, 1200);
+        });
+      }, { rootMargin: "200px" });
+      io.observe(v);
+    };
+  </script>
+
+  <!-- data + app -->
+  <script defer src="content.js?v=20260916a"></script>
+  <script defer src="script.js?v=20260916a"></script>
+</body>
+</html>
