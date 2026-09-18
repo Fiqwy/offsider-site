@@ -199,15 +199,18 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .footer__links a { font-size: .88rem; }
 .js.is-ready .reveal { opacity: 0; transform: translateY(26px); }
 .js.is-ready .reveal.in { opacity: 1; transform: none; transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
-(max-width: 960px) 
+@media (max-width: 960px) {
 .nav__links { display: none; }
 .nav__brand .brand-word { display: none; }
-(max-width: 560px) 
+}
+@media (max-width: 560px) {
 body { font-size: 16px; }
-(prefers-reduced-motion: reduce) 
+}
+@media (prefers-reduced-motion: reduce) {
 * { animation: none !important; scroll-behavior: auto !important; }
 .js.is-ready .reveal,
   .js .bubble, .js .sms__confirm { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
 .skip-link {
   position: absolute; top: -60px; left: 12px; z-index: 200;
   background: var(--accent-ink); color: #fff; font-weight: 700;
@@ -221,12 +224,14 @@ body[data-page="audit"] .nav__note {
   font-size: .9rem; font-weight: 600; color: var(--ink-2);
   white-space: nowrap;
 }
-(max-width: 960px) 
+@media (max-width: 960px) {
 body[data-page="audit"] .nav__brand .brand-word { display: inline; font-size: 1.06rem; }
 body[data-page="audit"] .nav__brand .brand-mark { width: 30px; height: 30px; }
-(max-width: 360px) 
+}
+@media (max-width: 360px) {
 body[data-page="audit"] .nav__brand .brand-word { font-size: .95rem; letter-spacing: -0.04em; }
 body[data-page="audit"] .nav__note { font-size: .82rem; }
+}
 .audit .wrap { max-width: 900px; }
 body[data-page="audit"] .stat-note { color: var(--muted); }
 .audit { padding-top: 56px; }
@@ -239,8 +244,9 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   font-size: .9rem; font-weight: 800; line-height: 1.25;
   letter-spacing: .06em; text-transform: uppercase; color: var(--ink);
 }
-(max-width: 360px) 
+@media (max-width: 360px) {
 .audit-trust__line { font-size: .84rem; letter-spacing: .04em; }
+}
 .audit-trust__line--hook {
   padding: .38rem 0 .08rem;
   font-size: 1.05rem; font-weight: 800; line-height: 1.2;
@@ -255,12 +261,14 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   font-size: .72rem; font-weight: 600; line-height: 1.35;
   color: var(--accent-ink); opacity: .82;
 }
-(max-height: 700px) 
+@media (max-height: 700px) {
 .audit-trust__micro { display: none; }
-(max-width: 360px) 
+}
+@media (max-width: 360px) {
 .audit-trust__line--hook { font-size: .98rem; }
 .audit-trust__sub { font-size: .76rem; }
 .audit-trust__micro { font-size: .69rem; }
+}
 .audit.is-first-screen .audit-trust__line {
   padding: .5rem 0 .08rem;
   font-size: clamp(1.3rem, 5.4vw, 1.7rem); font-weight: 800; line-height: 1.16;
@@ -300,10 +308,11 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   margin: .5rem 0 0; padding: .55rem .7rem;
   font-size: .86rem; line-height: 1.4;
 }
-(max-width: 360px) 
+@media (max-width: 360px) {
 .audit.is-first-screen .audit-trust__line { font-size: 1.14rem; padding-top: .42rem; }
 .audit.is-first-screen .audit-trust__tap { font-size: .8rem; }
 .audit-panel.is-first .audit-qi__title { font-size: 1.06rem; }
+}
 .audit-honesty {
   padding-top: clamp(1.6rem, 4vw, 2.6rem);
   padding-bottom: clamp(1.6rem, 4vw, 2.6rem);
@@ -390,17 +399,20 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 .audit-method__lead { margin-top: .8rem; font-size: 1.02rem; line-height: 1.6; color: var(--muted); max-width: 62ch; }
 .audit-method .check-list { max-width: 68ch; }
 .audit-method .check-list li { font-size: .98rem; color: var(--ink-2); }
-(max-width: 720px) 
+@media (max-width: 720px) {
 .audit-stage__mount { min-height: 560px; }
-(max-width: 420px) 
+}
+@media (max-width: 420px) {
 .qopt { font-size: .98rem; padding: .7rem .9rem; }
-(prefers-reduced-motion: reduce) 
+}
+@media (prefers-reduced-motion: reduce) {
 .audit-rail__track > i,
   .audit-sec__label::before,
   .audit-meter,
   .audit-q,
   .audit-qi,
   .leak-row__track > i { transition: none !important; }
+}
 .audit-build {
   display: flex; align-items: center; justify-content: space-between; gap: .8rem;
   margin-top: .35rem; padding: 0;

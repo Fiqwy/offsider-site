@@ -81,6 +81,7 @@ def serve(port):
         def log_message(self, *a):
             pass
 
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
     httpd = socketserver.ThreadingTCPServer(("127.0.0.1", port), H)
     httpd.daemon_threads = True
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
@@ -94,6 +95,87 @@ def font_faces(css):
     for m in re.finditer(r"@font-face\s*\{[^}]*\}", css):
         out.append(m.group(0))
     return out
+
+
+CONDITIONAL = ("@media", "@supports", "@container", "@layer")
+
+
+def at_blocks(css):
+    """Every conditional at-rule block in the sheet as (prelude, body_start, body_end).
+
+    Coverage reports the style rules INSIDE an @media block (and the bare condition
+    text) but never the `@media … {` and `}` around them. Emitting those slices as
+    they come ships `(max-width: 960px)` as a stray line: the rule after it is
+    swallowed as a bad selector and the rest of the block applies at every width.
+    That went live once. This index is how a used rule finds its wrapper again.
+    """
+    out, stack, seg, i, n = [], [], 0, 0, len(css)
+    while i < n:
+        ch = css[i]
+        if ch == "/" and css[i:i + 2] == "/*":
+            j = css.find("*/", i + 2)
+            i = n if j == -1 else j + 2
+            continue
+        if ch in "\"'":
+            j = i + 1
+            while j < n and css[j] != ch:
+                j += 2 if css[j] == "\\" else 1
+            i = j + 1
+            continue
+        if ch == "{":
+            prelude = re.sub(r"/\*.*?\*/", "", css[seg:i], flags=re.S).strip()
+            stack.append((prelude, i + 1))
+            seg = i + 1
+        elif ch == "}":
+            if stack:
+                prelude, start = stack.pop()
+                if prelude.startswith(CONDITIONAL):
+                    out.append((" ".join(prelude.split()), start, i))
+            seg = i + 1
+        elif ch == ";":
+            seg = i + 1
+        i += 1
+    return out
+
+
+def wrap(css, ranges):
+    """Used rules in source order, each back inside the at-rules it was written in."""
+    blocks = at_blocks(css)
+    out, open_ctx = [], ()
+
+    def close(to):
+        nonlocal open_ctx
+        while open_ctx != to[:len(open_ctx)] or len(open_ctx) > len(to):
+            out.append("}")
+            open_ctx = open_ctx[:-1]
+
+    for a, b in sorted(ranges):
+        text = css[a:b]
+        if "{" not in text:
+            continue                      # a bare condition: coverage's, not a rule
+        ctx = tuple(p for (p, s, e) in sorted(blocks, key=lambda t: t[1])
+                    if s <= a and b <= e)
+        close(ctx)
+        for p in ctx[len(open_ctx):]:
+            out.append(p + " {")
+        open_ctx = ctx
+        out.append(text)
+    close(())
+    return out
+
+
+def lint(crit):
+    """Refuse to write a block that would misparse. Returns a list of problems."""
+    bad = []
+    body = re.sub(r"/\*.*?\*/", "", crit, flags=re.S)
+    for ln in body.splitlines():
+        if re.match(r"^\s*(not\s+|only\s+)?(screen\s+and\s+|print\s+and\s+)?\([^{};]*\)\s*$", ln):
+            bad.append("bare media condition: %r" % ln.strip())
+    if body.count("{") != body.count("}"):
+        bad.append("unbalanced braces: %d open, %d close" % (body.count("{"), body.count("}")))
+    if "</style" in body.lower():
+        bad.append("a literal </style> would end the inline block early")
+    return bad
 
 
 def collect(port):
@@ -138,7 +220,7 @@ def collect(port):
             c.close()
         b.close()
     # cascade order is source order: sort by offset, never by pass
-    rules = [css[a:b] for (a, b) in sorted(ranges)]
+    rules = wrap(css, ranges)
     faces = [f for f in font_faces(css) if f not in rules]
     return "\n".join(faces + rules)
 
@@ -178,6 +260,14 @@ def main():
         crit = collect(args.port)
     finally:
         httpd.shutdown()
+        httpd.server_close()
+
+    problems = lint(crit)
+    if problems:
+        print("REFUSING to write: the generated block would misparse.")
+        for p in problems:
+            print("  - " + p)
+        return 3
 
     fresh = block(crit)
     if current(html) == fresh:
