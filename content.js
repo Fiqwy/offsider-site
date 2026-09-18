@@ -369,25 +369,23 @@ window.SITE = {
       name: "Free Revenue Leak Audit",
       promise: "Find out where your business is losing revenue, and what it could be costing you.",
       micro: "Seven taps. No typing. No call required.",
+      /* The first screen only. The ads promise a number, so the line under the
+         hook says when it arrives, counted in taps rather than minutes. Five
+         is PHONE_KEYS.length in audit.js: the phone prices on the fifth answer
+         and the counter lands there. */
+      tapLine: "Your number lands on tap 5.",
       /* Message match for paid visitors. Keyed by utm_campaign; the strip's
          line becomes the hook of the ad that sent them, one line, 34
          characters or fewer so it never wraps above question one. The trust
          line drops underneath, minus any claim the hook already makes. An
          unknown or absent campaign leaves the page exactly as it is. */
-      hooks: {
-        "leak-audit-why-free":        "Jobs leak. Finding them is free.",
-        "leak-audit-why-free-plain":  "Jobs leak. Finding them is free.",
-        "leak-audit-answer-or-ring":  "Answer it, or let it ring?",
-        "leak-audit-not-the-price":   "They went with whoever rang back.",
-        "leak-audit-clear-answer":    "What's the phone costing you?",
-        "leak-audit-sixteen-taps":    "Your leak number. Seven taps.",
-        "leak-audit-sixty-two":       "What do your missed calls cost?",
-        "leak-audit-three-quotes":    "Unsent quotes don't win jobs.",
-        "leak-audit-two-tuesdays":    "How many of yours went cold?",
-        "leak-audit-the-question":    "Which one costs you most?",
-        "leak-audit-your-score":      "Which leak is biggest?",
-        "leak-audit-plain-control":   "Five places your business leaks.",
-      },
+      /* The table itself now lives in the inline script at the top of
+         audit.html. The hook has to be on the page at FIRST PAINT: waiting
+         for this file plus audit.js plus script.js meant a paid visitor read
+         the generic name for the first few seconds on mobile data. Read back
+         off the window here so applyHook() and the inline script can never
+         drift apart. One table, two readers. */
+      hooks: (typeof window !== "undefined" && window.AUDIT_HOOKS) || {},
     },
 
     /* The visible h1 IS the trust strip. The page opens on question one, so
@@ -459,7 +457,7 @@ window.SITE = {
         key: "missed", section: "phone",
         title: "On the tools. The phone rings. What usually happens?",
         help: "Tap the one that sounds like your week.",
-        micro: "Seven taps and you see your number. No typing until then.",
+        micro: "Free. No typing. No call required.",
         options: [
           { key: "office",    label: "Someone in the office answers" },
           { key: "callback",  label: "I ring back later" },

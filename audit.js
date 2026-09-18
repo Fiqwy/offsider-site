@@ -1146,7 +1146,7 @@
     const last = next >= list.length;
     /* the counter has one more climb in it on the last of the seven, so the
        screen holds a beat longer there before the reveal takes over */
-    const wait = REDUCED ? 0 : (last && state.phase === "pre" ? 700 : 190);
+    const wait = REDUCED ? 0 : (last && state.phase === "pre" ? 700 : 120);
     state.busy = true;
     window.setTimeout(() => {
       /* Still the tap's own work: this is where the next question is built and
@@ -1179,6 +1179,19 @@
     progText.textContent = (p.label || "Question") + " " + (state.step + 1) + " " + (p.of || "of") + " " + total;
     progFill.style.width = ((state.step) / total * 100).toFixed(2) + "%";
     backBtn.hidden = state.step === 0;
+    firstScreen(state.phase === "pre" && state.step === 0);
+  }
+
+  /* The stripped first screen: the hook as the headline, question one, and
+     nothing else. Everything the rail and the strip say is true and useful on
+     question five and pure friction in front of tap one, so it is hidden (not
+     unbuilt) until the second question, which is why nothing moves when it
+     comes back. The <main> class also carries the trust strip's state. See
+     .is-first-screen in styles.css. */
+  function firstScreen(on) {
+    const main = doc.querySelector(".audit");
+    if (main) main.classList.toggle("is-first-screen", on);
+    if (panel) panel.classList.toggle("is-first", on);
   }
 
   /* Cross-fade the question and glide the panel to its new height. Both are
@@ -1452,6 +1465,7 @@
   }
 
   function renderMap(scores, opts) {
+    firstScreen(false);          // the stripped first screen is behind them now
     const R = A.result || {};
     const root = el("article", "leakmap");
 
@@ -2726,11 +2740,17 @@
      name moves: the promise and the micro line under it are true whichever ad
      sent them, so they stay exactly where they are. Nothing is added above
      question one, and an unknown or absent campaign changes nothing at all. */
+  /* The inline script in audit.html normally gets here first (the hook has to
+     be on the page at first paint, not 260KB later) and leaves data-hooked
+     behind. This is the fallback for a load where it did not run, off the same
+     table: content.js reads it back from window.AUDIT_HOOKS. */
   function applyHook() {
     const hooks = A && A.chrome && A.chrome.hooks;
     const camp = state.utm && state.utm.utm_campaign;
     const hook = hooks && camp && hooks[camp];
-    if (!hook) return;
+    /* Only a string from the table is a hook: a campaign named "constructor"
+       or "toString" finds something up the prototype chain instead. */
+    if (typeof hook !== "string" || !hook) return;
     const line = doc.querySelector(".audit-trust__line");
     if (!line || line.dataset.hooked) return;
     line.textContent = hook;
@@ -2750,6 +2770,37 @@
     renderRail();
     swapQuestion(buildQuestion(list[i], i, list));
     if (state.phase === "pre") updateCounter();
+  }
+
+  /* ---- The tap that landed before this file did -------------------------
+     Question one is static in audit.html so it paints with the document, which
+     means it can be tapped while these 260KB are still on the wire. The inline
+     script there records the pick on the group; we read it BEFORE mountPanel()
+     replaces that markup, then replay it through choose() so the answer, the
+     two milestones and the advance to question two are exactly the ones a
+     normal tap produces. A tap we dropped would be the whole cost of the page. */
+  function readEarlyPick() {
+    const g = doc.querySelector("[data-audit-static] .audit-opts[data-early-pick]");
+    return g ? g.getAttribute("data-early-pick") : "";
+  }
+  function replayEarlyPick(key) {
+    if (!key || state.screen !== "q" || state.phase !== "pre" || state.step !== 0) return;
+    const q = applicable()[0];
+    if (!q) return;
+    /* The tap WINS, even over an answer a resumed tab already holds. The
+       button went blue under their thumb: quietly restoring the old answer
+       would leave what is painted and what is stored telling two different
+       stories, and the one the visitor believes is the one they just did.
+       choose() overwrites, so a re-tap of the same option simply advances.
+       mark() is once per pageload, so no milestone is sent twice. */
+    const opts = q.options || [];
+    let i = -1;
+    for (let n = 0; n < opts.length; n++) if (opts[n].key === key) i = n;
+    if (i < 0) return;                           // not an option of question one
+    const group = qBox && qBox.querySelector(".audit-opts");
+    const btn = group && group.children[i];
+    if (!group || !btn) return;
+    choose(q, opts[i], btn, group);
   }
 
   const haveSeven = () => PRE_GATE_KEYS.every((k) => !!state.answers[k]);
@@ -2800,6 +2851,7 @@
 
     stage = doc.querySelector("[data-audit-stage]");
     if (!stage) return;
+    const early = readEarlyPick();     // read while the static markup is still up
 
     const saved = readStore();
     if (saved) {
@@ -2827,6 +2879,12 @@
        of them, and they stayed with it */
     watchSeen();
     watchDwell();
+    /* LAST, and deliberately so. An early tap sends `start`, and a `start`
+       that beats its own `land` onto the wire is a funnel with more starts
+       than landings. The question one option is still on screen at this
+       point (choose() holds it for a beat), so `seen` still observes the
+       option that was actually tapped. */
+    replayEarlyPick(early);
   };
 
   /* QA ONLY. The mirror is handed out when the page is opened with
