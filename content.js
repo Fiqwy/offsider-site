@@ -466,17 +466,29 @@ window.SITE = {
         ],
       },
       {
-        key: "missed_week", section: "phone",
-        title: "In a normal week, how many calls do you miss?",
-        help: "Best guess is fine. Or take a normal day and times it by five.",
+        key: "missed_week", section: "phone", dense: true,
+        title: "How many calls do you miss?",
+        help: "Best guess is fine. Pick the closest one.",
         micro: "Your count, not ours.",
+        /* Counted in DAYS, priced by the week. Someone on the tools knows what
+           the phone does in a day; "6 to 10 a week" was asking them to do our
+           arithmetic on a ladder, and the ones who could not be bothered took
+           "no idea" and got our number instead of theirs.
+           `hidden: true` keeps the four old weekly keys VALID without ever
+           offering them again: a tab resumed from before this build still
+           holds one in sessionStorage, and it has to price rather than be
+           thrown away. They are answers, just not questions. Never delete one. */
         options: [
-          { key: "none",     label: "Barely any" },
-          { key: "1_2",      label: "1 or 2" },
-          { key: "3_5",      label: "3 to 5" },
-          { key: "6_10",     label: "6 to 10" },
-          { key: "10_plus",  label: "More than 10" },
-          { key: "no_idea",  label: "Honestly, no idea" },
+          { key: "none",       label: "Hardly any" },
+          { key: "week_2_3",   label: "A couple a week" },
+          { key: "day_1_2",    label: "One or two a day" },
+          { key: "day_3_5",    label: "Three to five a day" },
+          { key: "day_5_plus", label: "More than five a day" },
+          { key: "no_idea",    label: "Honestly, no idea" },
+          { key: "1_2",        label: "1 or 2",       hidden: true },
+          { key: "3_5",        label: "3 to 5",       hidden: true },
+          { key: "6_10",       label: "6 to 10",      hidden: true },
+          { key: "10_plus",    label: "More than 10", hidden: true },
         ],
       },
       {
@@ -666,11 +678,19 @@ window.SITE = {
         // pre-gate only: every number here is theirs EXCEPT after hours, which
         // has not been asked yet, so the fallback is named rather than implied.
         partial: "{missed_week}, and that you {winback}. We have not asked about after hours yet. That part is our number, not yours.",
+        /* Byte-identical to the engine's own say-back: the card is written
+           twice (here, and in leak_audit.py a second later) and the visitor
+           must never see the sentence change under them. The four weekly
+           strings are the legacy keys, kept verbatim for a resumed tab. */
         missed_week: {
-          none:    "you hardly miss a call",
-          "1_2":   "you miss one or two calls in a normal week",
-          "3_5":   "you miss three to five calls in a normal week",
-          "6_10":  "you miss six to ten calls in a normal week",
+          none:      "you hardly ever miss a call",
+          week_2_3:  "you miss a couple of calls in a normal week",
+          day_1_2:   "you miss one or two calls a day, call it seven or eight a week",
+          day_3_5:   "you miss three to five calls a day, call it twenty a week",
+          day_5_plus: "you miss more than five calls a day, call it thirty a week",
+          "1_2":     "you miss one or two calls in a normal week",
+          "3_5":     "you miss three to five calls in a normal week",
+          "6_10":    "you miss six to ten calls in a normal week",
           "10_plus": "you miss more than ten calls in a normal week",
         },
         after_hours_calls: {

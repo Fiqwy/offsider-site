@@ -1362,6 +1362,14 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
 .audit-panel.is-first .qopt { gap: 0; min-height: 54px; }
 .audit-panel.is-first .audit-opts { margin-top: .7rem; }
 .audit-panel.is-first .audit-qi__micro { margin-top: .6rem; }
+/* ---- Dense questions ----------------------------------------------------
+   A question with six answers is a different shape to one with four. On a
+   620px phone the standard 58px button and .5rem gap put the sixth option
+   below the fold, and an option nobody can see is an answer nobody gives.
+   Driven by `dense` on the question in content.js, never by counting options:
+   question one has to keep its roomy buttons whatever happens to it. */
+.audit-qi.is-dense .audit-opts { gap: .4rem; margin-top: .6rem; }
+.audit-qi.is-dense .qopt { min-height: 48px; padding: .55rem .9rem; }
 /* A resumed tab is past question one, so the static screen waits rather than
    flashing (audit.html reads the same store audit.js does). visibility, not
    display: the box stays exactly where their own screen is about to land. */
@@ -1383,6 +1391,10 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
   .audit.is-first-screen .audit-trust__line { font-size: 1.14rem; padding-top: .42rem; }
   .audit.is-first-screen .audit-trust__tap { font-size: .8rem; }
   .audit-panel.is-first .audit-qi__title { font-size: 1.06rem; }
+  /* The narrowest phones: the answers win the argument over the help line,
+     which only ever repeats what the options already say. */
+  .audit-qi.is-dense .qopt { min-height: 42px; }
+  .audit-qi.is-dense .audit-qi__help { display: none; }
 }
 
 /* ---- The honesty block (was the hero, now below the instrument) ---------- */

@@ -21,6 +21,28 @@
 (function () {
   "use strict";
 
+  /* ---- replaceChildren, for the phones that predate it -------------------
+     Production reported "metaMount.replaceChildren is not a function" from a
+     real visitor: it landed in iOS Safari 14 / Chrome 86 and this file uses it
+     a dozen times, the first of them at mount. Since question one is static
+     markup now, a throw there is the worst failure this page has: the visitor
+     taps an answer, the button goes blue, and nothing ever happens. Five lines
+     of guarded prototype is cheaper than a visitor. */
+  (function (protos) {
+    for (let i = 0; i < protos.length; i++) {
+      const P = protos[i];
+      if (!P || P.replaceChildren) continue;
+      P.replaceChildren = function () {
+        while (this.firstChild) this.removeChild(this.firstChild);
+        for (let n = 0; n < arguments.length; n++) {
+          const x = arguments[n];
+          this.appendChild(typeof x === "string" ? document.createTextNode(x) : x);
+        }
+      };
+    }
+  })([typeof Element !== "undefined" && Element.prototype,
+      typeof DocumentFragment !== "undefined" && DocumentFragment.prototype]);
+
   const S = window.SITE;
   const doc = document;
 
@@ -51,7 +73,14 @@
 
   const F = {
     /* C1 — the phone */
-    missedWeek:     { none: 0.5, "1_2": 1.5, "3_5": 4, "6_10": 8, "10_plus": 13 },
+    /* A five-day week. The question is asked per DAY now, so the midpoints are
+       the day figure times five: 1.5x5, 4x5, and 6x5 as a FLOOR for the
+       open-ended top bucket, which is the least it can mean rather than the
+       most. The four quoted keys are the retired weekly options: still priced,
+       never offered, because a tab resumed from the old build holds one.
+       MISSED_WEEK_MID in the engine is this table to the decimal. */
+    missedWeek:     { none: 0.5, week_2_3: 2.5, day_1_2: 7.5, day_3_5: 20, day_5_plus: 30,
+                      "1_2": 1.5, "3_5": 4, "6_10": 8, "10_plus": 13 },
     missedFallback: { office: 0.05, callback: 0.15, voicemail: 0.30, rings_out: 0.40 },
     afterHours:     { answered: 0, ah_1_2: 1.5, ah_3_5: 4, ah_more: 7 },
     winback:        { win_most: 0.70, about_half: 0.50, a_few: 0.25, moved_on: 0.10 },
@@ -127,6 +156,13 @@
   /* A worked line is only worth showing where there is a real figure to work to. */
   const showsMaths = (mid, low, high) => mid > 0 && (low > 0 || high > 0);
 
+  /* The per-day bands said back in the words the owner tapped. The weekly
+     figure goes in the same breath, because every other number in the line is a
+     weekly one and the reader has to be able to follow the arithmetic across.
+     Word for word with _MISSED_DAY_PHRASE in the engine. */
+  const MISSED_DAY_PHRASE = { day_1_2: "one or two", day_3_5: "three to five",
+                              day_5_plus: "more than five" };
+
   /* Their phone numbers, added up in front of them. Every figure is one the
      engine actually used, including the cap and both fallbacks, which are
      admitted in the line rather than buried in a flag. */
@@ -135,6 +171,13 @@
     if (a.missed_week === "no_idea") {
       parts.push("You were not sure how many calls you miss, so from the way the phone is " +
                  "handled we used a conservative " + fmtQty(M) + " a week.");
+    } else if (MISSED_DAY_PHRASE[a.missed_week]) {
+      /* The open-ended top bucket says "we count as" rather than "is about",
+         because 30 a week is a floor WE chose off their words, not an estimate
+         of a number they gave. */
+      const tail = a.missed_week === "day_5_plus" ? "which we count as" : "which is about";
+      parts.push("You told us you miss " + MISSED_DAY_PHRASE[a.missed_week] +
+                 " calls a day, " + tail + " " + fmtQty(M) + " a week.");
     } else {
       parts.push("You told us you miss about " + fmtQty(M) + " calls in a normal week.");
     }
@@ -755,6 +798,13 @@
       return o;
     } catch (e) { return null; }
   }
+  /* What the visitor is actually offered. A `hidden` option is a retired
+     answer: enumTable(), readStore() and the validator all still take it, so a
+     cached or resumed answer prices exactly as it always did, but it is never
+     painted and never counted. Anything that maps a rendered button back to an
+     option has to walk THIS list, not q.options, or the indexes disagree. */
+  const shownOptions = (q) => ((q && q.options) || []).filter((o) => !o.hidden);
+
   const indexOfKey = (list, key) => {
     for (let i = 0; i < list.length; i++) if (list[i].key === key) return i;
     return -1;
@@ -773,7 +823,10 @@
     backBtn.type = "button";
     backBtn.appendChild(el("span", "audit-back__arrow", "←"));
     backBtn.appendChild(doc.createTextNode(" " + ((A.progress && A.progress.back) || "Back")));
-    backBtn.addEventListener("click", () => { if (state.step > 0) goTo(state.step - 1); });
+    backBtn.addEventListener("click", () => {
+      renderCause = Date.now();
+      if (state.step > 0) goTo(state.step - 1);
+    });
     progText = el("p", "audit-rail__count");
     progText.setAttribute("role", "status");
     progText.setAttribute("aria-live", "polite");
@@ -832,7 +885,10 @@
      separate reading task in front of the first tap, and the first tap is the
      only thing this screen is for. */
   function buildQuestion(q, index, list) {
-    const node = el("div", "audit-qi is-enter");
+    /* `dense` is set on the question, never derived from how many options it
+       has: question one is the whole first screen and must keep its roomier
+       buttons even if it ever grows a fifth answer. */
+    const node = el("div", "audit-qi is-enter" + (q.dense ? " is-dense" : ""));
 
     const h = el("h2", "audit-qi__title");
     h.id = "audit-q-" + q.key;
@@ -845,7 +901,7 @@
     const group = el("div", "audit-opts");
     group.setAttribute("role", "group");
     group.setAttribute("aria-labelledby", h.id);
-    (q.options || []).forEach((o) => {
+    shownOptions(q).forEach((o) => {
       const b = el("button", "qopt");
       b.type = "button";
       b.setAttribute("aria-pressed", state.answers[q.key] === o.key ? "true" : "false");
@@ -858,6 +914,16 @@
     });
     node.appendChild(group);
     if (q.micro) node.appendChild(el("p", "audit-qi__micro", q.micro));
+    /* ---- The funnel's per-question drop-off ----------------------------
+       One counter per pre-gate question, raised where the question actually
+       PAINTS, so the step means "this was in front of somebody" rather than
+       "somebody answered the one before". The number is the question's
+       position in the contract, not its position in the list on the day: a
+       question added or skipped later must not be able to rename q7. The
+       finishing run past the gate raises nothing, because the endpoint's
+       allow-list does not know those names. */
+    const n = PRE_GATE_KEYS.indexOf(q.key);
+    if (n > 0) markStep("q" + (n + 1) + "_" + q.key);
     return node;
   }
 
@@ -890,6 +956,20 @@
           .catch(() => {});
       }
     } catch (e) { /* never let telemetry touch the experience */ }
+  }
+
+  /* A milestone raised before the instrument has painted has to wait its turn.
+     A resumed tab builds question four during boot, which is BEFORE mark("land"),
+     and a q4 that beats its own landing onto the wire is a funnel with more
+     steps than visitors. Buffered here, flushed the instant `land` is away.
+     mark() still de-dupes, so a flush can never double count. */
+  const queued = [];
+  function markStep(step) {
+    if (!painted) { queued.push(step); return; }
+    mark(step);
+  }
+  function flushSteps() {
+    while (queued.length) mark(queued.shift());
   }
 
   /* ---- Engagement instrumentation (same mark() path, same silence) -------
@@ -1129,6 +1209,11 @@
   function choose(q, o, btn, group) {
     tapMark();               // a throw from here reports as phase "tap"
     if (state.busy) return;
+    /* The tap is what asked for the next question, so it is the tap the tuck
+       below measures itself against, not the render it eventually causes. A
+       flick that lands in the 270ms between the two is still the visitor
+       taking the wheel. */
+    renderCause = Date.now();
     state.answers[q.key] = o.key;
     Array.prototype.forEach.call(group.children, (c) => {
       const on = c === btn;
@@ -1201,6 +1286,7 @@
       const first = !qBox.firstChild;
       qBox.replaceChildren(next);
       next.classList.remove("is-enter");
+      tuckIfNotFirst();
       /* On the very first paint nothing has happened yet, so moving focus (and
          drawing a ring around the question) would be an announcement of
          nothing. Every later swap follows a tap and does move focus. */
@@ -1218,10 +1304,17 @@
       void qBox.offsetHeight;
       qBox.style.height = h1 + "px";
       requestAnimationFrame(() => next.classList.remove("is-enter"));
+      /* Start moving with the cross-fade rather than after it. The panel is
+         still animating its height, so the page may be shorter than it is
+         about to be and the browser clamps us; the second call below, once the
+         height has landed, finishes the job. It is a no-op when the first one
+         got there, so a normal swap scrolls once. */
+      const job = tuckIfNotFirst();
       const done = (e) => {
         if (e && e.propertyName !== "height") return;
         qBox.style.height = "";
         qBox.removeEventListener("transitionend", done);
+        retuck(job, true);
       };
       qBox.addEventListener("transitionend", done);
       window.setTimeout(done, 600);   // belt and braces if the transition never fires
@@ -1233,6 +1326,138 @@
     const h = node.querySelector(".audit-qi__title");
     if (!h) return;
     try { h.focus({ preventScroll: true }); } catch (err) { /* older Safari */ }
+  }
+
+  /* ---- Put the next question where the thumb already is -----------------
+     Question one owns the whole first screen. From question two the trust
+     strip, the rail and the build strip are back above the panel, and on a
+     620px phone that left the first option at y=380 and the last one off the
+     bottom; at 360x640 questions six and seven showed ONE option. The visitor
+     has just answered something, so the next question is what belongs in front
+     of them, not a header they read a minute ago. */
+  const NAV_H = 58;              // only used if the bar cannot be measured
+  const GAP = 8;
+
+  /* WHAT ASKED FOR THIS RENDER, and WHEN. A tap, a Back, or the boot of a
+     resumed tab. The tuck is only ever the answer to one of those three, so
+     any scrolling the visitor does after that moment calls the whole thing
+     off; anything they did before it does not, because then they tapped, and
+     a tap is a request to be shown the next question. */
+  let renderCause = 0;
+  let userMovedAt = 0;
+  let tuckJob = null;
+
+  /* Their hands on the page, and only theirs: window.scrollTo raises `scroll`
+     but never wheel, touchmove or a key, so our own move cannot call itself
+     off. */
+  (function () {
+    const KEYS = { PageDown: 1, PageUp: 1, ArrowDown: 1, ArrowUp: 1, Home: 1, End: 1,
+                   " ": 1, Spacebar: 1 };
+    const theirs = () => { userMovedAt = Date.now(); };
+    try {
+      window.addEventListener("touchmove", theirs, { passive: true });
+      window.addEventListener("wheel", theirs, { passive: true });
+      window.addEventListener("keydown", (e) => { if (e && KEYS[e.key]) theirs(); });
+    } catch (e) { /* no listeners here: the tuck simply cannot be called off */ }
+  })();
+
+  const raf = (fn) => (typeof window.requestAnimationFrame === "function"
+    ? window.requestAnimationFrame(fn) : window.setTimeout(fn, 16));
+
+  /* The screen the figure lands on: the one after the last answer that prices
+     the phone. Read off the applicable list rather than written down as 5, so a
+     question added or skipped in front of it cannot leave this pointing at the
+     wrong screen. It is a property of the SCREEN, not of the tap, which is what
+     lets a resumed tab settle in exactly the same place a tap would. */
+  function counterStep() {
+    const list = applicable(false);
+    let last = -1;
+    PHONE_KEYS.forEach((k) => { const i = indexOfKey(list, k); if (i > last) last = i; });
+    return last + 1;
+  }
+
+  function tuckUnderNav(job, exact) {
+    if (!panel) return;
+    const bar = doc.getElementById("nav");
+    const barH0 = bar ? bar.getBoundingClientRect().height : 0;
+    const barH = barH0 > 0 ? barH0 : NAV_H;
+    const vh = window.innerHeight || doc.documentElement.clientHeight || 0;
+    const sy = window.pageYOffset || doc.documentElement.scrollTop || 0;
+    /* What we want: the panel sitting right under the bar. */
+    let y = sy + panel.getBoundingClientRect().top - (barH + GAP);
+    /* What we sometimes need: from the sixth tap the live counter is 200px of
+       panel above the question, and tucking the PANEL under the bar still left
+       the last option off a 620px screen. The QUESTION is the thing being
+       asked, so it usually wins: scroll on far enough to fit all of it, but
+       never so far that its own heading goes under the bar. */
+    const qi = qBox && qBox.firstElementChild;
+    if (qi && vh > 0) {
+      const r = qi.getBoundingClientRect();
+      let cap = sy + r.top - (barH + GAP);          // never past the heading
+      /* EXCEPT on the one render where the figure lands. That screen is the
+         whole reason anybody taps: five answers in, the dollars appear. On a
+         568px phone scrolling far enough to fit the last option put 24 of the
+         figure's 37 pixels behind the bar at the exact moment it had not been
+         read yet. So on that render, and only that render, the counter is what
+         must not move: an option can go below the fold, the reward cannot go
+         above the bar. Every later render is back to question wins. */
+      if (job && job.counterWins) {
+        const fig = panel.querySelector(".audit-meter__fig");
+        if (fig) {
+          const f = fig.getBoundingClientRect();
+          /* hard against the bar, not GAP below it: every pixel we do not
+             spend here is a pixel of question we keep */
+          cap = Math.min(cap, sy + f.top - barH);
+          /* and it has to be whole at the bottom too */
+          const low = sy + f.bottom - vh;
+          if (low > y) y = low;
+        }
+      }
+      const fits = sy + r.bottom - (vh - GAP);
+      if (fits > y) y = Math.min(fits, cap);
+    }
+    const target = Math.max(0, y);
+    if (Math.abs(target - sy) < 4) return;         // already there: no nudge
+    try {
+      /* `exact` is the last shot, once the panel has stopped growing. A smooth
+         scroll is an animation and animations can be out-run: a scroll the
+         browser was still holding, or an anchoring correction, cancels ours and
+         leaves the question 130px off with nothing left to fix it. By then the
+         pretty version has already had its go, so this one simply lands. */
+      if (!exact && !REDUCED && "scrollBehavior" in doc.documentElement.style) {
+        window.scrollTo({ top: target, behavior: "smooth" });
+        return;
+      }
+    } catch (e) { /* an old WebView: the two-argument form below is universal */ }
+    window.scrollTo(0, target);
+  }
+
+  /* One job per question render, and it fires four times: now, on each of the
+     next two frames, and once the panel's height animation has landed. The
+     page is still growing underneath the first call and the browser clamps it,
+     so a single shot settles in the wrong place, which is exactly how a
+     resumed tab used to end up 60px out from a tapped advance to the same
+     question. Every shot re-reads the layout, and the 4px no-op guard means a
+     swap that got there first only scrolls once. */
+  function retuck(job, exact) {
+    if (!job || job !== tuckJob) return;           // a later render owns the page now
+    if (userMovedAt > renderCause) return;         // they took the wheel: we are done
+    tuckUnderNav(job, exact);
+  }
+
+  /* Everything except question one, which is already the first screen. */
+  function tuckIfNotFirst() {
+    if (state.phase === "pre" && state.step === 0) { tuckJob = null; return null; }
+    /* The counter's one and only landing, in this pageload, on whichever render
+       it is first live for: the sixth tap on a fresh run, the first render on a
+       tab resumed past it. */
+    const live = !!(meter && meter.classList.contains("is-live"));
+    const job = { counterWins: live && state.phase === "pre" && state.step === counterStep() };
+    tuckJob = job;
+    retuck(job);
+    raf(() => raf(() => retuck(job)));
+    window.setTimeout(() => retuck(job, true), 600);
+    return job;
   }
 
   /* ===========================================================================
@@ -2768,8 +2993,14 @@
     const i = Math.min(Math.max(0, state.step), list.length - 1);
     state.step = i;
     renderRail();
-    swapQuestion(buildQuestion(list[i], i, list));
+    /* BEFORE the swap, not after: on a resumed tab this is the call that makes
+       the counter live, and the tuck below has to see the panel it is about to
+       measure. Nothing visible moves: it is the same tick either way. */
     if (state.phase === "pre") updateCounter();
+    /* A resumed tab is a render like any other, and the visitor asked for it by
+       coming back. */
+    renderCause = Date.now();
+    swapQuestion(buildQuestion(list[i], i, list));
   }
 
   /* ---- The tap that landed before this file did -------------------------
@@ -2793,7 +3024,9 @@
        stories, and the one the visitor believes is the one they just did.
        choose() overwrites, so a re-tap of the same option simply advances.
        mark() is once per pageload, so no milestone is sent twice. */
-    const opts = q.options || [];
+    /* the RENDERED list: a retired option is still a valid answer but has no
+       button, so q.options would put us one index out */
+    const opts = shownOptions(q);
     let i = -1;
     for (let n = 0; n < opts.length; n++) if (opts[n].key === key) i = n;
     if (i < 0) return;                           // not an option of question one
@@ -2875,6 +3108,9 @@
     /* the denominator this funnel has never had: somebody was here, and the
        instrument painted in front of them */
     mark("land");
+    /* A resumed tab already built its question during resume() above, so the
+       step it landed on has been waiting for `land` to go first. */
+    flushSteps();
     /* and the two proofs behind it: the first option really painted in front
        of them, and they stayed with it */
     watchSeen();

@@ -140,6 +140,55 @@ EXAMPLES = [
     },
 ]
 
+# Every missed_week key, priced and said back. PARTIAL-CONTRACT.md sections 3 and 7.
+# The question is asked per DAY now; the four weekly keys are retired answers that a
+# resumed tab still holds, so they have to keep pricing exactly as they always did.
+# enquiries=100_plus deliberately, so min(M + AH, E) never bites and each row is the
+# table on its own rather than the cap. First sentence only: the rest of the line is
+# already pinned word for word by the three worked examples above.
+MISSED_WEEK_BASE = {
+    "missed": "rings_out", "winback": "about_half", "job_value": "500_1500",
+    "enquiries": "100_plus", "reply_speed": "hours", "late_outcome": "half_gone",
+    "after_hours_calls": "ah_1_2",
+}
+MISSED_WEEK = [
+    ("none", "You told us you miss about 0.5 calls in a normal week.", 12000, 25000),
+    ("week_2_3", "You told us you miss about 2.5 calls in a normal week.", 24000, 49000),
+    ("day_1_2", "You told us you miss one or two calls a day, which is about 7.5 a week.",
+     53000, 111000),
+    ("day_3_5", "You told us you miss three to five calls a day, which is about 20 a week.",
+     127000, 264000),
+    # "which we count as", not "which is about": 30 a week is a floor WE chose off an
+    # open-ended answer, not an estimate of a number they gave us.
+    ("day_5_plus", "You told us you miss more than five calls a day, which we count as 30 a week.",
+     186000, 387000),
+    ("1_2", "You told us you miss about 1.5 calls in a normal week.", 18000, 37000),
+    ("3_5", "You told us you miss about 4 calls in a normal week.", 33000, 68000),
+    ("6_10", "You told us you miss about 8 calls in a normal week.", 56000, 117000),
+    ("10_plus", "You told us you miss about 13 calls in a normal week.", 86000, 178000),
+    ("no_idea", "You were not sure how many calls you miss, so from the way the phone is "
+                "handled we used a conservative 31.2 a week.", 193000, 402000),
+]
+
+# The say-back fragment for each key, from content.js, byte for byte with the engine's
+# _ECHO_MISSED_WEEK. This one is read straight off window.SITE rather than scored,
+# because it is copy rather than arithmetic.
+SAY_BACK = {
+    "none": "you hardly ever miss a call",
+    "week_2_3": "you miss a couple of calls in a normal week",
+    "day_1_2": "you miss one or two calls a day, call it seven or eight a week",
+    "day_3_5": "you miss three to five calls a day, call it twenty a week",
+    "day_5_plus": "you miss more than five calls a day, call it thirty a week",
+    "1_2": "you miss one or two calls in a normal week",
+    "3_5": "you miss three to five calls in a normal week",
+    "6_10": "you miss six to ten calls in a normal week",
+    "10_plus": "you miss more than ten calls in a normal week",
+}
+
+# What the visitor is actually offered on question two, in order. The retired weekly
+# keys must still validate and still price, and must never be painted.
+MISSED_WEEK_SHOWN = ["none", "week_2_3", "day_1_2", "day_3_5", "day_5_plus", "no_idea"]
+
 # The five error strings, from PARTIAL-CONTRACT.md section 2. Each builder is
 # handed a complete, valid pre-gate answer set and breaks exactly one thing.
 VALIDATION = [
@@ -224,6 +273,53 @@ def main() -> int:
                 for n, g, w in bad:
                     fails += 1
                     print("    %-28s got %-14r want %r" % (n, g, w))
+
+            print("-" * 74)
+            for key, sentence, low, high in MISSED_WEEK:
+                a = dict(MISSED_WEEK_BASE)
+                a["missed_week"] = key
+                got = page.evaluate(
+                    "(a) => window.LEAK_AUDIT_MIRROR.scoreAuditPartial(a)", a)
+                c = [x for x in got["channels"] if x["key"] == "missed_calls"][0]
+                first = (c.get("maths") or "").split(". ")[0] + "."
+                bad = [(n, g, w) for n, g, w in
+                       (("first sentence", first, sentence),
+                        ("annual_low", c["annual_low"], low),
+                        ("annual_high", c["annual_high"], high))
+                       if g != w]
+                if bad:
+                    fails += len(bad)
+                print("%-58s %s" % ("missed_week: " + key, "PASS" if not bad else "FAIL"))
+                for n, g, w in bad:
+                    print("    %-28s got %-14r want %r" % (n, g, w))
+
+            print("-" * 74)
+            echo = page.evaluate(
+                "() => (((window.SITE.audit.echo || {}).missed_calls || {}).missed_week) || {}")
+            shown = page.evaluate("""() => {
+              const q = window.SITE.audit.questions.filter((x) => x.key === 'missed_week')[0];
+              return q.options.filter((o) => !o.hidden).map((o) => o.key);
+            }""")
+            all_keys = page.evaluate("""() => {
+              const q = window.SITE.audit.questions.filter((x) => x.key === 'missed_week')[0];
+              return q.options.map((o) => o.key);
+            }""")
+            for key, want in SAY_BACK.items():
+                ok = echo.get(key) == want
+                if not ok:
+                    fails += 1
+                print("%-58s %s" % ("say-back: " + key, "PASS" if ok else
+                                    "FAIL got %r want %r" % (echo.get(key), want)))
+            ok = shown == MISSED_WEEK_SHOWN
+            if not ok:
+                fails += 1
+            print("%-58s %s" % ("question two offers, in order", "PASS" if ok else
+                                "FAIL got %r want %r" % (shown, MISSED_WEEK_SHOWN)))
+            missing = [k for k, _s, _l, _h in MISSED_WEEK if k not in all_keys]
+            if missing:
+                fails += 1
+            print("%-58s %s" % ("every priced key is still a valid answer",
+                                "PASS" if not missing else "FAIL missing %r" % missing))
 
             print("-" * 74)
             good = dict(EXAMPLES[0]["answers"])

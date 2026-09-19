@@ -426,8 +426,8 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
        moment it lands; the noscript copy covers a browser with JS off, where
        nothing on this page works anyway but the writing should still be read.
        Only audit.html does this. It is the only page bought with money. -->
-  <link rel="stylesheet" href="styles.css?v=20260918b" media="print" onload="this.media='all';this.onload=null" />
-  <noscript><link rel="stylesheet" href="styles.css?v=20260918b" /></noscript>
+  <link rel="stylesheet" href="styles.css?v=20260919a" media="print" onload="this.media='all';this.onload=null" />
+  <noscript><link rel="stylesheet" href="styles.css?v=20260919a" /></noscript>
 
   <!-- The page itself plus the trail back to home. Static so it is in the
        source for crawlers that do not run JS. Deliberately thin: no ratings,
@@ -466,7 +466,7 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
        script on this site so it never blocks paint. It returns without loading
        anything at all if the browser sends Do Not Track or Global Privacy
        Control. Disclosed in full in privacy.html section 04. -->
-  <script defer src="meta-pixel.js?v=20260918b"></script>
+  <script defer src="meta-pixel.js?v=20260919a"></script>
 </head>
 <body data-page="audit">
   <a href="#top" class="skip-link">Skip to main content</a>
@@ -662,6 +662,26 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
                 c.classList.toggle("is-on", on);
                 c.setAttribute("aria-pressed", on ? "true" : "false");
               });
+              /* THE TAP THAT HAS NOT LANDED YET. audit.js replays this pick
+                 the moment it mounts, and mounting replaces this markup
+                 outright, so the note below normally never gets written. It is
+                 for the visitor whose audit.js is still on the wire, or never
+                 coming at all: a button that went blue and then did nothing
+                 for six seconds needs somebody to say so. The wording is true
+                 either way, because the tap really is saved (data-early-pick)
+                 and really is replayed on boot. It lives here rather than in
+                 content.js because content.js is the other file that may not
+                 have arrived. */
+              window.setTimeout(function () {
+                if (!document.body.contains(panel)) return;     // it mounted: nothing to say
+                if (panel.querySelector(".audit-stalled")) return;
+                var note = document.createElement("p");
+                note.className = "audit-noscript audit-noscript--q audit-stalled";
+                note.setAttribute("role", "status");
+                note.textContent = "Still loading. Your tap is saved and will go " +
+                  "through when the page finishes. If nothing happens, pull down to reload.";
+                g.parentNode.insertBefore(note, g.nextSibling);
+              }, 6000);
             });
           })();
           </script>
@@ -726,8 +746,8 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
        window.PAGE_INIT, which script.js calls inside boot(). defer keeps that
        order (deferred scripts execute in document order, before
        DOMContentLoaded), so the chain holds and nothing blocks the parser. -->
-  <script src="content.js?v=20260918b" defer></script>
-  <script src="audit.js?v=20260918b" defer></script>
-  <script src="script.js?v=20260918b" defer></script>
+  <script src="content.js?v=20260919a" defer></script>
+  <script src="audit.js?v=20260919a" defer></script>
+  <script src="script.js?v=20260919a" defer></script>
 </body>
 </html>
