@@ -10,7 +10,7 @@
         (backend/leak_audit.py) implements the same formulas and recomputes
         everything server-side from the raw answer keys. The two MUST agree, so
         treat the constants and formulas below as frozen: change the spec first.
-     2. The nine-question stepper (tap only, one question on screen).
+     2. The sixteen-question stepper (tap only, one question on screen).
      3. The live leak counter.
      4. The Leak Map: headline unblurred, breakdown blurred behind the capture
         card until the visitor trades name / mobile / email for it.
@@ -182,7 +182,7 @@
       parts.push("You told us you miss about " + fmtQty(M) + " calls in a normal week.");
     }
     const raw = M + AH;
-    /* after_hours_calls is optional and usually absent on the seven, and the
+    /* after_hours_calls is optional and usually absent on the eight, and the
        scoring treats an absence as "no idea". The prose has to agree. */
     const ah = a.after_hours_calls == null ? "no_idea" : a.after_hours_calls;
     if (ah === "no_idea") {
@@ -467,16 +467,23 @@
   /* ===========================================================================
      1b. THE PARTIAL MIRROR  (funnel/PARTIAL-CONTRACT.md — keep in lockstep)
 
-     The first seven taps price two channels of five. The engine's
-     score_audit_partial() is the authority; this reproduces it to the cent so
-     the counter, the reveal and the pre-gate map never disagree with the
-     figure the server sends back a second later.
+     The eight taps in front of the gate price two channels of five. The
+     engine's score_audit_partial() is the authority; this reproduces it to the
+     cent so the counter, the reveal and the pre-gate map never disagree with
+     the figure the server sends back a second later.
 
      Floating point is not associative, so the multiplication ORDER below is
      part of the contract. Do not tidy it.
      ========================================================================= */
-  const PRE_GATE_KEYS = ["missed", "missed_week", "winback", "job_value",
+  /* The pre-gate RUN, in the order it is asked. `trade` is question one and is
+     part of this list because the funnel's step names are counted off it, but
+     it is NOT an answer: it travels at the top level of the payload and is
+     validated on its own (validate_trade), so every list that feeds the mirror
+     or the POST body is the one below it. */
+  const PRE_GATE_KEYS = ["trade", "missed", "missed_week", "winback", "job_value",
                          "enquiries", "reply_speed", "late_outcome"];
+  /* The seven that travel INSIDE `answers`. */
+  const PRE_GATE_ANSWERS = PRE_GATE_KEYS.filter((k) => k !== "trade");
   const DEFERRED_KEYS = ["after_hours_calls", "quotes_week", "quotes_quiet", "quotes",
                          "reviews", "review_count", "list_size", "dormant"];
   const AH_FALLBACK_RATE = 0.30;
@@ -508,8 +515,8 @@
         return { ok: false, error: "answer not asked before the gate: " + k };
       }
     }
-    for (let i = 0; i < PRE_GATE_KEYS.length; i++) {
-      const k = PRE_GATE_KEYS[i];
+    for (let i = 0; i < PRE_GATE_ANSWERS.length; i++) {
+      const k = PRE_GATE_ANSWERS[i];
       if (!(k in answers)) return { ok: false, error: "missing answer: " + k };
     }
     for (let i = 0; i < keys.length; i++) {
@@ -683,7 +690,7 @@
   const state = {
     screen: "q",          // q | results | calendar | done
     book: "",             // "" = not asked for | open = form showing | done = booked
-    phase: "pre",         // pre = the seven in front of the gate, finish = the nine
+    phase: "pre",         // pre = the eight in front of the gate, finish = the eight
     step: 0,              // index into the CURRENTLY applicable question list
     answers: {},          // raw enum keys; skipped questions are deleted, not blanked
     mirror: null,
@@ -693,11 +700,6 @@
     mobile: "",           // taken on the conversion card, reused by the booking
     utm: null,            // read once from the query string, never stored
     busy: false,
-    /* The trade was tapped on the optional row under the receipt rather than
-       on the last of the nine. It is a separate flag from answers.trade
-       because it is what tells the finish run to skip a question it already
-       has the answer to, and what keeps that answer alive through prune(). */
-    tradeTap: false,
   };
   let stage = null, panel = null, qBox = null, meter = null, meterLow = null, meterHigh = null;
   let build = null, buildLabel = null, buildDots = null;
@@ -729,12 +731,7 @@
     const a = state.answers;
     const f = finish === undefined ? state.phase === "finish" : finish;
     return QS().filter((q) => inPhase(q, f))
-               .filter((q) => !(q.skipWhen && a[q.skipWhen.key] === q.skipWhen.value))
-               /* A question we already have the answer to is not a question.
-                  The trade chips under the receipt are the same answer asked
-                  earlier, so the finish run is eight taps, not nine, and every
-                  count and every line of copy about it says eight. */
-               .filter((q) => !(q.key === "trade" && state.tradeTap));
+               .filter((q) => !(q.skipWhen && a[q.skipWhen.key] === q.skipWhen.value));
   }
   /* A skipped question's answer must not survive: the API treats its absence
      as meaningful, so a stale value would be a lie about what they told us. */
@@ -742,10 +739,6 @@
     const live = {};
     applicable(false).forEach((q) => { live[q.key] = true; });
     applicable(true).forEach((q) => { live[q.key] = true; });
-    /* The trade is the one answer that can be held without its question being
-       on the list, because tapping the chip row under the receipt answers it
-       early. Pruning it here would throw away what they just told us. */
-    if (state.tradeTap) live.trade = true;
     QS().forEach((q) => { if (!live[q.key]) delete state.answers[q.key]; });
   }
 
@@ -768,7 +761,6 @@
         token: state.token,
         book: state.book,
         mobile: state.mobile,
-        tradeTap: state.tradeTap,
       }));
     } catch (e) { /* private mode, full quota: never break the run over it */ }
   }
@@ -846,7 +838,7 @@
     /* THE DOLLARS ARE READABLE. Every ad that points here promises "you see
        the number before we ask your name", so the digits are sharp from the
        first priced channel and they stay sharp. Nothing on this page buys the
-       map either: it opens on the seventh tap. What the three fields buy is
+       map either: it opens on the eighth tap. What the three fields buy is
        the CALL. Not a live region: it re-renders on every
        animation frame while it counts, which no screen reader should be made
        to sit through. It is reachable, it is just not announced. */
@@ -861,16 +853,17 @@
 
     /* --- the build strip: the receipt for the taps that cannot pay yet ---
        Five separate answers are needed before a number can honestly exist, and
-       until this strip there was nothing on screen to show a tap had done
-       anything at all. It counts down to the number and then gets out of the
-       way. No dollar figure ever appears here. */
+       the trade is tapped in front of them, so six taps are on the strip. Until
+       it existed there was nothing on screen to show a tap had done anything at
+       all. It counts down to the number and then gets out of the way. No dollar
+       figure ever appears here. */
     build = el("div", "audit-build");
     buildLabel = el("span", "audit-build__label");
     buildLabel.setAttribute("role", "status");
     buildLabel.setAttribute("aria-live", "polite");
     buildDots = el("span", "audit-build__dots");
     buildDots.setAttribute("aria-hidden", "true");   // the label already says it
-    for (let i = 0; i < PHONE_KEYS.length; i++) buildDots.appendChild(el("i", null));
+    for (let i = 0; i < BUILD_KEYS.length; i++) buildDots.appendChild(el("i", null));
     build.append(buildLabel, buildDots);
 
     /* --- the question --- */
@@ -885,10 +878,12 @@
      separate reading task in front of the first tap, and the first tap is the
      only thing this screen is for. */
   function buildQuestion(q, index, list) {
-    /* `dense` is set on the question, never derived from how many options it
-       has: question one is the whole first screen and must keep its roomier
-       buttons even if it ever grows a fifth answer. */
-    const node = el("div", "audit-qi is-enter" + (q.dense ? " is-dense" : ""));
+    /* `dense` and `cols2` are set on the QUESTION, never derived from how many
+       options it has: question one has eleven answers and needs two columns,
+       question two has four and must keep its roomier full-width buttons, and
+       counting options would hand one question's shape to the other. */
+    const node = el("div", "audit-qi is-enter"
+      + (q.dense ? " is-dense" : "") + (q.cols2 ? " is-cols2" : ""));
 
     const h = el("h2", "audit-qi__title");
     h.id = "audit-q-" + q.key;
@@ -919,9 +914,10 @@
        PAINTS, so the step means "this was in front of somebody" rather than
        "somebody answered the one before". The number is the question's
        position in the contract, not its position in the list on the day: a
-       question added or skipped later must not be able to rename q7. The
-       finishing run past the gate raises nothing, because the endpoint's
-       allow-list does not know those names. */
+       question added or skipped later must not be able to rename q8. Question
+       one raises nothing of its own: `start` is its milestone, sent by the
+       first option tapped. The finishing run past the gate raises nothing
+       either, because the endpoint's allow-list does not know those names. */
     const n = PRE_GATE_KEYS.indexOf(q.key);
     if (n > 0) markStep("q" + (n + 1) + "_" + q.key);
     return node;
@@ -1229,7 +1225,7 @@
     const list = applicable();
     const next = indexOfKey(list, q.key) + 1;
     const last = next >= list.length;
-    /* the counter has one more climb in it on the last of the seven, so the
+    /* the counter has one more climb in it on the last of the eight, so the
        screen holds a beat longer there before the reveal takes over */
     const wait = REDUCED ? 0 : (last && state.phase === "pre" ? 700 : 120);
     state.busy = true;
@@ -1469,16 +1465,22 @@
      phone lands as soon as the sizing and the three phone answers are in
      (after hours has not been asked yet, so the engine's own "no idea"
      fallback carries it and the card is flagged Estimated). The leads land on
-     the last of the seven. */
+     the last of the eight. */
   /* The five answers that price the phone, derived from the very list
      partialReady() walks below, so the strip and the reveal can never disagree
      about how many are left. */
-  const PHONE_KEYS = PRE_GATE_KEYS.filter(
+  const PHONE_KEYS = PRE_GATE_ANSWERS.filter(
     (k) => k !== "reply_speed" && k !== "late_outcome");
 
+  /* What the build strip counts down, which is TAPS rather than priced
+     answers: question one is the trade, which prices nothing on its own, and a
+     first tap that moved nothing on the screen is the exact thing this strip
+     was built to stop. Sliced off the run so it can never disagree with it. */
+  const BUILD_KEYS = PRE_GATE_KEYS.slice(0, PRE_GATE_KEYS.indexOf("enquiries") + 1);
+
   function partialReady(a) {
-    for (let i = 0; i < PRE_GATE_KEYS.length; i++) {
-      const k = PRE_GATE_KEYS[i];
+    for (let i = 0; i < PRE_GATE_ANSWERS.length; i++) {
+      const k = PRE_GATE_ANSWERS[i];
       if (k === "reply_speed" || k === "late_outcome") continue;
       if (!a[k]) return false;
     }
@@ -1488,7 +1490,7 @@
     /* the leads half needs both of its answers; until then it is worth zero,
        which is exactly what the engine would say about an unanswered pair */
     const feed = {};
-    PRE_GATE_KEYS.forEach((k) => { if (a[k]) feed[k] = a[k]; });
+    PRE_GATE_ANSWERS.forEach((k) => { if (a[k]) feed[k] = a[k]; });
     if (!feed.reply_speed || !feed.late_outcome) {
       feed.reply_speed = "minutes";
       feed.late_outcome = "few_gone";
@@ -1518,8 +1520,8 @@
     if (state.phase !== "pre") { build.classList.add("is-gone"); return; }
     const a = state.answers;
     let done = 0;
-    PHONE_KEYS.forEach((k) => { if (a[k]) done++; });
-    const gone = done >= PHONE_KEYS.length;
+    BUILD_KEYS.forEach((k) => { if (a[k]) done++; });
+    const gone = done >= BUILD_KEYS.length;
     build.classList.toggle("is-gone", gone);
     if (gone) return;
     const lines = (A.counter && A.counter.build) || [];
@@ -1603,7 +1605,7 @@
   /* ===========================================================================
      6. THE LEAK MAP
      ========================================================================= */
-  /* SCREEN 8. The result. The seventh tap lands here and EVERYTHING is handed
+  /* SCREEN 9. The result. The eighth tap lands here and EVERYTHING is handed
      over at once: the number, the whole breakdown and the fix for the worst
      leak, none of it blurred and none of it posted anywhere, because nothing
      has been asked for yet. The ask is the card underneath, and it buys a call
@@ -1636,7 +1638,7 @@
            strip.getBoundingClientRect().height + 12;
   }
 
-  /* Where the seventh tap lands, and where the booking lands after it: the top
+  /* Where the eighth tap lands, and where the booking lands after it: the top
      of the number, under the chrome, with the map and the ask below it. */
   function scrollToFlash() {
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -1659,7 +1661,7 @@
 
   let mapRefs = null;   // { root, body, lockwrap, flashSlot }
 
-  /* The one leak that is costing them most, out of the two the seven taps can
+  /* The one leak that is costing them most, out of the two the eight taps can
      price. It names the conversion card, and it is the card on the map that
      carries the Leak Fix. Ties fall to missed calls, same rule the engine's
      start_here uses, so the page and the server never disagree about which
@@ -1721,7 +1723,7 @@
     sting.appendChild(el("p", "leakmap__fine", R.disclaimer || ""));
     root.appendChild(sting);
 
-    /* ---- the breakdown. Never gated: it renders open on the seventh tap. ---- */
+    /* ---- the breakdown. Never gated: it renders open on the eighth tap. ---- */
     const lockwrap = el("div", "leakmap__lockwrap");
     /* `is-unblur` is the blur WITHOUT the crop, the mask or the dead pointer
        events, so it can be lifted one frame after paint and the map sharpens
@@ -1944,7 +1946,7 @@
       if (R.unpricedLine) box.appendChild(el("p", "leak-unpriced__note", R.unpricedLine));
       const T = A.thanks || {};
       const btn = el("button", "btn btn--ghost leak-unpriced__btn",
-        (state.tradeTap && T.finishLinkShort) || T.finishLink || "");
+        T.finishLink || "");
       btn.type = "button";
       btn.addEventListener("click", onFinish);
       box.appendChild(btn);
@@ -2326,12 +2328,14 @@
     };
     const a = state.answers;
 
-    /* Only the seven that were actually ASKED go in. A deferred question is a
-       real absence in the payload, which is exactly what
+    /* Only the seven answers that were actually ASKED go in, and `trade` is
+       not one of them: it is question one now, but it travels at the top level
+       (see below) because that is where validate_trade reads it. A deferred
+       question is a real absence in the payload, which is exactly what
        validate_answers_partial checks for, so nothing is blanked or defaulted
        here and nothing from the finish run is smuggled in early. */
     const answers = {};
-    PRE_GATE_KEYS.forEach((k) => { if (a[k]) answers[k] = a[k]; });
+    PRE_GATE_ANSWERS.forEach((k) => { if (a[k]) answers[k] = a[k]; });
 
     const payload = {
       name: val("name"),
@@ -2341,9 +2345,10 @@
       answers: answers,
       partial: true,
     };
-    /* trade is asked on the last of the nine, so at this point there usually is
-       none. The engine defaults it to "other", and it moves only a channel the
-       partial path does not price. */
+    /* The trade, at the TOP LEVEL, never inside `answers`: the engine validates
+       it with validate_trade and the partial scorer takes it as its second
+       argument. It is question one, so by here it is always their own answer
+       rather than the engine's neutral default. */
     if (a.trade) payload.trade = a.trade;
     /* Campaign attribution for the paid traffic. Read from the URL on load,
        never from a cookie or storage, and omitted entirely when absent. */
@@ -2424,12 +2429,9 @@
       flash.appendChild(actions);
     }
 
+    /* The trade used to be asked on a chip row here. It is question one now,
+       so the receipt goes straight to the booking. */
     const ending = [flash];
-    /* The trade, asked once and never before the map: under the receipt, one
-       tap, skippable in silence. Offered only when the audit row really landed,
-       because with no token there is nothing on our side to attach it to. */
-    const trade = token ? buildTradeRow(T) : null;
-    if (trade) ending.push(trade);
     ending.push(buildCalendar(token, T));
     if (T.scarcity) ending.push(el("p", "audit-flash__scarcity", T.scarcity));
 
@@ -2488,110 +2490,17 @@
   }
 
   /* ===========================================================================
-     6b. THE TRADE, ASKED ONCE THE MAP IS OPEN
-     The seven pre-gate taps never ask what they do, so nothing on this page may
-     picture anybody's day until they have told us. This row is where they can,
-     and it is genuinely optional: it buys WORDING, not a figure, so it sits
-     between the receipt and the offer, takes one tap, has no text field, and
-     collapses to a single quiet line the moment it is answered. Skipping it
-     costs the visitor nothing at all, and the offer and the booking below it
-     never wait on it.
+     6b. THE TRADE — gone from here, and asked at the top instead
+     It used to be an optional chip row under the receipt, because the pre-gate
+     run never asked what they did. It is QUESTION ONE now (content.js), so by
+     the time this screen paints the trade has been on the answers for eight
+     taps: it rides in the submission payload at the top level, the fix line
+     reads it straight off state.answers, and asking a second time would read
+     as a page that does not listen. The row, its chips, its /trade post and
+     its `trade_tapped` milestone went with it. That step name stays in the
+     server's allow-list so a tab still mid-run on the old build cannot 400.
      ========================================================================= */
-  const tradeQuestion = () => QS().filter((q) => q.key === "trade")[0] || null;
 
-  /* The chips: content's short list if it has one, otherwise the finish run's
-     own question, whole. Either way the keys ARE that question's enum values,
-     so a tap here is the same answer given earlier. */
-  function tradeChips() {
-    const TA = (A.thanks || {}).tradeAsk || {};
-    if (Array.isArray(TA.chips) && TA.chips.length) return TA.chips;
-    const q = tradeQuestion();
-    return (q && q.options) || [];
-  }
-
-  function tradeLabel(key) {
-    const all = tradeChips().concat(((tradeQuestion() || {}).options) || []);
-    const hit = all.filter((o) => o.key === key)[0];
-    return (hit && hit.label) || "";
-  }
-
-  function tradeDoneText() {
-    const TA = (A.thanks || {}).tradeAsk || {};
-    /* "Sorted, Something else." is not a sentence, so the way out has its own
-       line rather than being fed through the template. */
-    if (state.answers.trade === "other") return TA.doneOther || "";
-    return fill(TA.done || "", { trade: tradeLabel(state.answers.trade) });
-  }
-
-  function tradeDoneLine() {
-    const done = el("p", "audit-trade__ok", tradeDoneText());
-    done.setAttribute("role", "status");
-    return done;
-  }
-
-  function buildTradeRow(T) {
-    const TA = (T && T.tradeAsk) || {};
-    const chips = tradeChips();
-    if (!TA.label || !chips.length) return null;
-    const row = el("div", "audit-trade chip-row");
-    /* Already answered, this session: the question is gone and what is left is
-       the receipt for it. A reload lands straight back on this line. */
-    if (state.tradeTap && state.answers.trade) {
-      row.classList.add("is-done");
-      row.appendChild(tradeDoneLine());
-      return row;
-    }
-    row.appendChild(el("span", "chip-row__label audit-trade__label", TA.label));
-    const group = el("div", "chip-row__chips");
-    group.setAttribute("role", "group");
-    group.setAttribute("aria-label", TA.label);
-    chips.forEach((c) => {
-      const b = el("button", "chip-toggle", c.label);
-      b.type = "button";
-      b.addEventListener("click", () => pickTrade(c.key, row));
-      group.appendChild(b);
-    });
-    row.appendChild(group);
-    if (TA.micro) row.appendChild(el("p", "audit-trade__micro", TA.micro));
-    return row;
-  }
-
-  function pickTrade(key, row) {
-    if (!key || state.tradeTap) return;
-    state.answers.trade = key;
-    state.tradeTap = true;
-    save();
-    mark("trade_tapped");
-    postTrade(key);
-    row.classList.add("is-done");
-    row.replaceChildren(tradeDoneLine());
-    retellTrade();
-  }
-
-  /* Fire and forget, exactly like the funnel beacon: the answer is already on
-     the page and in the store, so a failed post costs the visitor nothing and
-     is never shown to them. The server stores it only where the row is still
-     carrying the engine's neutral default. */
-  function postTrade(trade) {
-    if (!state.token) return;
-    try {
-      fetch("/api/public/leak-audit/trade", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: state.token, trade: trade }),
-        keepalive: true,
-      }).catch(() => {});
-    } catch (e) { /* never let this touch the experience */ }
-  }
-
-  /* Say it again, now that we know who we are talking to. The only line on
-     this page that reads the trade is the worst leak's fix line, so that is
-     the only thing rebuilt. It goes through fixText(), so a trade-keyed line
-     added to that copy table later needs no new wiring. */
-  function retellTrade() {
-    const fixNode = doc.querySelector(".leak-fix__text");
-    if (fixNode) fixNode.textContent = fixText(worstLeak(state.mirror || {}));
-  }
 
   /* The confirmation, on its own. Built here as well as inside the booking
      form so a reload after a booking can print it without the form. */
@@ -2805,7 +2714,7 @@
      this takes has to survive the visitor counting. */
   const finishIntroText = () => {
     const T = A.thanks || {};
-    return (state.tradeTap && T.finishIntroShort) || T.finishIntro || "";
+    return T.finishIntro || "";
   };
 
   function startFinish() {
@@ -3036,7 +2945,9 @@
     choose(q, opts[i], btn, group);
   }
 
-  const haveSeven = () => PRE_GATE_KEYS.every((k) => !!state.answers[k]);
+  /* The seven ANSWERS, not the eight taps: a tab resumed from a build that
+     asked the trade last still holds all seven and its map is still theirs. */
+  const haveSeven = () => PRE_GATE_ANSWERS.every((k) => !!state.answers[k]);
 
   /* Back where they left off. A same-tab trip to index.html, a Meta in-app
      reload or an accidental back swipe all land here, and none of them is
@@ -3095,10 +3006,6 @@
       state.screen = typeof saved.screen === "string" ? saved.screen : "q";
       state.book = (saved.book === "open" || saved.book === "done") ? saved.book : "";
       state.mobile = typeof saved.mobile === "string" ? saved.mobile.slice(0, 24) : "";
-      /* Only ever true alongside a trade that survived readStore's enum check,
-         so a restored tab can never skip the trade question without holding
-         the answer to it. */
-      state.tradeTap = saved.tradeTap === true && !!state.answers.trade;
       prune();
     }
     resume();

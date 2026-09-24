@@ -1370,6 +1370,33 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
    question one has to keep its roomy buttons whatever happens to it. */
 .audit-qi.is-dense .audit-opts { gap: .4rem; margin-top: .6rem; }
 .audit-qi.is-dense .qopt { min-height: 48px; padding: .55rem .9rem; }
+/* ---- Two up: question one, the trade ------------------------------------
+   Eleven answers in one column is a scroll on every phone we ship to, and an
+   option nobody can see is an answer nobody gives. Driven by `cols2` on the
+   question in content.js, never by counting options: question two has four
+   answers and keeps its full-width buttons.
+   The honest way out spans both columns at the bottom, so "Something else"
+   reads as the way out rather than as one more trade. */
+.audit-qi.is-cols2 .audit-opts {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; margin-top: .7rem;
+}
+.audit-qi.is-cols2 .audit-opts > :last-child { grid-column: 1 / -1; }
+/* Beats .audit-panel.is-first .qopt on its own ground: question one is always
+   the first screen, so the two rules would otherwise fight over the height. */
+.audit-qi.is-cols2 .qopt,
+.audit-panel.is-first .audit-qi.is-cols2 .qopt {
+  min-height: 48px; padding: .6rem .7rem; gap: .5rem; font-size: .96rem;
+}
+/* The why. Question one hides its help line, because a second reading task in
+   front of the first tap costs more than it pays. This question is the one
+   exception: what it has to say is why we are asking at all, and a trade
+   question with no reason given is the kind of thing people close tabs over.
+   It is sized like the micro line rather than like a help line, because the
+   budget on this screen is the first option's top edge, inside 200px. ONE
+   LINE at 320px: keep it under about 43 characters or it costs 18 more. */
+.audit-panel.is-first .audit-qi.is-cols2 .audit-qi__help {
+  display: block; margin-top: .3rem; font-size: .82rem; line-height: 1.35;
+}
 /* A resumed tab is past question one, so the static screen waits rather than
    flashing (audit.html reads the same store audit.js does). visibility, not
    display: the box stays exactly where their own screen is about to land. */
@@ -1395,6 +1422,11 @@ body[data-page="audit"] .stat-note { color: var(--muted); }
      which only ever repeats what the options already say. */
   .audit-qi.is-dense .qopt { min-height: 42px; }
   .audit-qi.is-dense .audit-qi__help { display: none; }
+  /* Eleven answers and 568px of screen: the buttons get the pixels. */
+  .audit-qi.is-cols2 .qopt,
+  .audit-panel.is-first .audit-qi.is-cols2 .qopt {
+    min-height: 44px; padding: .5rem .6rem; font-size: .92rem;
+  }
 }
 
 /* ---- The honesty block (was the hero, now below the instrument) ---------- */

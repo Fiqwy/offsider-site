@@ -35,7 +35,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # ---------------------------------------------------------------------------
 # The worked maths line for each example, byte for byte. audit.js mirrors
 # leak_audit.py's _missed_maths and _slow_reply_maths so the working can be shown at
-# the seventh tap instead of waiting for a send. Two prose implementations with
+# the eighth tap instead of waiting for a send. Two prose implementations with
 # nothing comparing them drift, so this compares them; the same strings are asserted
 # against the Python side in backend/tests/test_leak_audit.py.
 MATHS = {
@@ -185,7 +185,8 @@ SAY_BACK = {
     "10_plus": "you miss more than ten calls in a normal week",
 }
 
-# What the visitor is actually offered on question two, in order. The retired weekly
+# What the visitor is actually offered on question three, in order. The trade is
+# question one now, so the phone questions all moved down by one. The retired weekly
 # keys must still validate and still price, and must never be painted.
 MISSED_WEEK_SHOWN = ["none", "week_2_3", "day_1_2", "day_3_5", "day_5_plus", "no_idea"]
 
@@ -313,7 +314,7 @@ def main() -> int:
             ok = shown == MISSED_WEEK_SHOWN
             if not ok:
                 fails += 1
-            print("%-58s %s" % ("question two offers, in order", "PASS" if ok else
+            print("%-58s %s" % ("question three offers, in order", "PASS" if ok else
                                 "FAIL got %r want %r" % (shown, MISSED_WEEK_SHOWN)))
             missing = [k for k, _s, _l, _h in MISSED_WEEK if k not in all_keys]
             if missing:

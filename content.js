@@ -335,8 +335,9 @@ window.SITE = {
   },
 
   /* ---- The Revenue Leak Audit (audit.html) ----------------------------------------
-     The interactive lead magnet. Nine tap-only questions, a live leak counter,
-     then the Leak Map behind a name/mobile/email gate.
+     The interactive lead magnet. Eight tap-only questions open the whole map,
+     with a live leak counter, and eight more finish it. Nothing is asked for
+     in between: the name/mobile/email gate buys the call, not the map.
 
      RAILS (do not violate):
      · Every dollar figure is a RANGE and is labelled "an estimate from your
@@ -368,12 +369,12 @@ window.SITE = {
          never move and nothing is added above question one. */
       name: "Free Revenue Leak Audit",
       promise: "Find out where your business is losing revenue, and what it could be costing you.",
-      micro: "Seven taps. No typing. No call required.",
+      micro: "Eight taps. No typing. No call required.",
       /* The first screen only. The ads promise a number, so the line under the
-         hook says when it arrives, counted in taps rather than minutes. Five
-         is PHONE_KEYS.length in audit.js: the phone prices on the fifth answer
-         and the counter lands there. */
-      tapLine: "Your number lands on tap 5.",
+         hook says when it arrives, counted in taps rather than minutes. Six is
+         BUILD_KEYS.length in audit.js: the trade, then the five answers that
+         price the phone, so the counter lands on the sixth tap. */
+      tapLine: "Your number lands on tap 6.",
       /* Message match for paid visitors. Keyed by utm_campaign; the strip's
          line becomes the hook of the ad that sent them, one line, 34
          characters or fewer so it never wraps above question one. The trust
@@ -394,9 +395,9 @@ window.SITE = {
     heading: "Free Revenue Leak Audit",
     honestyTitle: "Before you ask, yes, we made the number up out of your answers",
     sub: "Built for Australian trades and local service businesses. You give us your own numbers, we map where calls, leads, quotes and past customers slip out of your business, and put a dollar range on each one. No call required, no sales pitch.",
-    meta: ["Seven taps, no typing", "About a minute", "Built on your numbers", "Australian owned, founder-led"],
+    meta: ["Eight taps, no typing", "About a minute", "Built on your numbers", "Australian owned, founder-led"],
     // The trust play: the sting lands BEFORE we ask for anything. Say it out loud.
-    metaNote: "The number lands once the phone is priced, then it moves with every tap after, and the whole map opens on the seventh without you giving us anything. The maths is the same for everyone and written out at the bottom of this page, not made up for you. If your answers come back clean, the map says so and we tell you that plainly, because a map that always finds a problem is not a map.",
+    metaNote: "The number lands once the phone is priced, then it moves with every tap after, and the whole map opens on the eighth without you giving us anything. The maths is the same for everyone and written out at the bottom of this page, not made up for you. If your answers come back clean, the map says so and we tell you that plainly, because a map that always finds a problem is not a map.",
     // no-JS / pre-JS fallback line under the chrome
     noscript: "This audit needs JavaScript switched on. If you would rather just talk it through, book a free 15-minute Revenue Recovery Call instead.",
 
@@ -413,17 +414,19 @@ window.SITE = {
       // shown once, on the screen where the counter first appears
       revealLine: "That is the phone on its own, from the numbers you just gave us. Two taps left and we price your leads.",
       /* THE BUILD STRIP. The number cannot honestly appear until five separate
-         answers are in. Before this strip existed, the first four taps changed
-         nothing on the screen except the question: a man was asked to answer
-         four times on the promise of a number, with no evidence one was
-         coming. Indexed by how many of the five are in, so it counts DOWN to
+         answers are in, and the trade is tapped in front of those. Before this
+         strip existed, the first four taps changed nothing on the screen
+         except the question: a man was asked to answer four times on the
+         promise of a number, with no evidence one was coming. Indexed by how
+         many of the six are in, so it counts DOWN to
          the payoff. Never a dollar figure, because there is not an honest one
          yet. That is the whole point of it. */
       build: [
-        "Five answers and your number lands.",
-        "One in. Four to go.",
-        "Two in. Three to go.",
-        "Three in. Two to go.",
+        "Six taps and your number lands.",
+        "One in. Five to go.",
+        "Two in. Four to go.",
+        "Three in. Three to go.",
+        "Four in. Two to go.",
         "One more and your number lands.",
       ],
     },
@@ -440,11 +443,12 @@ window.SITE = {
       customers: { label: "Old customers",  intro: "The people who already paid you once." },
     },
 
-    /* The sixteen questions, in two runs. The first seven price the phone and
-       the leads and OPEN THE MAP: nothing is asked for in between. The nine
-       marked `deferred` are offered under the open map as the quiet second
-       choice, so the audit is still sixteen taps for anyone who wants all five
-       leaks priced, and seven for everyone else.
+    /* The sixteen questions, in two runs. The first eight open with the trade
+       and then price the phone and the leads, and they OPEN THE MAP: nothing
+       is asked for in between. The eight marked `deferred` are offered under
+       the open map as the quiet second choice, so the audit is still sixteen
+       taps for anyone who wants all five leaks priced, and eight for everyone
+       else.
        `key` and every option `key` are the API enum values: the server
        validates them strictly and recomputes the maths from them, so renaming
        one breaks the contract. `skipWhen` is the conditional-absence rule:
@@ -452,12 +456,46 @@ window.SITE = {
        because the API treats the absence as meaningful rather than as a
        missing field. `micro` is the one quiet line under the options. */
     questions: [
-      /* ---- The seven, in front of the gate ---- */
+      /* ---- The eight, in front of the gate ---- */
+      {
+        /* QUESTION ONE, AND IT COSTS NOTHING TO ANSWER. The audit used to open
+           on the phone, which asked a man we have never met to admit he loses
+           work before the page had given him a thing: 735 landed, 7 tapped.
+           This is the one question every tradie can answer instantly and is
+           proud of, and it earns its place on the maths as well as the manners
+           (see `help`): the trade is what decides whether the past-customers
+           leak can carry a dollar figure at all. It travels at the TOP LEVEL of
+           the payload, never inside `answers`, because that is the contract the
+           server validates it under. `cols2` is set here, on the question, and
+           is the only question that carries it: eleven answers in one column
+           are a scroll, and an option nobody can see is an answer nobody gives. */
+        key: "trade", section: "sizing", cols2: true,
+        title: "First up, what's your trade?",
+        /* Says what the trade actually does and nothing more. It does NOT move a
+           figure: the two channels priced before the gate do not touch it, and the
+           one channel it does move (dormant) is only ever priced on the finishing
+           run. What it really changes is the words, so that is what we claim. */
+        help: "So your map is written for your trade.",
+        micro: "Free. No typing. No call required.",
+        options: [
+          { key: "plumber",     label: "Plumber" },
+          { key: "electrician", label: "Electrician" },
+          { key: "builder",     label: "Builder" },
+          { key: "painter",     label: "Painter" },
+          { key: "landscaper",  label: "Landscaper" },
+          { key: "detailer",    label: "Car detailer" },
+          { key: "cleaner",     label: "Cleaner" },
+          { key: "auto",        label: "Mechanic" },
+          { key: "roofing",     label: "Roofer" },
+          { key: "hvac",        label: "Air con" },
+          { key: "other",       label: "Something else" },
+        ],
+      },
       {
         key: "missed", section: "phone",
         title: "On the tools. The phone rings. What usually happens?",
         help: "Tap the one that sounds like your week.",
-        micro: "Free. No typing. No call required.",
+        micro: "Every one of these is somebody's normal week.",
         options: [
           { key: "office",    label: "Someone in the office answers" },
           { key: "callback",  label: "I ring back later" },
@@ -551,7 +589,7 @@ window.SITE = {
         ],
       },
 
-      /* ---- The nine, offered after the map opens ---- */
+      /* ---- The eight, offered after the map opens ---- */
       {
         key: "after_hours_calls", section: "phone", deferred: true,
         title: "After 5pm or on the weekend, how many calls land then?",
@@ -643,24 +681,6 @@ window.SITE = {
           { key: "r_10_30",    label: "10 to 30" },
           { key: "r_30_100",   label: "30 to 100" },
           { key: "r_100_plus", label: "More than 100" },
-        ],
-      },
-      {
-        key: "trade", section: "sizing", deferred: true,
-        title: "Last one. What do you do?",
-        help: "So the map speaks your language.",
-        options: [
-          { key: "plumber",     label: "Plumber" },
-          { key: "electrician", label: "Electrician" },
-          { key: "builder",     label: "Builder or carpenter" },
-          { key: "painter",     label: "Painter" },
-          { key: "landscaper",  label: "Landscaper" },
-          { key: "detailer",    label: "Car detailer" },
-          { key: "cleaner",     label: "Cleaner" },
-          { key: "auto",        label: "Auto or mechanical" },
-          { key: "roofing",     label: "Roofing" },
-          { key: "hvac",        label: "Air con or refrigeration" },
-          { key: "other",       label: "Something else" },
         ],
       },
     ],
@@ -872,7 +892,7 @@ window.SITE = {
       reviewsLine: "More reviews means more calls from Google, but we won't invent a dollar figure for it. That is rather the point of this report.",
       // the ads say "to", never a dash, so the map says "to" as well
       rangeSep: " to ",
-      // a channel the seven taps could not price yet
+      // a channel the eight taps could not price yet
       notPricedLabel: "Not priced yet",
       // what those rows say instead of a figure
       notPriced: {
@@ -902,10 +922,10 @@ window.SITE = {
          is the bug that put this label here in the first place. */
       showAnswer: "Show your answer",
       hideAnswer: "Hide your answer",
-      /* The three leaks the seven taps cannot price used to be three cards
+      /* The three leaks the eight taps cannot price used to be three cards
          apologising. One line and a button instead: an offer, not an apology. */
       unpricedLead: "Three more leaks, not priced yet",
-      unpricedLine: "Nine more taps prices the ones that can be priced.",
+      unpricedLine: "Eight more taps prices the ones that can be priced.",
       // The honest hand-off. The diagnosis is the free value; the fix is what
       // we sell. NO DIY content, tips, templates or cadences anywhere on this
       // page or in the PDF (Nicholas, explicit): this is an ad-driven lead
@@ -933,7 +953,7 @@ window.SITE = {
       lead: "Not by you answering faster or working later. By something else picking up the parts of the week you cannot get to.",
       beforeLabel: "What happens now",
       afterLabel: "What happens instead",
-      /* Keyed by channel. Only the two the seven taps can price have a pair,
+      /* Keyed by channel. Only the two the eight taps can price have a pair,
          because the worst leak is always one of those two. */
       pairs: {
         missed_calls: {
@@ -1121,42 +1141,21 @@ window.SITE = {
       title: "Your audit is complete.",
       lead: "Let's look at your results together.",
       /* The fork. Three leaks are still unpriced, and the visitor picks how
-         they get priced: nine more taps here, or fifteen minutes with us. */
+         they get priced: eight more taps here, or fifteen minutes with us. */
       forkTitle: "Three leaks left to price",
-      forkBody: "Your quotes, your reviews and your past customers. Nine more taps finishes the map on this screen, or we do those three with you on the fifteen minutes.",
-      finishButton: "Finish the map. Nine taps.",
+      forkBody: "Your quotes, your reviews and your past customers. Eight more taps finishes the map on this screen, or we do those three with you on the fifteen minutes.",
+      finishButton: "Finish the map. Eight taps.",
 
-      /* THE TRADE, ASKED ONCE THE MAP IS OPEN. The seven pre-gate taps never
-         ask what they do, so until this row is tapped the page says nothing
-         that pictures anybody's day. Optional on purpose: it buys wording, not
-         a figure, so it sits between the receipt and the offer and never
-         stands in front of the call. One tap, no text field, and the row
-         collapses to a single quiet line the moment it is answered. */
-      tradeAsk: {
-        label: "What's your trade?",
-        micro: "One tap, so the map talks your language. Skip it if you like.",
-        // the eight most common, then the honest way out. Same enum keys as
-        // the finish run's trade question, so a tap here IS that answer.
-        chips: [
-          { key: "plumber",     label: "Plumber" },
-          { key: "electrician", label: "Electrician" },
-          { key: "builder",     label: "Builder" },
-          { key: "painter",     label: "Painter" },
-          { key: "landscaper",  label: "Landscaper" },
-          { key: "detailer",    label: "Car detailer" },
-          { key: "cleaner",     label: "Cleaner" },
-          { key: "roofing",     label: "Roofing" },
-          { key: "other",       label: "Something else" },
-        ],
-        done: "Sorted, {trade}.",
-        // "Sorted, Something else." is not a sentence, so the way out gets its
-        // own line rather than being fed through the template above.
-        doneOther: "Sorted. We'll keep it in plain English.",
-      },
+      /* The trade used to be asked here, on an optional chip row under the
+         receipt, because the pre-gate run never asked what they did. It is
+         question one now, so by the time this screen paints we have known the
+         trade for eight taps and asking again would read as a page that does
+         not listen. The row, its chips and its `trade_tapped` milestone are
+         gone with it; the fix line reads the trade straight off the answers. */
 
       /* THE ENDING. The map is open, so the number is no longer news: the only
          honest next step is the one thing they cannot do for themselves, which
-         is have the leak plugged. Headline keys are the two channels the seven
+         is have the leak plugged. Headline keys are the two channels the eight
          taps can price, and the copy speaks to the one that ranked worst.
          NO scarcity claim, no trial, no promise of a result, and the mechanism
          is never named here. The outcome is. */
@@ -1164,10 +1163,7 @@ window.SITE = {
          and button all moved into `convert` above, because the ask and the
          reason for the ask are now one card instead of two screens. These are
          the two quiet links that sit under it. */
-      finishLink: "Or price the last three leaks, nine taps.",
-      // the trade has already been tapped under the receipt, so the run is
-      // one question shorter and the promise has to say so
-      finishLinkShort: "Or price the last three leaks, eight taps.",
+      finishLink: "Or price the last three leaks, eight taps.",
       offer: {
         /* The one way out, offered AFTER the card has made its case and never
            before the number. Same tab: the run is held in sessionStorage, so
@@ -1191,8 +1187,7 @@ window.SITE = {
         embedFallback: "The calendar did not load. Tap a time that suits instead and we will text you.",
       },
 
-      finishIntro: "Nice one. These nine price the other three leaks, then the map is complete.",
-      finishIntroShort: "Nice one. These eight price the other three leaks, then the map is complete.",
+      finishIntro: "Nice one. These eight price the other three leaks, then the map is complete.",
       finishDone: "That is the lot. All five leaks, priced or honestly refused.",
       // shown only when the send failed, where there is no row to book against
       cta: "Book your free Revenue Recovery Call",
